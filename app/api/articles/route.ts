@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getAllArticles, saveArticle } from '@/lib/articles';
 import { Article } from '@/lib/types';
 import { v4 as uuidv4 } from 'uuid';
+import { cookies } from 'next/headers';
 
 export async function GET() {
   const articles = await getAllArticles();
@@ -15,10 +16,11 @@ export async function POST(req: NextRequest) {
     data.id = uuidv4();
   }
   
-  if (!data.publishedAt) {
-    data.publishedAt = new Date().toISOString();
+  if (!data.published_at) {
+    data.published_at = new Date().toISOString();
   }
 
-  await saveArticle(data);
+  const token = (await cookies()).get('access_token')?.value;
+  await saveArticle(data as any, token);
   return NextResponse.json({ success: true, article: data });
 }

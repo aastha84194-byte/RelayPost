@@ -7,6 +7,8 @@ import Cookies from 'js-cookie';
 import toast from 'react-hot-toast';
 import NetworkBackground from '../../components/NetworkBackground';
 
+const AUTH_BASE = process.env.NEXT_PUBLIC_AUTH_BASE || "http://localhost:8000";
+
 export default function Register() {
   const [formData, setFormData] = useState({ name: '', email: '', password: '', confirm: '' });
   const [showPassword, setShowPassword] = useState(false);
@@ -38,7 +40,7 @@ export default function Register() {
 
     setIsLoading(true);
     try {
-      const res = await fetch("http://localhost:8000/auth/register", {
+      const res = await fetch(`${AUTH_BASE}/auth/register`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -52,7 +54,7 @@ export default function Register() {
       if (!res.ok) throw new Error(data.detail || "Registration failed");
       
       // Attempt to immediately log the user in to get their session token
-      const loginRes = await fetch("http://localhost:8000/auth/token", {
+      const loginRes = await fetch(`${AUTH_BASE}/auth/token`, {
         method: "POST",
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
         body: new URLSearchParams({ username: formData.email, password: formData.password })
@@ -81,7 +83,7 @@ export default function Register() {
 
   const handleGoogleSuccess = async (credentialResponse: any) => {
       try {
-        const res = await fetch("http://localhost:8000/auth/google", {
+        const res = await fetch(`${AUTH_BASE}/auth/google`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ token: credentialResponse.credential })

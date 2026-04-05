@@ -122,3 +122,8 @@ h1, h2, h3 {
   width: max-content;
   animation: marquee-reverse 35s linear infinite;
 }
+
+.pause-on-hover:hover .animate-marquee,
+.pause-on-hover:hover .animate-marquee-reverse {
+  animation-play-state: paused;
+}

@@ -12,8 +12,24 @@ import TheBriefing from './components/TheBriefing';
 import CommunityPulse from './components/CommunityPulse';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
+import { getArticlesBySection } from '@/lib/articles';
+import { Article } from '@/lib/types';
 
 export default function Home() {
+  const [trending, setTrending] = React.useState<Article[]>([]);
+  const [expert, setExpert] = React.useState<Article[]>([]);
+  const [insights, setInsights] = React.useState<Article[]>([]);
+  const [hero, setHero] = React.useState<Article | null>(null);
+
+  React.useEffect(() => {
+    getArticlesBySection("TrendingNow").then(setTrending);
+    getArticlesBySection("ExpertAnalysis").then(setExpert);
+    getArticlesBySection("LatestInsights").then(setInsights);
+    getArticlesBySection("Hero").then(articles => {
+      if (articles.length > 0) setHero(articles[0]);
+    });
+  }, []);
+
   return (
     <div className="min-h-full flex flex-col font-sans">
       <Navbar />
@@ -23,11 +39,11 @@ export default function Home() {
         
         {/* LEFT COLUMN - 8 columns wide */}
         <div className="lg:col-span-8 flex flex-col gap-12">
-          <HeroSection />
-          <TrendingNow />
-          <LatestInsights />
+          <HeroSection article={hero} />
+          <TrendingNow articles={trending} />
+          <LatestInsights articles={insights} />
           <TechSpotlight />
-          <ExpertAnalysis />
+          <ExpertAnalysis articles={expert} />
           <InteractiveData />
         </div>
 

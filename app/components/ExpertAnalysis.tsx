@@ -1,48 +1,91 @@
 "use client";
-import React from 'react';
+import React, { useRef } from 'react';
 import Image from 'next/image';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { Article } from '@/lib/types';
+import Link from 'next/link';
+import { motion } from 'framer-motion';
 
-export default function ExpertAnalysis() {
+export default function ExpertAnalysis({ articles }: { articles: Article[] }) {
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  const scroll = (direction: 'left' | 'right') => {
+    if (scrollRef.current) {
+      const scrollAmount = 350;
+      scrollRef.current.scrollBy({ 
+        left: direction === 'left' ? -scrollAmount : scrollAmount, 
+        behavior: 'smooth' 
+      });
+    }
+  };
+
+  if (articles.length === 0) return null;
+
+  // Duplicate for marquee loop
+  const displayArticles = [...articles, ...articles, ...articles];
+
   return (
-    <section>
+    <motion.section
+      initial={{ opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      transition={{ duration: 0.5, delay: 0.2 }}
+      className="pause-on-hover"
+    >
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-2xl font-bold text-dark-bg border-l-4 border-[#4f46e5] pl-3">Expert Analysis</h2>
         <div className="flex gap-2">
-          <button className="w-8 h-8 rounded-full flex items-center justify-center bg-white border border-gray-200 text-gray-500 hover:text-brand hover:border-brand transition-colors"><ChevronLeft size={18} /></button>
-          <button className="w-8 h-8 rounded-full flex items-center justify-center bg-white border border-gray-200 text-gray-500 hover:text-brand hover:border-brand transition-colors"><ChevronRight size={18} /></button>
+          <button 
+            onClick={() => scroll('left')}
+            className="w-8 h-8 rounded-full flex items-center justify-center bg-white border border-gray-200 text-gray-500 hover:text-brand transition-colors shadow-sm"
+          >
+            <ChevronLeft size={18} />
+          </button>
+          <button 
+            onClick={() => scroll('right')}
+            className="w-8 h-8 rounded-full flex items-center justify-center bg-white border border-gray-200 text-gray-500 hover:text-brand transition-colors shadow-sm"
+          >
+            <ChevronRight size={18} />
+          </button>
         </div>
       </div>
       
       <div className="overflow-hidden w-full relative">
-        <div className="animate-marquee-reverse gap-0 pb-4">
-          {[
-            { name: "Dr. Anya Sharma", role: "Author & Tech Editor", title: "The Future of AI Regulation", img: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=800&auto=format&fit=crop&q=60" },
-            { name: "Dr. Anya Sharma", role: "Author & Tech Editor", title: "The Future of AI Computing is Reshaping Reality", img: "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=800&auto=format&fit=crop&q=60" },
-            { name: "Dr. Vaiza Oes", role: "Author & Researcher", title: "Can Artificial Intelligence Features Feel?", img: "https://images.unsplash.com/photo-1551836022-d5d88e9218df?w=800&auto=format&fit=crop&q=60" },
-            { name: "Dr. Anya Sharma", role: "Author & Tech Editor", title: "The Future of AI Regulation", img: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=800&auto=format&fit=crop&q=60" },
-            { name: "Dr. Anya Sharma", role: "Author & Tech Editor", title: "The Future of AI Computing is Reshaping Reality", img: "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=800&auto=format&fit=crop&q=60" },
-            { name: "Dr. Vaiza Oes", role: "Author & Researcher", title: "Can Artificial Intelligence Features Feel?", img: "https://images.unsplash.com/photo-1551836022-d5d88e9218df?w=800&auto=format&fit=crop&q=60" }
-          ].map((expert, i) => (
-            <div 
-              key={i} 
-              className="w-[300px] shrink-0 bg-white p-6 border border-gray-200 overflow-hidden flex flex-col group cursor-pointer hover:-translate-y-2 active:-translate-y-3 hover:shadow-xl hover:z-10 transition-all duration-300"
+        <div 
+          ref={scrollRef}
+          className="flex gap-4 animate-marquee-reverse no-scrollbar"
+        >
+          {displayArticles.map((item, i) => (
+            <Link 
+              key={item.id || i} 
+              href={`/article/${item.slug}`}
+              className="w-[300px] shrink-0 bg-white p-6 border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition-all duration-300 group"
             >
               <div className="flex items-center gap-3 mb-4">
-                <Image src={expert.img} width={40} height={40} className="w-10 h-10 rounded-full object-cover group-hover:scale-105 transition-transform shadow-sm" alt={expert.name} />
+                <div className="w-10 h-10 rounded-full overflow-hidden shrink-0 border border-gray-100 flex items-center justify-center bg-slate-100">
+                  <Image 
+                    src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${item.author_id || i}`} 
+                    width={40} 
+                    height={40} 
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform" 
+                    alt="Author" 
+                  />
+                </div>
                 <div>
-                  <h4 className="font-bold text-[13px] text-dark-bg">{expert.name}</h4>
-                  <p className="text-[11px] text-gray-500">{expert.role}</p>
+                  <h4 className="font-bold text-[13px] text-dark-bg">Expert Advisor</h4>
+                  <p className="text-[11px] text-gray-500 uppercase tracking-wider">{item.category_name || 'Analysis'}</p>
                 </div>
               </div>
-              <h3 className="font-bold text-dark-bg mb-3 text-[15px] leading-tight group-hover:text-brand transition-colors">{expert.title}</h3>
+              <h3 className="font-bold text-dark-bg mb-3 text-[15px] leading-tight group-hover:text-brand transition-colors line-clamp-2">
+                {item.title}
+              </h3>
               <p className="text-xs text-gray-500 line-clamp-3 leading-relaxed">
-                The shift from bits to qubits represents more than a speed upgrade - it&apos;s a fundamental change in processing...
+                {item.excerpt || item.subtitle}
               </p>
-            </div>
+            </Link>
           ))}
         </div>
       </div>
-    </section>
+    </motion.section>
   );
 }

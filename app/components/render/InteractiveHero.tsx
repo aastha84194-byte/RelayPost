@@ -41,9 +41,11 @@ export default function InteractiveHero({ imageSrc = "/quantum-hero.png" }: Inte
   };
 
   return (
-    <div className="relative w-full h-[500px] flex items-center justify-center overflow-hidden bg-[#0B0E23]">
-      {/* Background Ambience */}
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(78,96,255,0.15)_0%,transparent_70%)] animate-pulse" />
+    <div className="relative w-full h-full flex items-center justify-center overflow-hidden">
+      {/* Background Ambience - Layered Gradients */}
+      <div className="absolute inset-0 bg-[#0B0E23]" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(78,96,255,0.1)_0%,transparent_80%)]" />
+      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#0B0E23]/50 to-[#0A0D1F]" />
       
       {/* Interactive Chip Card */}
       <motion.div
@@ -55,51 +57,58 @@ export default function InteractiveHero({ imageSrc = "/quantum-hero.png" }: Inte
           rotateY,
           transformStyle: "preserve-3d",
         }}
-        initial={{ opacity: 0, scale: 0.9 }}
+        initial={{ opacity: 0, scale: 0.95, y: 20 }}
         animate={{ 
           opacity: 1, 
           scale: 1,
-          y: [0, -15, 0] // Constant Floating
+          y: 0
         }}
         transition={{
-          opacity: { duration: 0.8 },
-          scale: { duration: 0.8 },
-          y: { 
-            duration: 5, 
-            repeat: Infinity, 
-            ease: "easeInOut" 
-          }
+          duration: 1.2,
+          ease: [0.22, 1, 0.36, 1]
         }}
-        className="relative w-[320px] h-[320px] md:w-[450px] md:h-[450px] group cursor-pointer z-20"
+        className="relative w-full max-w-4xl h-[400px] md:h-[550px] group cursor-pointer z-10 px-4"
       >
         {/* Glow Layer */}
-        <div className="absolute inset-0 bg-brand/20 blur-[100px] rounded-full scale-75 group-hover:bg-brand/30 transition-colors duration-500" />
+        <div className="absolute inset-0 bg-brand/10 blur-[120px] rounded-full scale-90 group-hover:bg-brand/20 transition-all duration-700" />
         
-        {/* The Image Chip */}
+        {/* The Image Chip Container */}
         <div 
-          className="absolute inset-0 rounded-3xl overflow-hidden shadow-[0_0_50px_rgba(78,96,255,0.3)] border border-white/10 bg-[#0B0E23]"
+          className="absolute inset-0 rounded-[2rem] overflow-hidden shadow-[0_0_100px_rgba(78,96,255,0.2)] border border-white/5 bg-[#0B0E23]/40 backdrop-blur-sm"
           style={{ transform: "translateZ(50px)" }}
         >
           <Image 
             src={imageSrc} 
-            alt="Quantum Chip" 
+            alt="Article Hero" 
             fill 
-            className="object-cover opacity-90 group-hover:opacity-100 transition-opacity duration-500 scale-110 group-hover:scale-100 transition-transform duration-700"
+            className="object-cover opacity-60 group-hover:opacity-80 transition-opacity duration-700 scale-105 group-hover:scale-100 transition-transform duration-1000"
+            priority
           />
           
           {/* Inner Light/Pulse Overlay */}
-          <div className="absolute inset-0 bg-gradient-to-t from-brand/20 via-transparent to-transparent pointer-events-none" />
+          <div className="absolute inset-0 bg-gradient-to-t from-[#0A0D1F] via-transparent to-white/5 pointer-events-none" />
           
           {/* IQM Core Highlight */}
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-32 h-32 bg-brand/40 blur-[40px] rounded-full animate-pulse pointer-events-none" />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-brand/20 blur-[80px] rounded-full animate-pulse pointer-events-none" />
         </div>
 
-        {/* Decorative Circuit Lines (Simulated Layer) */}
+        {/* Decorative Circuit Lines overlay */}
         <div 
-          className="absolute inset-0 border-2 border-brand/20 rounded-3xl pointer-events-none transition-all duration-500 group-hover:border-brand/40"
-          style={{ transform: "translateZ(75px) scale(1.05)" }}
+          className="absolute inset-0 border border-brand/30 rounded-[2rem] pointer-events-none transition-all duration-700 group-hover:border-brand/60 group-hover:scale-[1.02]"
+          style={{ transform: "translateZ(80px)" }}
         />
+        
+        {/* Tech Corner Accents */}
+        <div className="absolute top-8 left-8 w-12 h-12 border-t-2 border-l-2 border-brand/40 rounded-tl-xl pointer-events-none" style={{ transform: "translateZ(90px)" }} />
+        <div className="absolute bottom-8 right-8 w-12 h-12 border-b-2 border-r-2 border-brand/40 rounded-br-xl pointer-events-none" style={{ transform: "translateZ(90px)" }} />
       </motion.div>
+
+      {/* Hero Visual Polish - Scanner Line */}
+      <motion.div 
+        animate={{ y: [0, 500, 0] }}
+        transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
+        className="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-brand to-transparent opacity-20 pointer-events-none z-20"
+      />
 
       {/* Helper text overlay */}
       <div className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 pointer-events-none opacity-50 z-30">
