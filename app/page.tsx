@@ -10,10 +10,15 @@ import PopularConversations from './components/PopularConversations';
 import GoUnlimited from './components/GoUnlimited';
 import TheBriefing from './components/TheBriefing';
 import CommunityPulse from './components/CommunityPulse';
+import Navbar from './components/Navbar';
+import Footer from './components/Footer';
 
 export default function Home() {
   return (
-    <div className="max-w-7xl mx-auto px-4 md:px-8 py-10">
+    <div className="min-h-full flex flex-col font-sans">
+      <Navbar />
+      <main className="flex-grow">
+        <div className="max-w-7xl mx-auto px-4 md:px-8 py-10">
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
         
         {/* LEFT COLUMN - 8 columns wide */}
@@ -35,6 +40,9 @@ export default function Home() {
         </div>
 
       </div>
+    </div>
+      </main>
+      <Footer />
     </div>
   );
 }
