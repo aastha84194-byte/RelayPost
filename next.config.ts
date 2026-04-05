@@ -6,30 +6,37 @@ const nextConfig: NextConfig = {
       {
         protocol: "https",
         hostname: "images.unsplash.com",
+        pathname: "**",
       },
       {
         protocol: "https",
         hostname: "api.dicebear.com",
+        pathname: "**",
       },
       {
         protocol: "https",
         hostname: "content-servive.onrender.com",
+        pathname: "**",
       },
       {
         protocol: "https",
         hostname: "*.onrender.com",
+        pathname: "**",
       },
       {
         protocol: "https",
         hostname: "lh3.googleusercontent.com",
+        pathname: "**",
       },
       {
         protocol: "http",
         hostname: "localhost",
+        pathname: "**",
       },
       {
         protocol: "http",
         hostname: "127.0.0.1",
+        pathname: "**",
       },
     ],
   },
