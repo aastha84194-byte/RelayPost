@@ -2,18 +2,21 @@
 
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 
+interface ParticleEffectProps {
+  mode?: 'repel' | 'attract';
+  interactiveId?: string;
+}
+
 interface Particle {
   x: number;
   y: number;
-  originX: number;
-  originY: number;
   vx: number;
   vy: number;
   size: number;
   color: string;
 }
 
-export default function ParticleEffect() {
+export default function ParticleEffect({ mode = 'repel', interactiveId }: ParticleEffectProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [isHovering, setIsHovering] = useState(false);
   const mouseRef = useRef({ x: 0, y: 0 });
@@ -23,17 +26,13 @@ export default function ParticleEffect() {
   // Initialize particles
   const initParticles = useCallback((width: number, height: number) => {
     const particles: Particle[] = [];
-    const numParticles = 120; // Number of stars
+    const numParticles = 180;
     for (let i = 0; i < numParticles; i++) {
-      const x = Math.random() * width;
-      const y = Math.random() * height;
       particles.push({
-        x,
-        y,
-        originX: x,
-        originY: y,
-        vx: (Math.random() - 0.5) * 0.8,
-        vy: (Math.random() - 0.5) * 0.8,
+        x: Math.random() * width,
+        y: Math.random() * height,
+        vx: (Math.random() - 0.5) * 0.4,
+        vy: (Math.random() - 0.5) * 0.4,
         size: Math.random() * 2 + 0.5,
         color: `rgba(255, 255, 255, ${Math.random() * 0.6 + 0.2})`
       });
@@ -62,14 +61,14 @@ export default function ParticleEffect() {
       ctx.clearRect(0, 0, width, height);
       
       const mouse = mouseRef.current;
-      const radius = 120; // Repel radius
+      const radius = mode === 'attract' ? 250 : 120;
       
       particlesRef.current.forEach(p => {
         // Natural drifting movement
         p.x += p.vx;
         p.y += p.vy;
 
-        // Mouse repel force
+        // Particle Interaction Logic
         if (isHovering) {
           const dx = mouse.x - p.x;
           const dy = mouse.y - p.y;
@@ -79,14 +78,25 @@ export default function ParticleEffect() {
             const forceDirectionX = dx / distance;
             const forceDirectionY = dy / distance;
             const force = (radius - distance) / radius;
-            const push = 3; // Push strength
             
-            p.x -= forceDirectionX * force * push;
-            p.y -= forceDirectionY * force * push;
+            if (mode === 'attract') {
+              // Pull toward mouse
+              const pull = 0.5;
+              p.vx = (p.vx + forceDirectionX * force * pull) * 0.95;
+              p.vy = (p.vy + forceDirectionY * force * pull) * 0.95;
+            } else {
+              // Push away from mouse
+              const push = 3;
+              p.x -= forceDirectionX * force * push;
+              p.y -= forceDirectionY * force * push;
+            }
+          } else {
+            p.vx *= 0.99;
+            p.vy *= 0.99;
           }
         }
 
-        // Continues flowing outside -> reappear wrap around
+        // Screen wrap
         if (p.x < 0) p.x = width;
         if (p.x > width) p.x = 0;
         if (p.y < 0) p.y = height;
@@ -118,7 +128,7 @@ export default function ParticleEffect() {
       window.removeEventListener('resize', handleResize);
       if (animationRef.current) cancelAnimationFrame(animationRef.current);
     };
-  }, [initParticles, isHovering]);
+  }, [initParticles, isHovering, mode]);
 
   const handleMouseMove = (e: React.MouseEvent<HTMLCanvasElement>) => {
     const rect = canvasRef.current?.getBoundingClientRect();
