@@ -39,7 +39,7 @@ export default function HeroSection({ article }: { article: Article | null }) {
           {article.excerpt || article.subtitle}
         </p>
         <Link 
-          href={`/article/${article.slug}`}
+          href={`/${article.category_name?.toLowerCase().replace(/ /g, '-') || 'general'}/${article.slug}`}
           className="bg-brand hover:bg-brand-dark text-white px-6 py-2.5 rounded-full font-medium inline-flex items-center gap-2 transition-colors shadow-lg shadow-brand/30 pointer-events-auto"
         >
           Read More

@@ -57,8 +57,8 @@ export default function ExpertAnalysis({ articles }: { articles: Article[] }) {
         >
           {displayArticles.map((item, i) => (
             <Link 
-              key={item.id || i} 
-              href={`/article/${item.slug}`}
+              key={`${item.id}-${i}`} 
+              href={`/${item.category_name?.toLowerCase().replace(/ /g, '-') || 'general'}/${item.slug}`}
               className="w-[300px] shrink-0 bg-white p-6 border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition-all duration-300 group"
             >
               <div className="flex items-center gap-3 mb-4">

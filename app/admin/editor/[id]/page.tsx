@@ -10,8 +10,11 @@ import {
   List as ListIcon, ListOrdered, Video, Globe, Code as CodeIcon,
   MessageSquare, ExternalLink, HelpCircle, Upload, Plus, Link as LinkIcon, Sparkles, CheckCircle2, Zap
 } from "lucide-react";
-import { Article, ContentBlock, SectionType, TemplateType, ArticleStatus } from "@/lib/types";
+import { Article, ContentBlock, SectionType, TemplateType, ThemeType, ArticleStatus } from "@/lib/types";
 import { motion, Reorder, AnimatePresence } from "framer-motion";
+import MediaLibrary from "../../components/MediaLibrary";
+import FloatingToolbar from "../../components/FloatingToolbar";
+import BlockPicker from "../../components/BlockPicker";
 
 const FONT_OPTIONS = ["Inter", "Merriweather", "JetBrains Mono", "Outfit"];
 
@@ -43,6 +46,7 @@ export default function AdvancedEditorPage() {
   const [linkSuggestions, setLinkSuggestions] = useState<any[]>([]);
   const [categories, setCategories] = useState<any[]>([]);
   const [newKeyword, setNewKeyword] = useState("");
+  const [showMediaLibrary, setShowMediaLibrary] = useState<{open: boolean, blockId?: string}>({open: false});
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -203,7 +207,22 @@ export default function AdvancedEditorPage() {
   };
 
   return (
-    <div className="flex h-screen bg-[#F8FAFC] overflow-hidden font-sans">
+    <div className="flex h-screen bg-[#F8FAFC] overflow-hidden font-sans relative">
+      <FloatingToolbar onFormat={(cmd, val) => document.execCommand(cmd, false, val)} />
+      
+      <AnimatePresence>
+        {showMediaLibrary.open && (
+           <MediaLibrary 
+             onClose={() => setShowMediaLibrary({open: false})}
+             onSelect={(url) => {
+                if(showMediaLibrary.blockId) updateBlock(showMediaLibrary.blockId, { content: url });
+                else setArticle({...article, hero_image: url});
+                setShowMediaLibrary({open: false});
+             }}
+           />
+        )}
+      </AnimatePresence>
+
       {/* Editor Sidebar */}
       <div className={`w-[480px] bg-white border-r border-slate-200 flex flex-col shadow-2xl z-20 flex-shrink-0 transition-all ${isPreview ? '-ml-[480px]' : 'ml-0'}`}>
         
@@ -283,12 +302,20 @@ export default function AdvancedEditorPage() {
                 </div>
                 <div>
                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 block">Hero Visual URL</label>
-                   <input 
-                     type="text" 
-                     value={article.hero_image || ""}
-                     onChange={(e) => setArticle({...article, hero_image: e.target.value})}
-                     className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-mono focus:outline-none focus:border-indigo-500 transition-all"
-                   />
+                   <div className="flex gap-2">
+                      <input 
+                        type="text" 
+                        value={article.hero_image || ""}
+                        onChange={(e) => setArticle({...article, hero_image: e.target.value})}
+                        className="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-mono focus:outline-none focus:border-indigo-500 transition-all"
+                      />
+                      <button 
+                        onClick={() => setShowMediaLibrary({open: true})}
+                        className="p-3 bg-slate-900 text-white rounded-xl hover:bg-indigo-600 transition-colors"
+                      >
+                         <ImageIcon size={16} />
+                      </button>
+                   </div>
                 </div>
               </div>
 
@@ -640,34 +667,7 @@ export default function AdvancedEditorPage() {
                 </Reorder.Group>
 
                 {/* Add Block Toolbar */}
-                <div className="mt-8 p-6 bg-slate-900 rounded-[2.5rem] grid grid-cols-4 gap-4 shadow-2xl">
-                  {[
-                    { id: 'heading', icon: TypeIcon, label: 'Head' },
-                    { id: 'paragraph', icon: Type, label: 'Text' },
-                    { id: 'image', icon: ImageIcon, label: 'Image' },
-                    { id: 'bullet_list', icon: ListIcon, label: 'List' },
-                    { id: 'quote', icon: QuoteIcon, label: 'Quote' },
-                    { id: 'graph', icon: BarChart3, label: 'Graph' },
-                    { id: 'table', icon: TableIcon, label: 'Data' },
-                    { id: 'code_block', icon: CodeIcon, label: 'Code' },
-                    { id: 'callout', icon: HelpCircle, label: 'Callout' },
-                    { id: 'faq_block', icon: MessageSquare, label: 'FAQ' },
-                    { id: 'cta_block', icon: Zap, label: 'CTA' },
-                    { id: 'youtube_embed', icon: Video, label: 'Video' },
-                    { id: 'divider', icon: Minus, label: 'Line' }
-                  ].map(btn => (
-                    <button 
-                      key={btn.id}
-                      onClick={() => addBlock(btn.id as any)} 
-                      className="flex flex-col items-center gap-2 p-2 hover:bg-slate-800 rounded-2xl transition-all group"
-                    >
-                      <div className="w-10 h-10 bg-white/5 rounded-xl flex items-center justify-center text-indigo-400 group-hover:scale-110 group-hover:bg-indigo-600 group-hover:text-white transition-all shadow-lg">
-                        <btn.icon size={18} />
-                      </div>
-                      <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest group-hover:text-slate-300 transition-colors">{btn.label}</span>
-                    </button>
-                  ))}
-                </div>
+                <BlockPicker onAdd={addBlock} />
               </div>
             </div>
           )}
@@ -858,13 +858,31 @@ export default function AdvancedEditorPage() {
                       <select 
                         value={article.template_type}
                         onChange={(e) => setArticle({...article, template_type: e.target.value as TemplateType})}
-                        className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-xs font-bold outline-none"
+                        className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-xs font-bold outline-none mb-6"
                       >
                         <option value="standard">Intelligence Report</option>
                         <option value="news">Breaking Dispatch</option>
                         <option value="tech">Technical Deep-Dive</option>
                         <option value="seo_blog">Longform Analysis</option>
                       </select>
+
+                      <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1.5 block">Visual Theme</label>
+                      <div className="grid grid-cols-3 gap-2">
+                         {[
+                           { id: 'standard', label: 'Standard', color: 'bg-slate-100' },
+                           { id: 'intelligence', label: 'Pro', color: 'bg-indigo-900' },
+                           { id: 'sports', label: 'High Energy', color: 'bg-orange-500' }
+                         ].map(t => (
+                           <button 
+                             key={t.id}
+                             onClick={() => setArticle({...article, theme: t.id as any})}
+                             className={`p-2 rounded-lg border-2 transition-all text-center ${article.theme === t.id ? 'border-indigo-600 bg-indigo-50' : 'border-slate-100 hover:border-slate-300'}`}
+                           >
+                             <div className={`h-8 w-full ${t.color} rounded mb-1 shadow-sm`} />
+                             <span className="text-[8px] font-black uppercase text-slate-500">{t.label}</span>
+                           </button>
+                         ))}
+                      </div>
                     </div>
                  </div>
               </div>
@@ -877,8 +895,8 @@ export default function AdvancedEditorPage() {
       <div className={`flex-1 relative bg-slate-100 flex flex-col justify-start transition-all duration-500 overflow-hidden`}>
         
         {/* Minimal Preview Frame */}
-        <div className="flex-1 overflow-y-auto custom-scrollbar p-6 md:p-12">
-            <div className={`mx-auto max-w-[960px] bg-white shadow-[0_40px_100px_-20px_rgba(0,0,0,0.1)] rounded-3xl min-h-full overflow-hidden transition-all duration-300 ${isPreview ? 'max-w-[1200px]' : ''}`}>
+        <div className={`flex-1 overflow-y-auto custom-scrollbar p-6 md:p-12 ${article.theme === 'intelligence' ? 'bg-slate-950' : article.theme === 'sports' ? 'bg-orange-50' : 'bg-slate-100'}`}>
+            <div className={`mx-auto max-w-[960px] bg-white shadow-[0_40px_100px_-20px_rgba(0,0,0,0.1)] rounded-3xl min-h-full overflow-hidden transition-all duration-300 ${isPreview ? 'max-w-[1250px]' : ''} ${article.theme === 'intelligence' ? 'ring-1 ring-white/10 dark-theme' : ''}`}>
                
                {/* Context Header */}
                <div className="bg-slate-900 text-white flex items-center justify-between px-8 py-4 border-b border-white/5">

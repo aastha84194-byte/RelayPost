@@ -54,6 +54,7 @@ export interface ContentBlock {
 }
 
 export type TemplateType = "standard" | "news" | "tech" | "seo_blog";
+export type ThemeType = "standard" | "intelligence" | "sports";
 export type ArticleStatus = "draft" | "pending_review" | "scheduled" | "published" | "archived" | "rejected";
 
 export interface Article {
@@ -71,6 +72,7 @@ export interface Article {
   
   // Content Structure
   template_type: TemplateType;
+  theme?: ThemeType;
   content_blocks: ContentBlock[];
   media_gallery?: any[];
   

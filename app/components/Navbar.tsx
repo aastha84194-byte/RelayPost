@@ -87,8 +87,8 @@ export default function Navbar() {
             <div className="hidden md:flex items-center gap-8">
               <Link className="text-white hover:text-indigo-400 transition-colors font-medium text-sm" href="/">Home</Link>
               <Link className="text-slate-300 hover:text-indigo-400 transition-colors font-medium text-sm" href="/categories">Categories</Link>
+              <Link className="text-slate-300 hover:text-indigo-400 transition-colors font-medium text-sm" href="/contribute">Contribute</Link>
               <Link className="text-slate-300 hover:text-indigo-400 transition-colors font-medium text-sm" href="/about">About</Link>
-              <Link className="text-slate-300 hover:text-indigo-400 transition-colors font-medium text-sm" href="/contact">Contact</Link>
             </div>
 
             {/* Action icons */}
