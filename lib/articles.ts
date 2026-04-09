@@ -2,9 +2,12 @@ import { Article } from './types';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE || "http://localhost:8001";
 
-export async function getAllArticles(): Promise<Article[]> {
+export async function getAllArticles(category?: string): Promise<Article[]> {
   try {
-    const res = await fetch(`${API_BASE}/public/articles`, { next: { revalidate: 60 } });
+    const url = new URL(`${API_BASE}/public/articles`);
+    if (category) url.searchParams.append("category", category);
+    
+    const res = await fetch(url.toString(), { next: { revalidate: 60 } });
     if (!res.ok) return [];
     return await res.json();
   } catch (err) {
@@ -56,9 +59,12 @@ export async function getArticleById(id: string, token?: string): Promise<Articl
   }
 }
 
-export async function getArticlesBySection(section: string): Promise<Article[]> {
+export async function getArticlesBySection(section: string, category?: string): Promise<Article[]> {
   try {
-    const res = await fetch(`${API_BASE}/public/articles/section/${section}`, { 
+    const url = new URL(`${API_BASE}/public/articles/section/${section}`);
+    if (category) url.searchParams.append("category", category);
+
+    const res = await fetch(url.toString(), { 
       next: { revalidate: 60 } 
     });
     if (!res.ok) return [];
@@ -134,5 +140,16 @@ export async function deleteArticle(id: string, token?: string): Promise<any> {
     } catch (err) {
       console.error("Failed to delete article", err);
       return null;
+    }
+}
+
+export async function getCategories(): Promise<any[]> {
+    try {
+      const res = await fetch(`${API_BASE}/public/categories`, { next: { revalidate: 60 } });
+      if (!res.ok) return [];
+      return await res.json();
+    } catch (err) {
+      console.error("Failed to fetch categories", err);
+      return [];
     }
 }

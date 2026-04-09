@@ -8,13 +8,14 @@ import {
   BarChart3, Table as TableIcon, Quote as QuoteIcon, Minus, Palette, 
   Type as TypeIcon, AlignLeft, AlignCenter, AlignRight, AlignJustify, Edit3,
   List as ListIcon, ListOrdered, Video, Globe, Code as CodeIcon,
-  MessageSquare, ExternalLink, HelpCircle, Upload, Plus, Link as LinkIcon, Sparkles, CheckCircle2, Zap
+  MessageSquare, ExternalLink, HelpCircle, Upload, Plus, Link as LinkIcon, Sparkles, CheckCircle2, Zap, Calendar
 } from "lucide-react";
 import { Article, ContentBlock, SectionType, TemplateType, ThemeType, ArticleStatus } from "@/lib/types";
 import { motion, Reorder, AnimatePresence } from "framer-motion";
 import MediaLibrary from "../../components/MediaLibrary";
 import FloatingToolbar from "../../components/FloatingToolbar";
 import BlockPicker from "../../components/BlockPicker";
+import toast from "react-hot-toast";
 
 const FONT_OPTIONS = ["Inter", "Merriweather", "JetBrains Mono", "Outfit"];
 
@@ -103,14 +104,14 @@ export default function AdvancedEditorPage() {
         const data = await res.json();
         setArticle(data);
         if (isNew) router.replace(`/admin/editor/${data.id}`);
-        alert(`Article saved as ${publishStatus}!`);
+        toast.success(`Article saved as ${publishStatus}!`);
       } else {
         const errorData = await res.json();
-        alert(`Error: ${errorData.detail || 'Unknown error'}`);
+        toast.error(errorData.detail || "Operation failed");
       }
     } catch (err) {
       console.error(err);
-      alert("Error saving article");
+      toast.error("Network error saving article");
     } finally {
       setIsSaving(false);
     }
@@ -167,9 +168,11 @@ export default function AdvancedEditorPage() {
           } else {
              setArticle({...article, hero_image: data.url});
           }
-          alert("Media uploaded to secure storage!");
+          toast.success("Media uploaded to secure storage!");
+       } else {
+          toast.error("Upload failed");
        }
-     } catch(e) { alert("Upload failed"); }
+     } catch(e) { toast.error("Upload failed"); }
   };
 
   const addBlock = (type: SectionType) => {
@@ -206,9 +209,50 @@ export default function AdvancedEditorPage() {
     }));
   };
 
+  const handleAIRewrite = async (intent: string) => {
+    const sel = window.getSelection();
+    if (!sel || sel.isCollapsed) return;
+
+    const text = sel.toString();
+    const range = sel.getRangeAt(0);
+    
+    try {
+      const Cookies = (await import("js-cookie")).default;
+      const token = Cookies.get("access_token");
+      
+      const res = await fetch("http://localhost:8001/admin/ai/rewrite", {
+        method: "POST",
+        headers: { 
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify({ text, intent })
+      });
+      
+      if(res.ok) {
+        const data = await res.json();
+        // Replace selection with rewritten text
+        range.deleteContents();
+        range.insertNode(document.createTextNode(data.rewritten));
+        
+        // Find the parent contenteditable to trigger an update to state
+        let parent = range.commonAncestorContainer as HTMLElement;
+        while(parent && !parent.getAttribute?.('contenteditable')) {
+          parent = parent.parentElement as HTMLElement;
+        }
+        if(parent && parent.dataset.blockId) {
+          updateBlock(parent.dataset.blockId, { content: parent.innerHTML });
+        }
+      }
+    } catch(e) { console.error("AI Rewrite failed", e); }
+  };
+
   return (
     <div className="flex h-screen bg-[#F8FAFC] overflow-hidden font-sans relative">
-      <FloatingToolbar onFormat={(cmd, val) => document.execCommand(cmd, false, val)} />
+      <FloatingToolbar 
+        onFormat={(cmd, val) => document.execCommand(cmd, false, val)} 
+        onAIRewrite={handleAIRewrite}
+      />
       
       <AnimatePresence>
         {showMediaLibrary.open && (
@@ -378,17 +422,21 @@ export default function AdvancedEditorPage() {
                               <div>
                                 <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1.5 block">Block Configuration</label>
                                 {block.type === 'paragraph' || block.type === 'quote' ? (
-                                   <textarea 
-                                     rows={4}
-                                     value={block.content}
-                                     onChange={(e) => updateBlock(block.id, { content: e.target.value })}
-                                     className="w-full text-sm border-none bg-slate-50 rounded-xl p-4 focus:ring-2 focus:ring-indigo-500/20 focus:bg-slate-100 outline-none transition-all font-medium"
+                                   <div 
+                                     contentEditable
+                                     suppressContentEditableWarning
+                                     data-block-id={block.id}
+                                     onBlur={(e) => updateBlock(block.id, { content: e.currentTarget.innerHTML })}
+                                     dangerouslySetInnerHTML={{ __html: block.content }}
+                                     className={`w-full text-sm border-none bg-slate-50 rounded-xl p-4 focus:ring-2 focus:ring-indigo-500/20 focus:bg-slate-100 outline-none transition-all font-medium min-h-[100px] ${block.type === 'quote' ? 'border-l-4 border-indigo-500 italic' : ''}`}
                                    />
                                 ) : block.type === 'heading' ? (
-                                   <input 
-                                     type="text" 
-                                     value={block.content}
-                                     onChange={(e) => updateBlock(block.id, { content: e.target.value })}
+                                   <div 
+                                     contentEditable
+                                     suppressContentEditableWarning
+                                     data-block-id={block.id}
+                                     onBlur={(e) => updateBlock(block.id, { content: e.currentTarget.innerHTML })}
+                                     dangerouslySetInnerHTML={{ __html: block.content }}
                                      className="w-full text-sm font-bold border-none bg-slate-50 rounded-xl p-4 focus:ring-2 focus:ring-indigo-500/20 focus:bg-slate-100 outline-none transition-all"
                                    />
                                 ) : block.type === 'image' ? (
@@ -866,8 +914,7 @@ export default function AdvancedEditorPage() {
                         <option value="seo_blog">Longform Analysis</option>
                       </select>
 
-                      <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1.5 block">Visual Theme</label>
-                      <div className="grid grid-cols-3 gap-2">
+                       <div className="grid grid-cols-3 gap-2 mb-6">
                          {[
                            { id: 'standard', label: 'Standard', color: 'bg-slate-100' },
                            { id: 'intelligence', label: 'Pro', color: 'bg-indigo-900' },
@@ -882,6 +929,20 @@ export default function AdvancedEditorPage() {
                              <span className="text-[8px] font-black uppercase text-slate-500">{t.label}</span>
                            </button>
                          ))}
+                      </div>
+
+                      <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1.5 block">Strategic Scheduling</label>
+                      <div className="flex items-center gap-3 bg-indigo-50 p-4 rounded-2xl border border-indigo-100">
+                         <Calendar size={20} className="text-indigo-600" />
+                         <div className="flex-1">
+                            <input 
+                              type="datetime-local" 
+                              value={article.scheduled_at ? new Date(article.scheduled_at).toISOString().slice(0, 16) : ""}
+                              onChange={(e) => setArticle({...article, scheduled_at: e.target.value ? new Date(e.target.value).toISOString() : undefined})}
+                              className="w-full bg-transparent border-none outline-none text-xs font-black text-indigo-900"
+                            />
+                            <p className="text-[8px] font-bold text-indigo-400 uppercase tracking-widest mt-1">Status will auto-switch to 'Scheduled'</p>
+                         </div>
                       </div>
                     </div>
                  </div>
@@ -965,7 +1026,14 @@ export default function AdvancedEditorPage() {
                       );
                       if (block.type === 'image') return (
                         <div key={block.id} className="my-12 rounded-[2rem] overflow-hidden shadow-2xl">
-                          <img src={block.content} className="w-full h-auto" />
+                          {block.content ? (
+                            <img src={block.content} className="w-full h-auto" />
+                          ) : (
+                            <div className="bg-slate-100 py-24 flex flex-col items-center justify-center text-slate-300">
+                               <ImageIcon size={48} className="mb-4" />
+                               <span className="text-[10px] font-black uppercase tracking-widest">Awaiting Media Payload</span>
+                            </div>
+                          )}
                         </div>
                       );
                       if (block.type === 'graph') {

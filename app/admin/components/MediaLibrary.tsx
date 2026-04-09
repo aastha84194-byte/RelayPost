@@ -50,32 +50,21 @@ export default function MediaLibrary({ onSelect, onClose }: MediaLibraryProps) {
 
   const searchUnsplash = async () => {
     if (!searchQuery) return;
-    const accessKey = process.env.NEXT_PUBLIC_UNSPLASH_ACCESS_KEY;
-    
-    if (!accessKey) {
-      console.warn("Unsplash Access Key missing. Using mock data.");
-      const mockResult = [
-        { id: '1', urls: { regular: `https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=1000&auto=format&fit=crop&sig=${Math.random()}` }, alt_description: 'Space nebula' },
-        { id: '2', urls: { regular: `https://images.unsplash.com/photo-1518770660439-4636190af475?q=80&w=1000&auto=format&fit=crop&sig=${Math.random()}` }, alt_description: 'Circuit board' },
-        { id: '3', urls: { regular: `https://images.unsplash.com/photo-1550751827-4bd374c3f58b?q=80&w=1000&auto=format&fit=crop&sig=${Math.random()}` }, alt_description: 'Cybersecurity' },
-        { id: '4', urls: { regular: `https://images.unsplash.com/photo-1485827404703-89b55fcc595e?q=80&w=1000&auto=format&fit=crop&sig=${Math.random()}` }, alt_description: 'Robot hand' },
-      ];
-      setStockImages(mockResult);
-      return;
-    }
-
     setIsLoading(true);
     try {
-      const res = await fetch(`https://api.unsplash.com/search/photos?query=${encodeURIComponent(searchQuery)}&per_page=20`, {
+      const Cookies = (await import("js-cookie")).default;
+      const token = Cookies.get("access_token");
+      
+      const res = await fetch(`http://localhost:8001/admin/media/stock/search?query=${encodeURIComponent(searchQuery)}`, {
         headers: {
-          "Authorization": `Client-ID ${accessKey}`
+          "Authorization": `Bearer ${token}`
         }
       });
       if (res.ok) {
-        const data = await res.json();
-        setStockImages(data.results);
+        setStockImages(await res.json());
       } else {
-        throw new Error("Unsplash API error");
+        const error = await res.json();
+        alert(error.detail || "Stock search failed");
       }
     } catch (e) {
       console.error("Stock search failed", e);
