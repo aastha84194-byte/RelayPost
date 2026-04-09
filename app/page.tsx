@@ -47,7 +47,7 @@ function HomeContent() {
   }, [category]);
 
   return (
-    <div className="min-h-full flex flex-col font-sans">
+    <div className="min-h-full flex flex-col font-sans bg-white md:bg-[#F8F9FB]">
       <Navbar />
       <main className="flex-grow">
         <div className="max-w-7xl mx-auto px-4 md:px-8 py-4">

@@ -23,10 +23,10 @@ export default function Login() {
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
         body: new URLSearchParams({ username: formData.email, password: formData.password })
       });
-      
+
       const data = await res.json();
       if (!res.ok) throw new Error(data.detail || "Login failed");
-      
+
       Cookies.set('access_token', data.access_token, { expires: 7, secure: true, sameSite: 'strict' });
       localStorage.setItem('auth_token', data.access_token);
       toast.success("Welcome back!");
@@ -39,25 +39,25 @@ export default function Login() {
   };
 
   const handleGoogleSuccess = async (credentialResponse: any) => {
-      try {
-        const res = await fetch(`${AUTH_BASE}/auth/google`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ token: credentialResponse.credential })
-        });
-        const data = await res.json();
-        if (res.ok) {
-            Cookies.set('access_token', data.access_token, { expires: 7, secure: true, sameSite: 'strict' });
-            localStorage.setItem('auth_token', data.access_token);
-            toast.success("Successfully authenticated with Google");
-            setTimeout(() => window.location.href = "/", 600);
-        } else {
-            toast.error(data.detail || "Google Login failed");
-        }
-      } catch (err: any) {
-          console.error("Google auth failed", err);
-          toast.error("Network error: Could not reach the server.");
+    try {
+      const res = await fetch(`${AUTH_BASE}/auth/google`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ token: credentialResponse.credential })
+      });
+      const data = await res.json();
+      if (res.ok) {
+        Cookies.set('access_token', data.access_token, { expires: 7, secure: true, sameSite: 'strict' });
+        localStorage.setItem('auth_token', data.access_token);
+        toast.success("Successfully authenticated with Google");
+        setTimeout(() => window.location.href = "/", 600);
+      } else {
+        toast.error(data.detail || "Google Login failed");
       }
+    } catch (err: any) {
+      console.error("Google auth failed", err);
+      toast.error("Network error: Could not reach the server.");
+    }
   };
 
   return (
@@ -65,25 +65,25 @@ export default function Login() {
       <div className="bg-deep-sea min-h-screen flex flex-col items-center justify-center p-6 relative overflow-hidden">
         {/* Background Pattern */}
         <NetworkBackground />
-        
+
         <main className="z-10 w-full max-w-md relative">
           <div className="glass-panel rounded-2xl p-6 md:p-8 transition-all duration-300 shadow-2xl">
             <div className="flex flex-col items-center mb-6">
-              <span className="text-white text-2xl font-extrabold tracking-tighter mb-2 cursor-pointer" onClick={() => window.location.href="/"}>Editorial Intelligence</span>
+              <span className="text-white text-2xl font-extrabold tracking-tighter mb-2 cursor-pointer" onClick={() => window.location.href = "/"}>Editorial Intelligence</span>
               <h1 className="text-white text-xl md:text-2xl font-bold tracking-tight text-center">Welcome Back</h1>
               <p className="text-slate-400 text-xs mt-1 font-body">Login to continue exploring insights.</p>
             </div>
-            
+
             <form onSubmit={handleLogin} className="space-y-4">
               <div className="space-y-1">
                 <label className="text-xs font-semibold text-slate-300 uppercase tracking-widest px-1">Email Address</label>
                 <div className="relative">
-                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 material-symbols-outlined text-lg">mail</span>
-                    <input 
-                    type="email" 
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 material-symbols-outlined text-lg">mail</span>
+                  <input
+                    type="email"
                     value={formData.email}
-                    onChange={(e) => setFormData({...formData, email: e.target.value})}
-                    className="w-full bg-white/5 border border-white/10 rounded-lg pl-10 pr-3 py-2 text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all text-sm" 
+                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                    className="w-full bg-white/5 border border-white/10 rounded-lg pl-10 pr-3 py-2 text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all text-sm"
                     placeholder="name@company.com" required />
                 </div>
               </div>
@@ -92,22 +92,22 @@ export default function Login() {
                 <label className="text-xs font-semibold text-slate-300 uppercase tracking-widest px-1">Password</label>
                 <div className="relative">
                   <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 material-symbols-outlined text-lg">lock</span>
-                  <input 
-                    type={showPassword ? "text" : "password"} 
+                  <input
+                    type={showPassword ? "text" : "password"}
                     value={formData.password}
-                    onChange={(e) => setFormData({...formData, password: e.target.value})}
-                    className="w-full bg-white/5 border border-white/10 rounded-lg pl-10 pr-10 py-2 text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all text-sm" 
+                    onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                    className="w-full bg-white/5 border border-white/10 rounded-lg pl-10 pr-10 py-2 text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all text-sm"
                     placeholder="••••••••" minLength={8} required />
                   <button onClick={() => setShowPassword(!showPassword)} type="button" className="absolute right-3 top-[50%] -translate-y-[50%] flex items-center justify-center text-slate-400 hover:text-primary transition-colors">
                     <span className="material-symbols-outlined text-lg leading-none">{showPassword ? "visibility_off" : "visibility"}</span>
                   </button>
                 </div>
               </div>
-              
+
               <div className="flex items-center justify-between py-1.5">
                 <label className="flex items-center text-xs text-slate-400 cursor-pointer">
-                    <input type="checkbox" className="mr-2 w-3 h-3 rounded border-white/20 bg-white/5 text-primary focus:ring-primary focus:ring-offset-0" />
-                    Remember me
+                  <input type="checkbox" className="mr-2 w-3 h-3 rounded border-white/20 bg-white/5 text-primary focus:ring-primary focus:ring-offset-0" />
+                  Remember me
                 </label>
                 <a href="#" className="text-xs text-indigo-400 hover:text-indigo-300 transition-colors">Forgot Password?</a>
               </div>
@@ -125,20 +125,20 @@ export default function Login() {
                     <span className="px-2 bg-transparent text-slate-400 uppercase tracking-widest">Or Continue With</span>
                   </div>
                 </div>
-                
+
                 <div className="mt-4 flex justify-center opacity-90 transition-opacity hover:opacity-100 transform scale-90">
-                   <GoogleLogin 
-                      onSuccess={handleGoogleSuccess} 
-                      onError={() => console.log('Login Failed')} 
-                      theme="filled_blue"
-                      shape="pill"
-                    />
+                  <GoogleLogin
+                    onSuccess={handleGoogleSuccess}
+                    onError={() => console.log('Login Failed')}
+                    theme="filled_blue"
+                    shape="pill"
+                  />
                 </div>
               </div>
 
               <div className="text-center mt-4 pt-2">
                 <p className="text-slate-400 text-xs">
-                  Don't have an account? 
+                  Don't have an account?
                   <Link href="/register" className="text-white font-semibold hover:text-indigo-400 transition-colors ml-1">Sign Up.</Link>
                 </p>
               </div>

@@ -33,7 +33,7 @@ export default function ExpertAnalysis({ articles }: { articles: Article[] }) {
       className="pause-on-hover"
     >
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-2xl font-bold text-dark-bg border-l-4 border-[#4f46e5] pl-3">Expert Analysis</h2>
+        <h2 className="text-xl md:text-2xl font-bold text-dark-bg border-l-4 border-[#4f46e5] pl-3">Expert Analysis</h2>
         <div className="flex gap-2">
           <button 
             onClick={() => scroll('left')}
@@ -63,13 +63,14 @@ export default function ExpertAnalysis({ articles }: { articles: Article[] }) {
             >
               <div className="flex items-center gap-3 mb-4">
                 <div className="w-10 h-10 rounded-full overflow-hidden shrink-0 border border-gray-100 flex items-center justify-center bg-slate-100">
-                  <Image 
-                    src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${item.author_id || i}`} 
-                    width={40} 
-                    height={40} 
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform" 
-                    alt="Author" 
-                  />
+                    <Image 
+                      src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${item.author_id || i}`} 
+                      width={40} 
+                      height={40} 
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform" 
+                      alt="Author" 
+                      unoptimized
+                    />
                 </div>
                 <div>
                   <h4 className="font-bold text-[13px] text-dark-bg">Expert Advisor</h4>

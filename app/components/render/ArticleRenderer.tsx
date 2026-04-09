@@ -117,14 +117,14 @@ export default function ArticleRenderer({ article }: ArticleRendererProps) {
   return (
     <div className={`${themeClasses.body} min-h-screen font-sans selection:bg-brand selection:text-white transition-colors duration-300 pb-24 ${theme === 'intelligence' ? 'dark' : ''}`}>
       {/* Premium Hero Section (Maritime Style) */}
-      <section className="relative h-[85vh] min-h-[600px] overflow-hidden bg-[#0A0D1F]">
+      <section className="relative h-[60vh] md:h-[85vh] min-h-[400px] md:min-h-[600px] overflow-hidden bg-[#0A0D1F]">
         <InteractiveHero imageSrc={article.hero_image || ""} />
         <ParticleEffect mode="attract" />
         
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#0A0D1F]/40 to-[#0A0D1F] pointer-events-none" />
         
-        <div className="absolute inset-0 flex flex-col justify-center items-center text-center p-8 max-w-5xl mx-auto w-full z-20">
-          <motion.div {...fadeIn} className="space-y-8">
+        <div className="absolute inset-0 flex flex-col justify-center items-center text-center p-4 md:p-8 w-full md:max-w-5xl md:mx-auto z-20">
+          <motion.div {...fadeIn} className="space-y-4 md:space-y-8">
             <div className="flex justify-center gap-3">
               <span className="px-4 py-1.5 bg-brand/90 backdrop-blur-sm text-white text-[11px] font-black tracking-[0.2em] uppercase rounded-full shadow-lg shadow-brand/20 flex items-center gap-2">
                 <Sparkles size={12} />
@@ -132,7 +132,7 @@ export default function ArticleRenderer({ article }: ArticleRendererProps) {
               </span>
             </div>
             
-            <h1 className="text-5xl md:text-7xl font-black text-white leading-[1.1] tracking-tight drop-shadow-2xl">
+            <h1 className="text-2xl md:text-5xl lg:text-7xl font-black text-white leading-tight md:leading-[1.1] tracking-tight drop-shadow-2xl">
               {article.title}
             </h1>
             
@@ -163,7 +163,7 @@ export default function ArticleRenderer({ article }: ArticleRendererProps) {
       </section>
 
       {/* Main Content Card (Floating Style) */}
-      <main className="max-w-7xl mx-auto px-4 md:px-8 -mt-24 relative z-30 grid grid-cols-1 lg:grid-cols-12 gap-8">
+      <main className="w-full md:max-w-7xl md:mx-auto px-4 md:px-8 -mt-12 md:-mt-24 relative z-30 grid grid-cols-1 lg:grid-cols-12 gap-8">
         
         <div className="hidden lg:block lg:col-span-1" />
 
