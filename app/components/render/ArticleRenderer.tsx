@@ -3,7 +3,8 @@
 import React, { useState, useEffect } from "react";
 import { Article, ContentBlock, Reflection } from "@/lib/types";
 import { motion, AnimatePresence } from "framer-motion";
-import { User, Calendar, Share, ThumbsUp, ChevronRight, Quote as QuoteIcon, Trophy, Sparkles, MessageSquare, Send } from "lucide-react";
+import { User, Calendar, Share, ThumbsUp, ChevronRight, Quote as QuoteIcon, Trophy, Sparkles, MessageSquare, Send, Zap, Shield, Target } from "lucide-react";
+import Link from "next/link";
 import ParticleEffect from "../ParticleEffect";
 import InteractiveHero from "./InteractiveHero";
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, LineChart, Line, AreaChart, Area, Cell } from 'recharts';
@@ -77,8 +78,44 @@ export default function ArticleRenderer({ article }: ArticleRendererProps) {
     transition: { duration: 0.6 }
   };
 
+  const theme = article.theme || "standard";
+  
+  const themeClasses = {
+    standard: {
+      body: "bg-[#f0f2f5] dark:bg-slate-950",
+      card: "bg-white dark:bg-slate-900 border-transparent",
+      text: "text-slate-700 dark:text-slate-300",
+      heading: "text-slate-900 dark:text-white",
+      accent: "text-brand",
+      button: "bg-brand text-white hover:bg-brand-dark"
+    },
+    intelligence: {
+      body: "bg-slate-900 dark:bg-black",
+      card: "bg-slate-800 dark:bg-slate-900 border-indigo-500/20",
+      text: "text-slate-300 dark:text-slate-400",
+      heading: "text-white dark:text-indigo-100",
+      accent: "text-indigo-400 font-serif",
+      button: "bg-indigo-600 text-white hover:bg-indigo-700"
+    },
+    sports: {
+      body: "bg-orange-50 dark:bg-orange-950/20",
+      card: "bg-white dark:bg-slate-900 border-orange-500/10",
+      text: "text-slate-800 dark:text-slate-200",
+      heading: "text-slate-900 dark:text-white font-black italic",
+      accent: "text-orange-600",
+      button: "bg-orange-600 text-white hover:bg-orange-700"
+    }
+  }[theme] || {
+    body: "bg-[#f0f2f5] dark:bg-slate-950",
+    card: "bg-white dark:bg-slate-900 border-transparent",
+    text: "text-slate-700 dark:text-slate-300",
+    heading: "text-slate-900 dark:text-white",
+    accent: "text-brand",
+    button: "bg-brand text-white hover:bg-brand-dark"
+  };
+
   return (
-    <div className="bg-[#f0f2f5] dark:bg-slate-950 min-h-screen font-sans selection:bg-brand selection:text-white transition-colors duration-300 pb-24">
+    <div className={`${themeClasses.body} min-h-screen font-sans selection:bg-brand selection:text-white transition-colors duration-300 pb-24 ${theme === 'intelligence' ? 'dark' : ''}`}>
       {/* Premium Hero Section (Maritime Style) */}
       <section className="relative h-[60vh] md:h-[85vh] min-h-[400px] md:min-h-[600px] overflow-hidden bg-[#0A0D1F]">
         <InteractiveHero imageSrc={article.hero_image || ""} />
@@ -131,7 +168,7 @@ export default function ArticleRenderer({ article }: ArticleRendererProps) {
         <div className="hidden lg:block lg:col-span-1" />
 
         {/* Article Body */}
-        <div className="lg:col-span-7 bg-white dark:bg-slate-900 rounded-3xl md:rounded-[2.5rem] shadow-[0_32px_128px_-32px_rgba(0,0,0,0.15)] p-4 md:p-12 lg:p-20 overflow-hidden">
+        <div className={`lg:col-span-7 ${themeClasses.card} rounded-[2.5rem] shadow-[0_32px_128px_-32px_rgba(0,0,0,0.15)] p-10 md:p-20 border overflow-hidden`}>
           
           <div className="space-y-12">
             {article.ai_summary && (
@@ -163,7 +200,7 @@ export default function ArticleRenderer({ article }: ArticleRendererProps) {
                  >
                    
                    {block.type === 'heading' && React.createElement(`h${block.metadata?.level || 2}`, {
-                      className: `font-black tracking-tight text-slate-900 dark:text-white ${
+                      className: `font-black tracking-tight ${themeClasses.heading} ${
                         block.metadata?.level === 1 ? 'text-5xl md:text-6xl mb-12' :
                         block.metadata?.level === 3 ? 'text-3xl mb-6' : 'text-xl mb-4'
                       }`,
@@ -172,7 +209,7 @@ export default function ArticleRenderer({ article }: ArticleRendererProps) {
 
                    {block.type === 'paragraph' && (
                      <p 
-                       className={`text-xl md:text-2xl text-slate-700 dark:text-slate-300 leading-[1.7] mb-8 ${idx === 0 ? 'first-letter:text-7xl first-letter:font-black first-letter:text-brand first-letter:mr-3 first-letter:float-left' : ''}`} 
+                       className={`text-xl md:text-2xl ${themeClasses.text} leading-[1.7] mb-8 ${idx === 0 ? `first-letter:text-7xl first-letter:font-black first-letter:${themeClasses.accent.split(' ')[0]} first-letter:mr-3 first-letter:float-left` : ''}`} 
                        style={blockStyle}
                      >
                        {block.content}
@@ -370,14 +407,18 @@ export default function ArticleRenderer({ article }: ArticleRendererProps) {
         {/* Sidebar Container */}
         <aside className="lg:col-span-4 space-y-8">
           
-          <div className="bg-white dark:bg-slate-900 rounded-[2.5rem] shadow-[0_32px_128px_-32px_rgba(0,0,0,0.1)] p-8 space-y-8">
+          <div className={`${themeClasses.card} rounded-[2.5rem] shadow-[0_32px_128px_-32px_rgba(0,0,0,0.1)] p-8 border space-y-8`}>
              <h3 className="text-[11px] font-black text-brand uppercase tracking-[0.3em] flex items-center gap-3">
                 <span className="w-4 h-0.5 bg-brand" />
                 Related Dispatches
              </h3>
              <div className="space-y-6">
                 {relatedArticles.length > 0 ? relatedArticles.map((item, i) => (
-                  <a key={i} href={`/article/${item.slug}`} className="flex gap-4 group cursor-pointer">
+                  <Link 
+                    key={i} 
+                    href={`/${item.category_name?.toLowerCase().replace(/ /g, '-') || 'general'}/${item.slug}`} 
+                    className="flex gap-4 group cursor-pointer"
+                  >
                      <div className="w-20 h-20 rounded-2xl overflow-hidden shrink-0 shadow-md">
                         <img src={item.hero_image || "https://images.unsplash.com/photo-1544411047-c491574abb46?w=400&q=80"} alt="Thumb" className="w-full h-full object-cover group-hover:scale-110 transition-all duration-500" />
                      </div>
@@ -386,7 +427,7 @@ export default function ArticleRenderer({ article }: ArticleRendererProps) {
                         <h4 className="text-sm font-black text-slate-800 dark:text-slate-100 leading-snug group-hover:text-brand transition-colors">{item.title}</h4>
                         <p className="text-[9px] text-slate-400 font-bold uppercase tracking-widest">Analysis</p>
                      </div>
-                  </a>
+                  </Link>
                 )) : (
                   <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest px-2">No related dispatches found.</p>
                 )}

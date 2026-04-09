@@ -1,12 +1,12 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { Suspense, useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { Search, User, Monitor, Briefcase, Trophy, Heart, Film, Landmark, Microscope, Globe, Hash, Settings, Bookmark, Star, Edit3, Menu, X } from "lucide-react";
 import { motion, useScroll, useMotionValueEvent, AnimatePresence } from "framer-motion";
+import { useRouter, useSearchParams } from "next/navigation";
 
 const categories = [
-  { name: "TAGS", icon: Hash, bg: "bg-indigo-600", text: "text-white" },
   { name: "Business", icon: Briefcase },
   { name: "Sports", icon: Trophy },
   { name: "Health", icon: Heart },
@@ -15,6 +15,48 @@ const categories = [
   { name: "Science", icon: Microscope },
   { name: "World News", icon: Globe },
 ];
+
+function NavbarCategoryFilters() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const activeCategory = searchParams.get("category");
+
+  const handleCategoryClick = (name: string) => {
+    const params = new URLSearchParams(searchParams.toString());
+    if (activeCategory === name) {
+      params.delete("category");
+    } else {
+      params.set("category", name);
+    }
+    router.push(`/?${params.toString()}`);
+  };
+
+  return (
+    <div className="max-w-7xl mx-auto px-4 md:px-8 mb-6 mt-[-10px]">
+      <div className="flex items-center gap-3 overflow-x-auto hide-scrollbar py-2">
+        {categories.map((cat) => {
+          const Icon = cat.icon;
+          const isActive = activeCategory === cat.name;
+          return (
+            <button
+              key={cat.name}
+              type="button"
+              onClick={() => handleCategoryClick(cat.name)}
+              className={`flex items-center gap-2 px-4 py-2 rounded-full whitespace-nowrap text-sm font-medium transition-all shadow-sm border ${
+                isActive
+                  ? "bg-indigo-600 text-white border-indigo-600 ring-4 ring-indigo-500/10 scale-105"
+                  : "bg-white text-gray-500 border-gray-200 hover:text-indigo-600 hover:border-indigo-600"
+              }`}
+            >
+              <Icon size={14} className={isActive ? "text-white" : "text-gray-400 group-hover:text-indigo-600"} />
+              {cat.name}
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
 
 export default function Navbar() {
   const { scrollY } = useScroll();
@@ -175,10 +217,15 @@ export default function Navbar() {
                   {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
                 </button>
               </div>
-            </nav>
-          </div>
-        </motion.header>
-      </div>
+            </Link>
+
+            {/* Links */}
+            <div className="hidden md:flex items-center gap-8">
+              <Link className="text-white hover:text-indigo-400 transition-colors font-medium text-sm" href="/">Home</Link>
+              <Link className="text-slate-300 hover:text-indigo-400 transition-colors font-medium text-sm" href="/categories">Categories</Link>
+              <Link className="text-slate-300 hover:text-indigo-400 transition-colors font-medium text-sm" href="/contribute">Contribute</Link>
+              <Link className="text-slate-300 hover:text-indigo-400 transition-colors font-medium text-sm" href="/about">About</Link>
+            </div>
 
       {/* Mobile Menu Overlay */}
       <AnimatePresence>
@@ -220,27 +267,13 @@ export default function Navbar() {
       {/* Spacer to avoid content being hidden behind the sticky navbar */}
       <div className="h-16 md:h-28"></div>
 
-      {/* Categories Bar */}
-      <div className="w-full md:max-w-7xl md:mx-auto px-4 md:px-8 mb-6 mt-[-10px]">
-        <div className="flex items-center gap-3 overflow-x-auto hide-scrollbar py-2">
-          {categories.map((cat, i) => {
-            const Icon = cat.icon;
-            const isFirst = i === 0;
-            return (
-              <button
-                key={cat.name}
-                className={`flex items-center gap-2 px-4 py-2 rounded-full whitespace-nowrap text-sm font-medium transition-all shadow-sm border ${isFirst
-                    ? "bg-indigo-600 text-white border-indigo-600"
-                    : "bg-white text-gray-500 border-gray-200 hover:text-indigo-600 hover:border-indigo-600"
-                  }`}
-              >
-                <Icon size={14} className={isFirst ? "text-white" : "text-gray-400 group-hover:text-indigo-600"} />
-                {cat.name}
-              </button>
-            )
-          })}
-        </div>
-      </div>
+      <Suspense
+        fallback={
+          <div className="max-w-7xl mx-auto px-4 md:px-8 mb-6 mt-[-10px] min-h-[52px]" aria-hidden />
+        }
+      >
+        <NavbarCategoryFilters />
+      </Suspense>
     </>
   );
 }

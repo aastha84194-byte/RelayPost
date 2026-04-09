@@ -58,7 +58,7 @@ export default function TrendingNow({ articles }: { articles: Article[] }) {
           {displayArticles.map((item, i) => (
             <Link 
               key={`${item.id}-${i}`} 
-              href={`/article/${item.slug}`}
+              href={`/${item.category_name?.toLowerCase().replace(/ /g, '-') || 'general'}/${item.slug}`}
               className="w-[200px] md:w-[240px] shrink-0 bg-white border border-gray-200 shadow-sm hover:shadow-md transition-all duration-300 rounded-lg overflow-hidden group"
             >
               <div className="h-28 relative overflow-hidden">

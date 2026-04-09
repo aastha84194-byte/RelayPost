@@ -8,10 +8,14 @@ import {
   BarChart3, Table as TableIcon, Quote as QuoteIcon, Minus, Palette, 
   Type as TypeIcon, AlignLeft, AlignCenter, AlignRight, AlignJustify, Edit3,
   List as ListIcon, ListOrdered, Video, Globe, Code as CodeIcon,
-  MessageSquare, ExternalLink, HelpCircle, Upload, Plus, Link as LinkIcon, Sparkles, CheckCircle2, Zap
+  MessageSquare, ExternalLink, HelpCircle, Upload, Plus, Link as LinkIcon, Sparkles, CheckCircle2, Zap, Calendar
 } from "lucide-react";
-import { Article, ContentBlock, SectionType, TemplateType, ArticleStatus } from "@/lib/types";
+import { Article, ContentBlock, SectionType, TemplateType, ThemeType, ArticleStatus } from "@/lib/types";
 import { motion, Reorder, AnimatePresence } from "framer-motion";
+import MediaLibrary from "../../components/MediaLibrary";
+import FloatingToolbar from "../../components/FloatingToolbar";
+import BlockPicker from "../../components/BlockPicker";
+import toast from "react-hot-toast";
 
 const FONT_OPTIONS = ["Inter", "Merriweather", "JetBrains Mono", "Outfit"];
 
@@ -43,6 +47,7 @@ export default function AdvancedEditorPage() {
   const [linkSuggestions, setLinkSuggestions] = useState<any[]>([]);
   const [categories, setCategories] = useState<any[]>([]);
   const [newKeyword, setNewKeyword] = useState("");
+  const [showMediaLibrary, setShowMediaLibrary] = useState<{open: boolean, blockId?: string}>({open: false});
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -99,14 +104,14 @@ export default function AdvancedEditorPage() {
         const data = await res.json();
         setArticle(data);
         if (isNew) router.replace(`/admin/editor/${data.id}`);
-        alert(`Article saved as ${publishStatus}!`);
+        toast.success(`Article saved as ${publishStatus}!`);
       } else {
         const errorData = await res.json();
-        alert(`Error: ${errorData.detail || 'Unknown error'}`);
+        toast.error(errorData.detail || "Operation failed");
       }
     } catch (err) {
       console.error(err);
-      alert("Error saving article");
+      toast.error("Network error saving article");
     } finally {
       setIsSaving(false);
     }
@@ -163,9 +168,11 @@ export default function AdvancedEditorPage() {
           } else {
              setArticle({...article, hero_image: data.url});
           }
-          alert("Media uploaded to secure storage!");
+          toast.success("Media uploaded to secure storage!");
+       } else {
+          toast.error("Upload failed");
        }
-     } catch(e) { alert("Upload failed"); }
+     } catch(e) { toast.error("Upload failed"); }
   };
 
   const addBlock = (type: SectionType) => {
@@ -202,8 +209,64 @@ export default function AdvancedEditorPage() {
     }));
   };
 
+  const handleAIRewrite = async (intent: string) => {
+    const sel = window.getSelection();
+    if (!sel || sel.isCollapsed) return;
+
+    const text = sel.toString();
+    const range = sel.getRangeAt(0);
+    
+    try {
+      const Cookies = (await import("js-cookie")).default;
+      const token = Cookies.get("access_token");
+      
+      const res = await fetch("http://localhost:8001/admin/ai/rewrite", {
+        method: "POST",
+        headers: { 
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify({ text, intent })
+      });
+      
+      if(res.ok) {
+        const data = await res.json();
+        // Replace selection with rewritten text
+        range.deleteContents();
+        range.insertNode(document.createTextNode(data.rewritten));
+        
+        // Find the parent contenteditable to trigger an update to state
+        let parent = range.commonAncestorContainer as HTMLElement;
+        while(parent && !parent.getAttribute?.('contenteditable')) {
+          parent = parent.parentElement as HTMLElement;
+        }
+        if(parent && parent.dataset.blockId) {
+          updateBlock(parent.dataset.blockId, { content: parent.innerHTML });
+        }
+      }
+    } catch(e) { console.error("AI Rewrite failed", e); }
+  };
+
   return (
-    <div className="flex h-screen bg-[#F8FAFC] overflow-hidden font-sans">
+    <div className="flex h-screen bg-[#F8FAFC] overflow-hidden font-sans relative">
+      <FloatingToolbar 
+        onFormat={(cmd, val) => document.execCommand(cmd, false, val)} 
+        onAIRewrite={handleAIRewrite}
+      />
+      
+      <AnimatePresence>
+        {showMediaLibrary.open && (
+           <MediaLibrary 
+             onClose={() => setShowMediaLibrary({open: false})}
+             onSelect={(url) => {
+                if(showMediaLibrary.blockId) updateBlock(showMediaLibrary.blockId, { content: url });
+                else setArticle({...article, hero_image: url});
+                setShowMediaLibrary({open: false});
+             }}
+           />
+        )}
+      </AnimatePresence>
+
       {/* Editor Sidebar */}
       <div className={`w-[480px] bg-white border-r border-slate-200 flex flex-col shadow-2xl z-20 flex-shrink-0 transition-all ${isPreview ? '-ml-[480px]' : 'ml-0'}`}>
         
@@ -283,12 +346,20 @@ export default function AdvancedEditorPage() {
                 </div>
                 <div>
                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 block">Hero Visual URL</label>
-                   <input 
-                     type="text" 
-                     value={article.hero_image || ""}
-                     onChange={(e) => setArticle({...article, hero_image: e.target.value})}
-                     className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-mono focus:outline-none focus:border-indigo-500 transition-all"
-                   />
+                   <div className="flex gap-2">
+                      <input 
+                        type="text" 
+                        value={article.hero_image || ""}
+                        onChange={(e) => setArticle({...article, hero_image: e.target.value})}
+                        className="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-mono focus:outline-none focus:border-indigo-500 transition-all"
+                      />
+                      <button 
+                        onClick={() => setShowMediaLibrary({open: true})}
+                        className="p-3 bg-slate-900 text-white rounded-xl hover:bg-indigo-600 transition-colors"
+                      >
+                         <ImageIcon size={16} />
+                      </button>
+                   </div>
                 </div>
               </div>
 
@@ -351,17 +422,21 @@ export default function AdvancedEditorPage() {
                               <div>
                                 <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1.5 block">Block Configuration</label>
                                 {block.type === 'paragraph' || block.type === 'quote' ? (
-                                   <textarea 
-                                     rows={4}
-                                     value={block.content}
-                                     onChange={(e) => updateBlock(block.id, { content: e.target.value })}
-                                     className="w-full text-sm border-none bg-slate-50 rounded-xl p-4 focus:ring-2 focus:ring-indigo-500/20 focus:bg-slate-100 outline-none transition-all font-medium"
+                                   <div 
+                                     contentEditable
+                                     suppressContentEditableWarning
+                                     data-block-id={block.id}
+                                     onBlur={(e) => updateBlock(block.id, { content: e.currentTarget.innerHTML })}
+                                     dangerouslySetInnerHTML={{ __html: block.content }}
+                                     className={`w-full text-sm border-none bg-slate-50 rounded-xl p-4 focus:ring-2 focus:ring-indigo-500/20 focus:bg-slate-100 outline-none transition-all font-medium min-h-[100px] ${block.type === 'quote' ? 'border-l-4 border-indigo-500 italic' : ''}`}
                                    />
                                 ) : block.type === 'heading' ? (
-                                   <input 
-                                     type="text" 
-                                     value={block.content}
-                                     onChange={(e) => updateBlock(block.id, { content: e.target.value })}
+                                   <div 
+                                     contentEditable
+                                     suppressContentEditableWarning
+                                     data-block-id={block.id}
+                                     onBlur={(e) => updateBlock(block.id, { content: e.currentTarget.innerHTML })}
+                                     dangerouslySetInnerHTML={{ __html: block.content }}
                                      className="w-full text-sm font-bold border-none bg-slate-50 rounded-xl p-4 focus:ring-2 focus:ring-indigo-500/20 focus:bg-slate-100 outline-none transition-all"
                                    />
                                 ) : block.type === 'image' ? (
@@ -640,34 +715,7 @@ export default function AdvancedEditorPage() {
                 </Reorder.Group>
 
                 {/* Add Block Toolbar */}
-                <div className="mt-8 p-6 bg-slate-900 rounded-[2.5rem] grid grid-cols-4 gap-4 shadow-2xl">
-                  {[
-                    { id: 'heading', icon: TypeIcon, label: 'Head' },
-                    { id: 'paragraph', icon: Type, label: 'Text' },
-                    { id: 'image', icon: ImageIcon, label: 'Image' },
-                    { id: 'bullet_list', icon: ListIcon, label: 'List' },
-                    { id: 'quote', icon: QuoteIcon, label: 'Quote' },
-                    { id: 'graph', icon: BarChart3, label: 'Graph' },
-                    { id: 'table', icon: TableIcon, label: 'Data' },
-                    { id: 'code_block', icon: CodeIcon, label: 'Code' },
-                    { id: 'callout', icon: HelpCircle, label: 'Callout' },
-                    { id: 'faq_block', icon: MessageSquare, label: 'FAQ' },
-                    { id: 'cta_block', icon: Zap, label: 'CTA' },
-                    { id: 'youtube_embed', icon: Video, label: 'Video' },
-                    { id: 'divider', icon: Minus, label: 'Line' }
-                  ].map(btn => (
-                    <button 
-                      key={btn.id}
-                      onClick={() => addBlock(btn.id as any)} 
-                      className="flex flex-col items-center gap-2 p-2 hover:bg-slate-800 rounded-2xl transition-all group"
-                    >
-                      <div className="w-10 h-10 bg-white/5 rounded-xl flex items-center justify-center text-indigo-400 group-hover:scale-110 group-hover:bg-indigo-600 group-hover:text-white transition-all shadow-lg">
-                        <btn.icon size={18} />
-                      </div>
-                      <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest group-hover:text-slate-300 transition-colors">{btn.label}</span>
-                    </button>
-                  ))}
-                </div>
+                <BlockPicker onAdd={addBlock} />
               </div>
             </div>
           )}
@@ -858,13 +906,44 @@ export default function AdvancedEditorPage() {
                       <select 
                         value={article.template_type}
                         onChange={(e) => setArticle({...article, template_type: e.target.value as TemplateType})}
-                        className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-xs font-bold outline-none"
+                        className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-xs font-bold outline-none mb-6"
                       >
                         <option value="standard">Intelligence Report</option>
                         <option value="news">Breaking Dispatch</option>
                         <option value="tech">Technical Deep-Dive</option>
                         <option value="seo_blog">Longform Analysis</option>
                       </select>
+
+                       <div className="grid grid-cols-3 gap-2 mb-6">
+                         {[
+                           { id: 'standard', label: 'Standard', color: 'bg-slate-100' },
+                           { id: 'intelligence', label: 'Pro', color: 'bg-indigo-900' },
+                           { id: 'sports', label: 'High Energy', color: 'bg-orange-500' }
+                         ].map(t => (
+                           <button 
+                             key={t.id}
+                             onClick={() => setArticle({...article, theme: t.id as any})}
+                             className={`p-2 rounded-lg border-2 transition-all text-center ${article.theme === t.id ? 'border-indigo-600 bg-indigo-50' : 'border-slate-100 hover:border-slate-300'}`}
+                           >
+                             <div className={`h-8 w-full ${t.color} rounded mb-1 shadow-sm`} />
+                             <span className="text-[8px] font-black uppercase text-slate-500">{t.label}</span>
+                           </button>
+                         ))}
+                      </div>
+
+                      <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1.5 block">Strategic Scheduling</label>
+                      <div className="flex items-center gap-3 bg-indigo-50 p-4 rounded-2xl border border-indigo-100">
+                         <Calendar size={20} className="text-indigo-600" />
+                         <div className="flex-1">
+                            <input 
+                              type="datetime-local" 
+                              value={article.scheduled_at ? new Date(article.scheduled_at).toISOString().slice(0, 16) : ""}
+                              onChange={(e) => setArticle({...article, scheduled_at: e.target.value ? new Date(e.target.value).toISOString() : undefined})}
+                              className="w-full bg-transparent border-none outline-none text-xs font-black text-indigo-900"
+                            />
+                            <p className="text-[8px] font-bold text-indigo-400 uppercase tracking-widest mt-1">Status will auto-switch to 'Scheduled'</p>
+                         </div>
+                      </div>
                     </div>
                  </div>
               </div>
@@ -877,8 +956,8 @@ export default function AdvancedEditorPage() {
       <div className={`flex-1 relative bg-slate-100 flex flex-col justify-start transition-all duration-500 overflow-hidden`}>
         
         {/* Minimal Preview Frame */}
-        <div className="flex-1 overflow-y-auto custom-scrollbar p-6 md:p-12">
-            <div className={`mx-auto max-w-[960px] bg-white shadow-[0_40px_100px_-20px_rgba(0,0,0,0.1)] rounded-3xl min-h-full overflow-hidden transition-all duration-300 ${isPreview ? 'max-w-[1200px]' : ''}`}>
+        <div className={`flex-1 overflow-y-auto custom-scrollbar p-6 md:p-12 ${article.theme === 'intelligence' ? 'bg-slate-950' : article.theme === 'sports' ? 'bg-orange-50' : 'bg-slate-100'}`}>
+            <div className={`mx-auto max-w-[960px] bg-white shadow-[0_40px_100px_-20px_rgba(0,0,0,0.1)] rounded-3xl min-h-full overflow-hidden transition-all duration-300 ${isPreview ? 'max-w-[1250px]' : ''} ${article.theme === 'intelligence' ? 'ring-1 ring-white/10 dark-theme' : ''}`}>
                
                {/* Context Header */}
                <div className="bg-slate-900 text-white flex items-center justify-between px-8 py-4 border-b border-white/5">
@@ -947,7 +1026,14 @@ export default function AdvancedEditorPage() {
                       );
                       if (block.type === 'image') return (
                         <div key={block.id} className="my-12 rounded-[2rem] overflow-hidden shadow-2xl">
-                          <img src={block.content} className="w-full h-auto" />
+                          {block.content ? (
+                            <img src={block.content} className="w-full h-auto" />
+                          ) : (
+                            <div className="bg-slate-100 py-24 flex flex-col items-center justify-center text-slate-300">
+                               <ImageIcon size={48} className="mb-4" />
+                               <span className="text-[10px] font-black uppercase tracking-widest">Awaiting Media Payload</span>
+                            </div>
+                          )}
                         </div>
                       );
                       if (block.type === 'graph') {
