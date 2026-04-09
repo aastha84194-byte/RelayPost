@@ -33,7 +33,7 @@ export default function TrendingNow({ articles }: { articles: Article[] }) {
       className="pause-on-hover"
     >
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-2xl font-bold text-dark-bg border-l-4 border-[#4f46e5] pl-3">Trending Now</h2>
+        <h2 className="text-xl md:text-2xl font-bold text-dark-bg border-l-4 border-[#4f46e5] pl-3">Trending Now</h2>
         <div className="flex gap-2">
           <button 
             onClick={() => scroll('left')}
@@ -57,7 +57,7 @@ export default function TrendingNow({ articles }: { articles: Article[] }) {
         >
           {displayArticles.map((item, i) => (
             <Link 
-              key={item.id || i} 
+              key={`${item.id}-${i}`} 
               href={`/article/${item.slug}`}
               className="w-[200px] md:w-[240px] shrink-0 bg-white border border-gray-200 shadow-sm hover:shadow-md transition-all duration-300 rounded-lg overflow-hidden group"
             >

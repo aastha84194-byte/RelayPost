@@ -31,32 +31,32 @@ export default function Home() {
   }, []);
 
   return (
-    <div className="min-h-full flex flex-col font-sans">
+    <div className="min-h-full flex flex-col font-sans bg-white md:bg-[#F8F9FB]">
       <Navbar />
       <main className="flex-grow">
-        <div className="max-w-7xl mx-auto px-4 md:px-8 py-10">
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
-        
-        {/* LEFT COLUMN - 8 columns wide */}
-        <div className="lg:col-span-8 flex flex-col gap-12">
-          <HeroSection article={hero} />
-          <TrendingNow articles={trending} />
-          <LatestInsights articles={insights} />
-          <TechSpotlight />
-          <ExpertAnalysis articles={expert} />
-          <InteractiveData />
-        </div>
+        <div className="w-full md:max-w-7xl md:mx-auto px-0 md:px-8 py-6 md:py-10">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 md:gap-10">
+            
+            {/* LEFT COLUMN - 8 columns wide */}
+            <div className="lg:col-span-8 flex flex-col gap-10 md:gap-12 px-4 md:px-0">
+              <HeroSection article={hero} />
+              <TrendingNow articles={trending} />
+              <LatestInsights articles={insights} />
+              <TechSpotlight />
+              <ExpertAnalysis articles={expert} />
+              <InteractiveData />
+            </div>
 
-        {/* RIGHT COLUMN - Sidebar - 4 columns wide */}
-        <div className="lg:col-span-4 flex flex-col pl-0 lg:pl-4">
-          <PopularConversations />
-          <GoUnlimited />
-          <TheBriefing />
-          <CommunityPulse />
-        </div>
+            {/* RIGHT COLUMN - Sidebar - 4 columns wide */}
+            <div className="lg:col-span-4 flex flex-col gap-10 px-4 md:px-0 md:pl-4">
+              <PopularConversations />
+              <GoUnlimited />
+              <TheBriefing />
+              <CommunityPulse />
+            </div>
 
-      </div>
-    </div>
+          </div>
+        </div>
       </main>
       <Footer />
     </div>
