@@ -12,7 +12,7 @@ export default function TechSpotlight() {
         {/* Large Featured Spotlight */}
         <div className="md:col-span-3 relative rounded-none md:rounded-xl overflow-hidden min-h-[300px] group shadow-md -mx-4 md:mx-0">
           <div className="absolute inset-0">
-            <Image src="https://images.unsplash.com/photo-1677442136019-21780ecad995?w=800&auto=format&fit=crop&q=60" alt="Spotlight" fill className="object-cover group-hover:scale-105 transition-transform duration-700" />
+            <Image src="https://images.unsplash.com/photo-1677442136019-21780ecad995?w=800&auto=format&fit=crop&q=60" alt="Spotlight" fill sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw" priority className="object-cover group-hover:scale-105 transition-transform duration-700" />
             <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-gray-900/40 to-transparent" />
           </div>
           <div className="absolute bottom-0 left-0 p-6 w-full">
@@ -34,7 +34,7 @@ export default function TechSpotlight() {
           ].map((item, i) => (
             <div key={i} className="flex gap-4 items-center group cursor-pointer hover:bg-gray-50 md:p-2 rounded-xl transition-all duration-300">
               <div className="w-16 h-16 md:w-20 md:h-20 rounded-xl relative overflow-hidden flex-shrink-0 shadow-sm">
-                <Image src={item.img} alt={item.title} fill className="object-cover group-hover:scale-110 transition-transform duration-500" />
+                <Image src={item.img} alt={item.title} fill sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw" className="object-cover group-hover:scale-110 transition-transform duration-500" />
               </div>
               <div className="flex-1">
                 <h4 className="font-bold text-dark-bg text-xs md:text-sm leading-snug group-hover:text-brand transition-colors mb-0.5 md:mb-1">{item.title}</h4>

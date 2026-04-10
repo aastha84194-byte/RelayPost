@@ -8,7 +8,7 @@ import toast from 'react-hot-toast';
 import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion';
 import NetworkBackground from '../../components/NetworkBackground';
 
-const AUTH_BASE = process.env.NEXT_PUBLIC_AUTH_BASE || "http://localhost:8000";
+const AUTH_BASE = process.env.NEXT_PUBLIC_AUTH_BASE || "https://relaypost-backend.onrender.com";
 
 export default function Register() {
   const [formData, setFormData] = useState({ name: '', email: '', password: '', confirm: '' });
@@ -40,7 +40,7 @@ export default function Register() {
     x.set(0);
     y.set(0);
   };
-  
+
   const calculatePasswordStrength = (pass: string) => {
     let score = 0;
     if (pass.length > 7) score++;
@@ -53,11 +53,17 @@ export default function Register() {
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
+
     if (formData.password !== formData.confirm) {
       toast.error("Passwords do not match");
       return;
     }
     
+    if (formData.password.length < 8) {
+      toast.error("Password must be at least 8 characters long");
+      return;
+    }
+
     setIsLoading(true);
     try {
       const res = await fetch(`${AUTH_BASE}/auth/register`, {
@@ -69,16 +75,17 @@ export default function Register() {
           display_name: formData.name
         })
       });
-      
+
       const data = await res.json();
       if (!res.ok) throw new Error(data.detail || "Registration failed");
-      
+
+      // Attempt to immediately log the user in to get their session token
       const loginRes = await fetch(`${AUTH_BASE}/auth/token`, {
         method: "POST",
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
         body: new URLSearchParams({ username: formData.email, password: formData.password })
       });
-      
+
       if (loginRes.ok) {
         const tokenData = await loginRes.json();
         Cookies.set('access_token', tokenData.access_token, { expires: 7, secure: true, sameSite: 'strict' });
@@ -90,7 +97,11 @@ export default function Register() {
         setTimeout(() => window.location.href = "/login", 1200);
       }
     } catch (err: any) {
-      toast.error(err.message || "Registration protocol failed");
+      if (Array.isArray(err.message)) {
+        toast.error(err.message[0].msg || "Validation error");
+      } else {
+        toast.error(err.message || "Registration protocol failed");
+      }
     } finally {
       setIsLoading(false);
     }
@@ -113,12 +124,13 @@ export default function Register() {
             toast.error(data.detail || "Google Link failed");
         }
       } catch (err: any) {
+          console.error("Google auth failed", err);
           toast.error("Network error: Host unreachable.");
       }
   };
 
   return (
-    <GoogleOAuthProvider clientId={process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "mock-client-id"}>
+    <GoogleOAuthProvider clientId={process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "45916998595-bd3pc3o44oo0qst9mob0ibsq05te4cjq.apps.googleusercontent.com"}>
       <div className="bg-deep-sea min-h-screen flex flex-col items-center justify-center p-6 relative overflow-hidden font-sans">
         
         {/* Background Design Elements */}
@@ -203,7 +215,7 @@ export default function Register() {
                           if(input.field === 'password') calculatePasswordStrength(e.target.value);
                         }}
                         className="w-full bg-white/[0.03] border border-white/10 rounded-2xl px-4 py-3 text-white placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary/60 transition-all text-sm" 
-                        placeholder="••••••••" required 
+                        placeholder="••••••••" required minLength={input.field === 'password' ? 8 : undefined}
                       />
                       {input.field === 'password' && (
                         <button onClick={() => setShowPassword(!showPassword)} type="button" className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-white transition-colors">

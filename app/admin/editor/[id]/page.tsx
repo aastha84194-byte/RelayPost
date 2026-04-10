@@ -19,6 +19,8 @@ import toast from "react-hot-toast";
 
 const FONT_OPTIONS = ["Inter", "Merriweather", "JetBrains Mono", "Outfit"];
 
+const API_BASE = process.env.NEXT_PUBLIC_API_BASE || "http://localhost:8001";
+
 export default function AdvancedEditorPage() {
   const params = useParams();
   const router = useRouter();
@@ -52,7 +54,7 @@ export default function AdvancedEditorPage() {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const res = await fetch("http://localhost:8001/admin/categories");
+        const res = await fetch(`${API_BASE}/admin/categories`);
         if (res.ok) setCategories(await res.json());
       } catch (e) { console.error("Categories fetch failed", e); }
     };
@@ -63,7 +65,7 @@ export default function AdvancedEditorPage() {
     if (!isNew) {
       import("js-cookie").then((Cookies) => {
         const token = Cookies.default.get("access_token");
-        fetch(`http://localhost:8001/admin/articles/${articleId}`, {
+        fetch(`${API_BASE}/admin/articles/${articleId}`, {
           headers: { "Authorization": `Bearer ${token}` }
         })
           .then(res => res.ok ? res.json() : Promise.reject("Not authorized"))
@@ -89,7 +91,7 @@ export default function AdvancedEditorPage() {
       if(isNew && !payload.id) delete payload.id;
       
       const method = isNew ? "POST" : "PUT";
-      const url = isNew ? "http://localhost:8001/admin/articles" : `http://localhost:8001/admin/articles/${article.id}`;
+      const url = isNew ? `${API_BASE}/admin/articles` : `${API_BASE}/admin/articles/${article.id}`;
       
       const res = await fetch(url, {
         method,
@@ -128,7 +130,7 @@ export default function AdvancedEditorPage() {
           content_snippet: article.content_blocks.slice(0, 3).map(b => b.content).join(" ")
        };
 
-       const res = await fetch("http://localhost:8001/admin/articles/suggest-keywords", {
+       const res = await fetch(`${API_BASE}/admin/articles/suggest-keywords`, {
           method: "POST",
           headers: { 
              "Content-Type": "application/json",
@@ -139,7 +141,7 @@ export default function AdvancedEditorPage() {
        if(res.ok) setKeywordSuggestions(await res.json());
 
        if(!isNew) {
-          const resLinks = await fetch(`http://localhost:8001/admin/articles/${article.id}/suggest-links`, {
+          const resLinks = await fetch(`${API_BASE}/admin/articles/${article.id}/suggest-links`, {
              headers: { "Authorization": `Bearer ${token}` }
           });
           if(resLinks.ok) setLinkSuggestions(await resLinks.json());
@@ -155,7 +157,7 @@ export default function AdvancedEditorPage() {
        const Cookies = (await import("js-cookie")).default;
        const token = Cookies.get("access_token");
        
-       const res = await fetch("http://localhost:8001/admin/media/upload", {
+       const res = await fetch(`${API_BASE}/admin/media/upload`, {
           method: "POST",
           headers: { "Authorization": `Bearer ${token}` },
           body: formData
