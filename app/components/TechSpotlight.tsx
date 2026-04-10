@@ -8,7 +8,7 @@ export default function TechSpotlight() {
     <section>
       <h2 className="text-xl md:text-2xl font-bold text-dark-bg mb-4 border-l-4 border-[#4f46e5] pl-3">Tech Spotlight</h2>
       <div className="grid grid-cols-1 md:grid-cols-5 gap-4 md:gap-6">
-        
+
         {/* Large Featured Spotlight */}
         <div className="md:col-span-3 relative rounded-none md:rounded-xl overflow-hidden min-h-[300px] group shadow-md -mx-4 md:mx-0">
           <div className="absolute inset-0">
@@ -24,7 +24,7 @@ export default function TechSpotlight() {
             </button>
           </div>
         </div>
-        
+
         {/* Side Stack Spotlight */}
         <div className="md:col-span-2 flex flex-col justify-between gap-4">
           {[

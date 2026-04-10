@@ -12,9 +12,9 @@ export default function TrendingNow({ articles }: { articles: Article[] }) {
   const scroll = (direction: 'left' | 'right') => {
     if (scrollRef.current) {
       const scrollAmount = 300;
-      scrollRef.current.scrollBy({ 
-        left: direction === 'left' ? -scrollAmount : scrollAmount, 
-        behavior: 'smooth' 
+      scrollRef.current.scrollBy({
+        left: direction === 'left' ? -scrollAmount : scrollAmount,
+        behavior: 'smooth'
       });
     }
   };
@@ -35,13 +35,13 @@ export default function TrendingNow({ articles }: { articles: Article[] }) {
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-xl md:text-2xl font-bold text-dark-bg border-l-4 border-[#4f46e5] pl-3">Trending Now</h2>
         <div className="flex gap-2">
-          <button 
+          <button
             onClick={() => scroll('left')}
             className="w-8 h-8 rounded-full flex items-center justify-center bg-white border border-gray-200 text-gray-500 hover:text-brand transition-colors shadow-sm"
           >
             <ChevronLeft size={18} />
           </button>
-          <button 
+          <button
             onClick={() => scroll('right')}
             className="w-8 h-8 rounded-full flex items-center justify-center bg-white border border-gray-200 text-gray-500 hover:text-brand transition-colors shadow-sm"
           >
@@ -49,9 +49,9 @@ export default function TrendingNow({ articles }: { articles: Article[] }) {
           </button>
         </div>
       </div>
-      
+
       <div className="overflow-hidden w-full relative pb-1">
-        <div 
+        <div
           ref={scrollRef}
           className="flex gap-4 animate-marquee-reverse no-scrollbar"
         >

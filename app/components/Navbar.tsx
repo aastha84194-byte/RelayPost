@@ -40,8 +40,8 @@ function NavbarCategoryFilters() {
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 md:px-8 mb-6 mt-[-10px]">
-      <div className="flex items-center gap-3 overflow-x-auto hide-scrollbar py-2">
+    <div className="w-full md:max-w-7xl md:mx-auto px-4 md:px-8 mb-6 mt-4 md:mt-6">
+      <div className="flex items-center gap-3 overflow-x-auto hide-scrollbar py-1">
         {categories.map((cat) => {
           const Icon = cat.icon;
           const isActive = activeCategory === cat.name;
@@ -56,7 +56,7 @@ function NavbarCategoryFilters() {
                   : "bg-white text-gray-500 border-gray-200 hover:text-indigo-600 hover:border-indigo-600"
               }`}
             >
-              <Icon size={14} className={isActive ? "text-white" : "text-gray-400 group-hover:text-indigo-600"} />
+              <Icon size={14} className={isActive ? "text-white" : "text-gray-400"} />
               {cat.name}
             </button>
           );
@@ -129,7 +129,7 @@ export default function Navbar() {
                   <span className="text-white font-bold text-xl">E</span>
                 </div>
                 <div className="flex md:hidden flex-col leading-tight">
-                  <span className="text-white font-bold text-base tracking-tight">Editorial Intelligence</span>
+                  <span className="text-white font-bold text-base tracking-tight">RelayPost</span>
                 </div>
                 <AnimatePresence mode="wait">
                   {!isScrolled && (
@@ -140,8 +140,8 @@ export default function Navbar() {
                       transition={{ duration: 0.3 }}
                       className="hidden md:flex flex-col leading-tight"
                     >
-                      <span className="text-white font-bold text-lg tracking-tight">Editorial</span>
-                      <span className="text-indigo-300 text-[10px] font-semibold uppercase tracking-widest">Intelligence</span>
+                      <span className="text-white font-bold text-lg tracking-tight">Relay</span>
+                      <span className="text-indigo-300 text-[10px] font-semibold uppercase tracking-widest">Post</span>
                     </motion.div>
                   )}
                 </AnimatePresence>
@@ -197,7 +197,7 @@ export default function Navbar() {
                   title={isScrolled ? "Search" : undefined}
                 >
                   <input 
-                    className={`bg-slate-800/50 border border-white/5 rounded-full py-2 pl-4 pr-10 text-sm text-white focus:ring-2 focus:ring-indigo-500 focus:outline-none transition-all placeholder-slate-400 ${
+                    className={`bg-slate-800/50 border-none rounded-full py-2 pl-4 pr-10 text-sm text-white focus:ring-2 focus:ring-indigo-500 focus:outline-none transition-all placeholder-slate-400 shadow-inner ${
                       isScrolled ? "w-10 opacity-0 pointer-events-none" : "w-48 opacity-100"
                     }`} 
                     placeholder="Search..." 
@@ -210,7 +210,7 @@ export default function Navbar() {
 
                 {isLoggedIn ? (
                   isAdminOrPublisher ? (
-                    <Link href="/admin/dashboard" className="w-9 h-9 md:w-10 md:h-10 rounded-full bg-indigo-600/30 border border-indigo-500 flex items-center justify-center text-indigo-400 hover:text-indigo-300 hover:bg-indigo-600/50 transition-colors" title="Go to Dashboard">
+                    <Link href="/admin/dashboard" className="w-9 h-9 md:w-10 md:h-10 rounded-full bg-indigo-600/30 border border-indigo-500 flex items-center justify-center text-indigo-400 hover:text-indigo-300 hover:bg-indigo-600/50 transition-colors shadow-lg" title="Go to Dashboard">
                       <Monitor size={18} />
                     </Link>
                   ) : (
@@ -270,14 +270,14 @@ export default function Navbar() {
                 ) : (
                   <div className="hidden md:flex items-center gap-3 ml-2">
                     <Link href="/login" className="text-slate-300 hover:text-white font-medium text-sm transition-colors px-2">Login</Link>
-                    <Link href="/register" className="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-full font-medium text-sm transition-colors cursor-pointer">Sign Up</Link>
+                    <Link href="/register" className="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-full font-medium text-sm transition-colors cursor-pointer shadow-lg">Sign Up</Link>
                   </div>
                 )}
 
                 {/* Mobile Menu Toggle */}
                 <button
                   onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                  className="flex md:hidden w-9 h-9 items-center justify-center text-white"
+                  className="flex md:hidden w-10 h-10 items-center justify-center text-white bg-white/5 rounded-full"
                 >
                   {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
                 </button>
@@ -313,7 +313,6 @@ export default function Navbar() {
                 <Search size={22} className="absolute right-5 top-1/2 -translate-y-1/2 text-slate-500" />
               </div>
               <Link onClick={() => setMobileMenuOpen(false)} className="text-2xl font-bold text-white flex items-center justify-between" href="/">Home</Link>
-              <Link onClick={() => setMobileMenuOpen(false)} className="text-2xl font-bold text-slate-300" href="/categories">Categories</Link>
               <Link onClick={() => setMobileMenuOpen(false)} className="text-2xl font-bold text-slate-300" href="/about">About</Link>
               <Link onClick={() => setMobileMenuOpen(false)} className="text-2xl font-bold text-slate-300" href="/contact">Contact</Link>
             </div>
@@ -331,11 +330,12 @@ export default function Navbar() {
       </AnimatePresence>
 
       {/* Spacer to avoid content being hidden behind the sticky navbar */}
-      <div className="h-16 md:h-28"></div>
+      <div className="h-20 md:h-28"></div>
 
+      {/* Categories Bar */}
       <Suspense
         fallback={
-          <div className="max-w-7xl mx-auto px-4 md:px-8 mb-6 mt-[-10px] min-h-[52px]" aria-hidden />
+          <div className="max-w-7xl mx-auto px-4 md:px-8 mb-6 mt-4 md:mt-6 min-h-[52px]" aria-hidden />
         }
       >
         <NavbarCategoryFilters />

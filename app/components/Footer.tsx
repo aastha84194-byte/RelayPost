@@ -6,10 +6,10 @@ export default function Footer() {
   return (
     <footer className="bg-dark-bg text-gray-300 py-16 mt-24 border-t border-gray-800">
       <div className="max-w-7xl mx-auto px-4 md:px-8">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-x-8 gap-y-12 mb-12">
           
           {/* Logo & Description */}
-          <div className="col-span-1 md:col-span-1">
+          <div className="col-span-2 md:col-span-1">
             <Link href="/" className="flex items-center gap-2 mb-4">
               <div className="w-8 h-8 rounded-lg bg-brand flex items-center justify-center font-bold text-xl text-white">
                 E
@@ -24,19 +24,19 @@ export default function Footer() {
           </div>
 
           {/* Links Col 1 */}
-          <div>
-            <h4 className="text-white font-semibold mb-4">About</h4>
+          <div className="col-span-1 md:col-span-1">
+            <h4 className="text-white font-semibold mb-4 text-base">About</h4>
             <ul className="space-y-3 text-sm">
               <li><Link href="#" className="hover:text-white transition-colors">Home</Link></li>
-              <li><Link href="#" className="hover:text-white transition-colors">Categories</Link></li>
-              <li><Link href="#" className="hover:text-white transition-colors">About</Link></li>
-              <li><Link href="#" className="hover:text-white transition-colors">Contact</Link></li>
+              <li><Link href="/" className="hover:text-white transition-colors">Categories</Link></li>
+              <li><Link href="/about" className="hover:text-white transition-colors">About</Link></li>
+              <li><Link href="/contact" className="hover:text-white transition-colors">Contact</Link></li>
             </ul>
           </div>
 
           {/* Links Col 2 */}
-          <div>
-            <h4 className="text-white font-semibold mb-4">Categories</h4>
+          <div className="col-span-1 md:col-span-1">
+            <h4 className="text-white font-semibold mb-4 text-base">Categories</h4>
             <ul className="space-y-3 text-sm">
               <li><Link href="#" className="hover:text-white transition-colors">Sports</Link></li>
               <li><Link href="#" className="hover:text-white transition-colors">Health</Link></li>
@@ -46,12 +46,12 @@ export default function Footer() {
           </div>
 
           {/* Mission & Newsletter Box */}
-          <div className="col-span-1 md:col-span-1">
-            <h4 className="text-white font-semibold mb-4">Support the Mission</h4>
+          <div className="col-span-2 md:col-span-1">
+            <h4 className="text-white font-semibold mb-4 text-base">Support the Mission</h4>
             <p className="text-sm text-gray-400 mb-4">
               Sign up for exclusive content and monthly contributions to the site.
             </p>
-            <div className="flex items-center bg-dark-surface rounded-full p-1 border border-gray-700/50 focus-within:border-brand/50 transition-colors">
+            <div className="flex items-center bg-dark-surface rounded-full p-1 border border-gray-700/50 focus-within:border-brand/50 transition-colors max-w-sm">
               <span className="pl-4 text-gray-500">$</span>
               <input 
                 type="number" 
