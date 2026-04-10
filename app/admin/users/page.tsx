@@ -9,6 +9,8 @@ import {
 import Cookies from "js-cookie";
 import { motion, AnimatePresence } from "framer-motion";
 import toast from "react-hot-toast";
+const AUTH_BASE = process.env.NEXT_PUBLIC_AUTH_BASE || "http://localhost:8000";
+
 
 interface User {
   id: string;
@@ -37,7 +39,7 @@ export default function UsersManagement() {
     setIsLoading(true);
     const token = Cookies.get("access_token");
     try {
-      const res = await fetch("http://localhost:8000/admin/users", {
+      const res = await fetch(`${AUTH_BASE}/admin/users`, {
         headers: { "Authorization": `Bearer ${token}` }
       });
       if (res.ok) setUsers(await res.json());
@@ -51,7 +53,7 @@ export default function UsersManagement() {
   const handleInvite = async () => {
     const token = Cookies.get("access_token");
     try {
-      const res = await fetch("http://localhost:8000/admin/invites", {
+      const res = await fetch(`${AUTH_BASE}/admin/invites`, {
         method: "POST",
         headers: { 
           "Authorization": `Bearer ${token}`,
@@ -74,7 +76,7 @@ export default function UsersManagement() {
     if (!selectedUser) return;
     const token = Cookies.get("access_token");
     try {
-      const res = await fetch(`http://localhost:8000/admin/users/${selectedUser.id}`, {
+      const res = await fetch(`${AUTH_BASE}/admin/users/${selectedUser.id}`, {
         method: "PUT",
         headers: { 
           "Authorization": `Bearer ${token}`,
@@ -100,7 +102,7 @@ export default function UsersManagement() {
   const toggleUserStatus = async (user: User) => {
     const token = Cookies.get("access_token");
     try {
-      await fetch(`http://localhost:8000/admin/users/${user.id}`, {
+      await fetch(`${AUTH_BASE}/admin/users/${user.id}`, {
         method: "PUT",
         headers: { 
           "Authorization": `Bearer ${token}`,

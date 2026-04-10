@@ -4,6 +4,8 @@ import React, { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { ShieldCheck, Lock, User, ArrowRight, Loader2 } from "lucide-react";
 import { motion } from "framer-motion";
+const AUTH_BASE = process.env.NEXT_PUBLIC_AUTH_BASE || "http://localhost:8000";
+
 
 export default function InviteSignup() {
   const { token } = useParams();
@@ -18,7 +20,7 @@ export default function InviteSignup() {
   useEffect(() => {
     const checkInvite = async () => {
       try {
-        const res = await fetch(`http://localhost:8000/auth/invite/${token}`);
+        const res = await fetch(`${AUTH_BASE}/auth/invite/${token}`);
         if (!res.ok) throw new Error("Invalid or expired invitation");
         setInvite(await res.json());
       } catch (e: any) {
@@ -35,7 +37,7 @@ export default function InviteSignup() {
     setIsSubmitting(true);
     setError("");
     try {
-      const res = await fetch("http://localhost:8000/auth/invite/register", {
+      const res = await fetch(`${AUTH_BASE}/auth/invite/register`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

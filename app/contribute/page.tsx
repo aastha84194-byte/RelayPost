@@ -10,6 +10,8 @@ import {
 import Navbar from "../components/Navbar";
 import Cookies from "js-cookie";
 import { motion, AnimatePresence } from "framer-motion";
+const API_BASE = process.env.NEXT_PUBLIC_API_BASE || "http://localhost:8001";
+
 
 export default function ContributePage() {
   const [formData, setFormData] = useState({
@@ -34,7 +36,7 @@ export default function ContributePage() {
     }
 
     try {
-      const res = await fetch("http://localhost:8001/public/contributions", {
+      const res = await fetch(`${API_BASE}/public/contributions`, {
         method: "POST",
         headers: {
           "Authorization": `Bearer ${token}`,

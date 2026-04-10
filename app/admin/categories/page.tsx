@@ -9,6 +9,8 @@ import {
 import Cookies from "js-cookie";
 import { motion, AnimatePresence } from "framer-motion";
 import toast from "react-hot-toast";
+const API_BASE = process.env.NEXT_PUBLIC_API_BASE || "http://localhost:8001";
+
 
 interface Category {
   id: string;
@@ -33,7 +35,7 @@ export default function CategoriesManagement() {
   const fetchCategories = async () => {
     setIsLoading(true);
     try {
-      const res = await fetch("http://localhost:8001/public/categories");
+      const res = await fetch(`${API_BASE}/public/categories`);
       if (res.ok) setCategories(await res.json());
     } catch (e) { console.error(e); }
     finally { setIsLoading(false); }
@@ -43,7 +45,7 @@ export default function CategoriesManagement() {
     if (!newCat.name || !newCat.slug) return;
     const token = Cookies.get("access_token");
     try {
-      const res = await fetch("http://localhost:8001/admin/categories", {
+      const res = await fetch(`${API_BASE}/admin/categories`, {
         method: "POST",
         headers: { 
           "Authorization": `Bearer ${token}`,
@@ -66,7 +68,7 @@ export default function CategoriesManagement() {
   const handleUpdate = async (id: string) => {
     const token = Cookies.get("access_token");
     try {
-      const res = await fetch(`http://localhost:8001/admin/categories/${id}`, {
+      const res = await fetch(`${API_BASE}/admin/categories/${id}`, {
         method: "PUT",
         headers: { 
           "Authorization": `Bearer ${token}`,
@@ -89,7 +91,7 @@ export default function CategoriesManagement() {
     if (!confirm("Are you sure? Articles in this category will become unassigned.")) return;
     const token = Cookies.get("access_token");
     try {
-      const res = await fetch(`http://localhost:8001/admin/categories/${id}`, {
+      const res = await fetch(`${API_BASE}/admin/categories/${id}`, {
         method: "DELETE",
         headers: { "Authorization": `Bearer ${token}` }
       });

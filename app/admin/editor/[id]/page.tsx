@@ -222,7 +222,7 @@ export default function AdvancedEditorPage() {
       const Cookies = (await import("js-cookie")).default;
       const token = Cookies.get("access_token");
       
-      const res = await fetch("http://localhost:8001/admin/ai/rewrite", {
+      const res = await fetch(`${API_BASE}/admin/ai/rewrite`, {
         method: "POST",
         headers: { 
           "Content-Type": "application/json",

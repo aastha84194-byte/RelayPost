@@ -3,6 +3,8 @@
 import React, { useState } from "react";
 import Image from "next/image";
 import { Send, MapPin, Mail, Radio, Globe, Rss } from "lucide-react";
+const API_BASE = process.env.NEXT_PUBLIC_API_BASE || "http://localhost:8001";
+
 
 export default function ContactPage() {
   const [formData, setFormData] = useState({
@@ -18,7 +20,7 @@ export default function ContactPage() {
     setStatus("loading");
     
     try {
-      const res = await fetch("http://localhost:8001/public/contact", {
+      const res = await fetch(`${API_BASE}/public/contact`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData)

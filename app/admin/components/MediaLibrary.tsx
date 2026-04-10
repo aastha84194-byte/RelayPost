@@ -6,6 +6,8 @@ import {
   Check, Loader2, Globe, HardDrive 
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+const API_BASE = process.env.NEXT_PUBLIC_API_BASE || "http://localhost:8001";
+
 
 interface MediaLibraryProps {
   onSelect: (url: string) => void;
@@ -37,7 +39,7 @@ export default function MediaLibrary({ onSelect, onClose }: MediaLibraryProps) {
   const fetchUploads = async () => {
     setIsLoading(true);
     try {
-      const res = await fetch("http://localhost:8001/admin/media");
+      const res = await fetch(`${API_BASE}/admin/media`);
       if (res.ok) {
         setUploads(await res.json());
       }
@@ -55,7 +57,7 @@ export default function MediaLibrary({ onSelect, onClose }: MediaLibraryProps) {
       const Cookies = (await import("js-cookie")).default;
       const token = Cookies.get("access_token");
       
-      const res = await fetch(`http://localhost:8001/admin/media/stock/search?query=${encodeURIComponent(searchQuery)}`, {
+      const res = await fetch(`${API_BASE}/admin/media/stock/search?query=${encodeURIComponent(searchQuery)}`, {
         headers: {
           "Authorization": `Bearer ${token}`
         }
@@ -83,7 +85,7 @@ export default function MediaLibrary({ onSelect, onClose }: MediaLibraryProps) {
 
     try {
       // In real app, get token from cookies
-      const res = await fetch("http://localhost:8001/admin/media/upload", {
+      const res = await fetch(`${API_BASE}/admin/media/upload`, {
         method: "POST",
         body: formData,
       });

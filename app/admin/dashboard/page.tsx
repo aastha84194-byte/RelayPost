@@ -5,6 +5,10 @@ import Link from "next/link";
 import { CopyPlus, TrendingUp, Users, Activity, FileText } from "lucide-react";
 import Cookies from "js-cookie";
 import { motion } from "framer-motion";
+const AUTH_BASE = process.env.NEXT_PUBLIC_AUTH_BASE || "http://localhost:8000";
+
+const API_BASE = process.env.NEXT_PUBLIC_API_BASE || "http://localhost:8001";
+
 
 export default function AdminDashboard() {
   const [stats, setStats] = useState({
@@ -22,19 +26,19 @@ export default function AdminDashboard() {
       const token = Cookies.get("access_token");
       try {
         // Fetch Content Stats
-        const contentRes = await fetch("http://localhost:8001/admin/stats/content", {
+        const contentRes = await fetch(`${API_BASE}/admin/stats/content`, {
           headers: { "Authorization": `Bearer ${token}` }
         });
         const contentData = await contentRes.json();
 
         // Fetch Auth Stats
-        const authRes = await fetch("http://localhost:8000/admin/stats/auth", {
+        const authRes = await fetch(`${AUTH_BASE}/admin/stats/auth`, {
           headers: { "Authorization": `Bearer ${token}` }
         });
         const authData = await authRes.json();
 
         // Fetch Recent Activity
-        const activityRes = await fetch("http://localhost:8001/admin/activity", {
+        const activityRes = await fetch(`${API_BASE}/admin/activity`, {
           headers: { "Authorization": `Bearer ${token}` }
         });
         const activityData = await activityRes.json();

@@ -8,6 +8,8 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 import Cookies from "js-cookie";
 import toast from "react-hot-toast";
+const API_BASE = process.env.NEXT_PUBLIC_API_BASE || "http://localhost:8001";
+
 
 interface SystemSettings {
   site_name: string;
@@ -40,7 +42,7 @@ export default function SettingsPage() {
   const fetchSettings = async () => {
     try {
       const token = Cookies.get("access_token");
-      const res = await fetch("http://localhost:8001/admin/settings", {
+      const res = await fetch(`${API_BASE}/admin/settings`, {
         headers: { "Authorization": `Bearer ${token}` }
       });
       if (res.ok) setSettings(await res.json());
@@ -58,7 +60,7 @@ export default function SettingsPage() {
     const id = toast.loading("Saving configuration...");
     try {
       const token = Cookies.get("access_token");
-      const res = await fetch("http://localhost:8001/admin/settings", {
+      const res = await fetch(`${API_BASE}/admin/settings`, {
         method: "PUT",
         headers: { 
           "Authorization": `Bearer ${token}`,

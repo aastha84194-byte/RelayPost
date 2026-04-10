@@ -12,6 +12,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Article } from "@/lib/types";
+const API_BASE = process.env.NEXT_PUBLIC_API_BASE || "http://localhost:8001";
+
 
 export default function ArticlesManagement() {
   const router = useRouter();
@@ -32,7 +34,7 @@ export default function ArticlesManagement() {
     setIsLoading(true);
     const token = Cookies.get("access_token");
     try {
-      const res = await fetch("http://localhost:8001/admin/articles", {
+      const res = await fetch(`${API_BASE}/admin/articles`, {
          headers: { "Authorization": `Bearer ${token}` }
       });
       if (res.ok) {
@@ -47,7 +49,7 @@ export default function ArticlesManagement() {
 
   const fetchCategories = async () => {
     try {
-      const res = await fetch("http://localhost:8001/public/categories");
+      const res = await fetch(`${API_BASE}/public/categories`);
       if (res.ok) setCategories(await res.json());
     } catch (e) { console.error(e); }
   };
@@ -55,7 +57,7 @@ export default function ArticlesManagement() {
   const updateArticle = async (id: string, updates: any) => {
     const token = Cookies.get("access_token");
     try {
-      const res = await fetch(`http://localhost:8001/admin/articles/${id}`, {
+      const res = await fetch(`${API_BASE}/admin/articles/${id}`, {
         method: "PUT",
         headers: { 
           "Authorization": `Bearer ${token}`,
@@ -71,7 +73,7 @@ export default function ArticlesManagement() {
     if (!confirm("Confirm article archival? This will move it to trash but not delete permanently.")) return;
     const token = Cookies.get("access_token");
     try {
-      const res = await fetch(`http://localhost:8001/admin/articles/${id}`, {
+      const res = await fetch(`${API_BASE}/admin/articles/${id}`, {
         method: "DELETE",
         headers: { "Authorization": `Bearer ${token}` }
       });
@@ -84,7 +86,7 @@ export default function ArticlesManagement() {
   const updatePlacement = async (id: string, section: string, order: number) => {
      const token = Cookies.get("access_token");
      try {
-       const res = await fetch(`http://localhost:8001/admin/articles/${id}/placement`, {
+       const res = await fetch(`${API_BASE}/admin/articles/${id}/placement`, {
          method: "PUT",
          headers: { 
            "Authorization": `Bearer ${token}`,

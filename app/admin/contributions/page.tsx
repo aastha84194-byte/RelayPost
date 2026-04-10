@@ -9,6 +9,8 @@ import {
 } from "lucide-react";
 import Cookies from "js-cookie";
 import { motion, AnimatePresence } from "framer-motion";
+const API_BASE = process.env.NEXT_PUBLIC_API_BASE || "http://localhost:8001";
+
 
 interface Contribution {
   id: string;
@@ -35,7 +37,7 @@ export default function ContributionsManagement() {
     setIsLoading(true);
     const token = Cookies.get("access_token");
     try {
-      const res = await fetch(`http://localhost:8001/admin/contributions?status=${filterStatus}`, {
+      const res = await fetch(`${API_BASE}/admin/contributions?status=${filterStatus}`, {
         headers: { "Authorization": `Bearer ${token}` }
       });
       if (res.ok) {
@@ -51,7 +53,7 @@ export default function ContributionsManagement() {
   const updateStatus = async (id: string, status: string, notes: string = "") => {
     const token = Cookies.get("access_token");
     try {
-      const res = await fetch(`http://localhost:8001/admin/contributions/${id}`, {
+      const res = await fetch(`${API_BASE}/admin/contributions/${id}`, {
         method: "PUT",
         headers: { 
           "Authorization": `Bearer ${token}`,

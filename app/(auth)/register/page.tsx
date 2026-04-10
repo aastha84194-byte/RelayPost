@@ -10,7 +10,7 @@ import NetworkBackground from '../../components/NetworkBackground';
 import Navbar from '../../components/Navbar';
 import Footer from '../../components/Footer';
 
-const AUTH_BASE = process.env.NEXT_PUBLIC_AUTH_BASE || "https://relaypost-backend.onrender.com";
+const AUTH_BASE = process.env.NEXT_PUBLIC_AUTH_BASE || "http://localhost:8000";
 
 export default function Register() {
   const [formData, setFormData] = useState({ name: '', email: '', password: '', confirm: '' });

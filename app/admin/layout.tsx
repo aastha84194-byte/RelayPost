@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import Cookies from "js-cookie";
 import Link from "next/link";
 import { LayoutDashboard, FileText, Settings, Users, Tags, LogOut, ChevronLeft, Inbox } from "lucide-react";
+const API_BASE = process.env.NEXT_PUBLIC_API_BASE || "http://localhost:8001";
+
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
@@ -41,7 +43,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       if (!isAuthorized || role !== 'ADMIN') return;
       try {
         const token = Cookies.get("access_token");
-        const res = await fetch("http://localhost:8001/admin/inquiries/notifications", {
+        const res = await fetch(`${API_BASE}/admin/inquiries/notifications`, {
           headers: { "Authorization": `Bearer ${token}` }
         });
         if (res.ok) {

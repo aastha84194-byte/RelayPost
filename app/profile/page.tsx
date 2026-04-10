@@ -5,6 +5,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { Edit2, Share2, Sparkles, Clock, Users, CreditCard, Plus } from "lucide-react";
 import { Article } from "@/lib/types";
+const API_BASE = process.env.NEXT_PUBLIC_API_BASE || "http://localhost:8001";
+
 
 export default function ProfileDashboard() {
   const [stats, setStats] = useState<any>(null);
@@ -20,7 +22,7 @@ export default function ProfileDashboard() {
         const token = (await import("js-cookie")).default.get("access_token");
         
         // Example backend call:
-        // const statsRes = await fetch("http://localhost:8001/profile/stats", {
+        // const statsRes = await fetch(`${API_BASE}/profile/stats`, {
         //   headers: { Authorization: `Bearer ${token}` }
         // });
         // const statsData = await statsRes.json();
