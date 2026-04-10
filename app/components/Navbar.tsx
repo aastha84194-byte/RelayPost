@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Search, User, Monitor, Briefcase, Trophy, Heart, Film, Landmark, Microscope, Globe, Hash, Settings, Bookmark, Star, Edit3, Menu, X } from "lucide-react";
 import { motion, useScroll, useMotionValueEvent, AnimatePresence } from "framer-motion";
 import { useRouter, useSearchParams } from "next/navigation";
+import { ThemeToggle } from "./ThemeToggle";
 
 const categories = [
   { name: "Business", icon: Briefcase },
@@ -142,6 +143,8 @@ export default function Navbar() {
                   />
                   <Search size={16} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400" />
                 </div>
+                
+                <ThemeToggle />
 
                 {isLoggedIn ? (
                   isAdminOrPublisher ? (
@@ -217,16 +220,10 @@ export default function Navbar() {
                   {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
                 </button>
               </div>
-            </Link>
-
-            {/* Links */}
-            <div className="hidden md:flex items-center gap-8">
-              <Link className="text-white hover:text-indigo-400 transition-colors font-medium text-sm" href="/">Home</Link>
-              <Link className="text-slate-300 hover:text-indigo-400 transition-colors font-medium text-sm" href="/categories">Categories</Link>
-              <Link className="text-slate-300 hover:text-indigo-400 transition-colors font-medium text-sm" href="/contribute">Contribute</Link>
-              <Link className="text-slate-300 hover:text-indigo-400 transition-colors font-medium text-sm" href="/about">About</Link>
-            </div>
-
+            </nav>
+          </div>
+        </motion.header>
+      </div>
       {/* Mobile Menu Overlay */}
       <AnimatePresence>
         {mobileMenuOpen && (
