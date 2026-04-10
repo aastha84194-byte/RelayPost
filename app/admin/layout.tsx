@@ -4,12 +4,13 @@ import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Cookies from "js-cookie";
 import Link from "next/link";
-import { LayoutDashboard, FileText, Settings, Users, Tags, LogOut, ChevronLeft } from "lucide-react";
+import { LayoutDashboard, FileText, Settings, Users, Tags, LogOut, ChevronLeft, Inbox } from "lucide-react";
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const [isAuthorized, setIsAuthorized] = useState(false);
   const [role, setRole] = useState<string | null>(null);
+  const [unreadInquiries, setUnreadInquiries] = useState(0);
 
   useEffect(() => {
     const token = Cookies.get("access_token");
@@ -34,6 +35,28 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       router.push("/login");
     }
   }, [router]);
+
+  useEffect(() => {
+    const fetchNotifications = async () => {
+      if (!isAuthorized || role !== 'ADMIN') return;
+      try {
+        const token = Cookies.get("access_token");
+        const res = await fetch("http://localhost:8001/admin/inquiries/notifications", {
+          headers: { "Authorization": `Bearer ${token}` }
+        });
+        if (res.ok) {
+          const data = await res.json();
+          setUnreadInquiries(data.unread_count);
+        }
+      } catch (err) {
+        console.error("Failed to fetch notifications", err);
+      }
+    };
+
+    fetchNotifications();
+    const interval = setInterval(fetchNotifications, 60000); // Check every minute
+    return () => clearInterval(interval);
+  }, [isAuthorized, role]);
 
   const handleLogout = () => {
     Cookies.remove("access_token");
@@ -70,9 +93,21 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           </Link>
           
           {role === 'ADMIN' && (
-            <Link href="/admin/users" className="flex items-center gap-3 px-3 py-2 text-gray-600 hover:bg-gray-50 hover:text-indigo-600 rounded-lg transition-colors font-medium text-sm">
-              <Users size={18} /> Users & Roles
-            </Link>
+            <>
+              <Link href="/admin/users" className="flex items-center gap-3 px-3 py-2 text-gray-600 hover:bg-gray-50 hover:text-indigo-600 rounded-lg transition-colors font-medium text-sm">
+                <Users size={18} /> Users & Roles
+              </Link>
+              <Link href="/admin/inquiries" className="flex items-center justify-between px-3 py-2 text-gray-600 hover:bg-gray-50 hover:text-indigo-600 rounded-lg transition-colors font-medium text-sm">
+                <div className="flex items-center gap-3">
+                  <Inbox size={18} /> Inquiries
+                </div>
+                {unreadInquiries > 0 && (
+                  <span className="bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[18px] text-center">
+                    {unreadInquiries}
+                  </span>
+                )}
+              </Link>
+            </>
           )}
 
           <Link href="/admin/settings" className="flex items-center gap-3 px-3 py-2 text-gray-600 hover:bg-gray-50 hover:text-indigo-600 rounded-lg transition-colors font-medium text-sm">
