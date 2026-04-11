@@ -2,10 +2,12 @@
 
 import React, { Suspense, useState, useEffect, useRef } from "react";
 import Link from "next/link";
-import { Search, User, Monitor, Briefcase, Trophy, Heart, Film, Landmark, Microscope, Globe, Hash, Settings, Bookmark, Star, Edit3, Menu, X, Home, LayoutGrid, PlusCircle, Info } from "lucide-react";
+import { Search, User, Monitor, Briefcase, Trophy, Heart, Film, Landmark, Microscope, Globe, Hash, Settings, Bookmark, Star, Edit3, Menu, X, Home, LayoutGrid, PlusCircle, Info, Anchor, Cpu } from "lucide-react";
 import { motion, useScroll, useMotionValueEvent, AnimatePresence } from "framer-motion";
 import { useRouter, useSearchParams } from "next/navigation";
 import { ThemeToggle } from "./ThemeToggle";
+
+import SearchOverlay from "../../components/SearchOverlay";
 
 const navItems = [
   { name: "Home", href: "/", icon: Home },
@@ -73,6 +75,7 @@ export default function Navbar() {
   const [userRole, setUserRole] = useState<string | null>(null);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -112,6 +115,8 @@ export default function Navbar() {
 
   return (
     <>
+      <SearchOverlay isOpen={searchOpen} onClose={() => setSearchOpen(false)} />
+      
       <div className="fixed top-0 w-full z-50 pointer-events-none flex justify-center md:px-4">
         <motion.header 
           className="md:pt-4 w-full flex justify-center pointer-events-auto"
@@ -191,20 +196,30 @@ export default function Navbar() {
               </div>
 
               {/* Action icons */}
-              <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2 md:gap-4">
                 <div 
                   className="relative hidden xl:block"
-                  title={isScrolled ? "Search" : undefined}
                 >
-                  <input 
-                    className={`bg-slate-800/50 border-none rounded-full py-2 pl-4 pr-10 text-sm text-white focus:ring-2 focus:ring-indigo-500 focus:outline-none transition-all placeholder-slate-400 shadow-inner ${
-                      isScrolled ? "w-10 opacity-0 pointer-events-none" : "w-48 opacity-100"
-                    }`} 
-                    placeholder="Search..." 
-                    type="text"
-                  />
-                  <Search size={18} className={`absolute right-3 top-1/2 -translate-y-1/2 text-slate-300 cursor-pointer hover:text-white transition-colors ${isScrolled ? "scale-110" : "scale-100"}`} />
+                   <button 
+                    onClick={() => setSearchOpen(true)}
+                    className={`flex items-center gap-3 transition-all bg-slate-800/50 border border-white/10 rounded-full hover:bg-slate-700/50 hover:text-white ${
+                        isScrolled 
+                        ? "w-10 h-10 justify-center text-slate-300" 
+                        : "w-48 py-2 px-4 text-sm text-slate-400 shadow-inner"
+                    }`}
+                   >
+                     <Search size={18} className="flex-shrink-0" />
+                     {!isScrolled && <span>Search...</span>}
+                   </button>
                 </div>
+
+                {/* Mobile Search Icon */}
+                <button 
+                  onClick={() => setSearchOpen(true)}
+                  className="flex xl:hidden w-9 h-9 md:w-10 md:h-10 items-center justify-center text-slate-400 hover:text-white transition-all rounded-full bg-white/5 border border-white/10"
+                >
+                   <Search size={18} />
+                </button>
                 
                 <ThemeToggle />
 
@@ -304,17 +319,10 @@ export default function Navbar() {
                <X size={24} /> 
             </button>
             <div className="flex flex-col gap-6 mb-12">
-              <div className="relative mb-4">
-                <input
-                  className="bg-slate-800 border border-slate-700 rounded-2xl py-4 pl-6 pr-12 text-lg text-white focus:ring-2 focus:ring-indigo-500 w-full focus:outline-none transition-all placeholder-slate-500 shadow-xl"
-                  placeholder="Universal Search..."
-                  type="text"
-                />
-                <Search size={22} className="absolute right-5 top-1/2 -translate-y-1/2 text-slate-500" />
-              </div>
               <Link onClick={() => setMobileMenuOpen(false)} className="text-2xl font-bold text-white flex items-center justify-between" href="/">Home</Link>
-              <Link onClick={() => setMobileMenuOpen(false)} className="text-2xl font-bold text-slate-300" href="/about">About</Link>
-              <Link onClick={() => setMobileMenuOpen(false)} className="text-2xl font-bold text-slate-300" href="/contact">Contact</Link>
+              <Link onClick={() => setMobileMenuOpen(false)} className="text-2xl font-bold text-slate-300" href="/categories">Categories</Link>
+              <Link onClick={() => setMobileMenuOpen(false)} className="text-2xl font-bold text-slate-300" href="/about">About Us</Link>
+              <Link onClick={() => setMobileMenuOpen(false)} className="text-2xl font-bold text-slate-300" href="/contribute">Contribute</Link>
             </div>
 
             <div className="mt-auto space-y-4">
@@ -329,10 +337,8 @@ export default function Navbar() {
         )}
       </AnimatePresence>
 
-      {/* Spacer to avoid content being hidden behind the sticky navbar */}
       <div className="h-20 md:h-28"></div>
 
-      {/* Categories Bar */}
       <Suspense
         fallback={
           <div className="max-w-7xl mx-auto px-4 md:px-8 mb-6 mt-4 md:mt-6 min-h-[52px]" aria-hidden />

@@ -4,7 +4,7 @@ import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Cookies from "js-cookie";
 import Link from "next/link";
-import { LayoutDashboard, FileText, Settings, Users, Tags, LogOut, ChevronLeft, Inbox } from "lucide-react";
+import { LayoutDashboard, FileText, Settings, Users, Tags, LogOut, ChevronLeft, Inbox, Zap } from "lucide-react";
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE || "http://localhost:8001";
 
 
@@ -65,6 +65,25 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     router.push("/");
   };
 
+  const handleTriggerAutomation = async () => {
+    try {
+      const token = Cookies.get("access_token");
+      const res = await fetch(`${API_BASE}/admin/ai/trigger-automation`, {
+        method: "POST",
+        headers: { "Authorization": `Bearer ${token}` }
+      });
+      if (res.ok) {
+        const data = await res.json();
+        alert(data.message);
+      } else {
+        alert("Failed to trigger automation");
+      }
+    } catch (err) {
+      console.error("Error triggering automation", err);
+      alert("Error triggering automation");
+    }
+  };
+
   if (!isAuthorized) {
     return <div className="h-screen w-full flex items-center justify-center">Authenticating...</div>;
   }
@@ -115,6 +134,19 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           <Link href="/admin/settings" className="flex items-center gap-3 px-3 py-2 text-gray-600 hover:bg-gray-50 hover:text-indigo-600 rounded-lg transition-colors font-medium text-sm">
             <Settings size={18} /> Settings
           </Link>
+
+          {role === 'ADMIN' && (
+            <div className="pt-4 mt-4 border-t border-gray-100">
+              <button 
+                onClick={handleTriggerAutomation} 
+                className="w-full flex items-center justify-between px-3 py-2 text-indigo-700 bg-indigo-50 hover:bg-indigo-100 rounded-lg transition-colors font-semibold text-sm"
+              >
+                <div className="flex items-center gap-3">
+                   <Zap size={18} className="fill-indigo-700" /> Run Content Engine
+                </div>
+              </button>
+            </div>
+          )}
         </nav>
 
         <div className="p-4 border-t border-gray-100 space-y-2">

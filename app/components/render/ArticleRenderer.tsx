@@ -126,13 +126,10 @@ export default function ArticleRenderer({ article }: ArticleRendererProps) {
         <div className="absolute inset-0 flex flex-col justify-center items-center text-center p-4 md:p-8 w-full md:max-w-5xl md:mx-auto z-20">
           <motion.div {...fadeIn} className="space-y-4 md:space-y-8">
             <div className="flex justify-center gap-3">
-              <span className="px-4 py-1.5 bg-brand/90 backdrop-blur-sm text-white text-[11px] font-black tracking-[0.2em] uppercase rounded-full shadow-lg shadow-brand/20 flex items-center gap-2">
-                <Sparkles size={12} />
-                {article.template_type?.toUpperCase() || 'INTELLIGENCE'}
-              </span>
+              {/* Template badge removed for cleaner look */}
             </div>
             
-            <h1 className="text-2xl md:text-5xl lg:text-7xl font-black text-white leading-tight md:leading-[1.1] tracking-tight drop-shadow-2xl">
+            <h1 className="text-xl md:text-4xl lg:text-4xl font-black text-white leading-tight md:leading-[1.1] tracking-tight drop-shadow-2xl">
               {article.title}
             </h1>
             
@@ -142,8 +139,12 @@ export default function ArticleRenderer({ article }: ArticleRendererProps) {
                    <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${article.author_id}`} alt="Author" className="w-full h-full object-cover" />
                 </div>
                 <div className="text-left">
-                  <p className="text-white font-black text-sm tracking-wide uppercase">AUTHOR</p>
-                  <p className="text-brand text-[10px] font-bold tracking-widest uppercase">{article.category_name || 'Expert Contributor'}</p>
+                  <p className="text-white font-black text-[10px] tracking-widest uppercase mb-0.5 opacity-60">Published By</p>
+                  <p className="text-brand text-xs font-black tracking-widest uppercase">
+                    {article.author_id === '00000000-0000-0000-0000-000000000000' 
+                      ? 'RelayPost Intelligence' 
+                      : 'Kartik'}
+                  </p>
                 </div>
               </div>
               
@@ -261,6 +262,29 @@ export default function ArticleRenderer({ article }: ArticleRendererProps) {
                          )}
                       </figure>
                    )}
+
+                    {block.type === 'table' && block.metadata?.tableData && (
+                       <div className="my-14 overflow-x-auto rounded-[2.5rem] border border-slate-100 dark:border-white/5 shadow-2xl">
+                          <table className="w-full text-left border-collapse">
+                             <thead>
+                                <tr className="bg-slate-50 dark:bg-slate-800">
+                                   {block.metadata.tableData.headers?.map((header: string, i: number) => (
+                                      <th key={i} className="p-6 text-[10px] font-black text-slate-500 uppercase tracking-widest border-b border-slate-100 dark:border-white/10">{header}</th>
+                                   ))}
+                                </tr>
+                             </thead>
+                             <tbody className="divide-y divide-slate-100 dark:divide-white/5">
+                                {block.metadata.tableData.rows?.map((row: string[], i: number) => (
+                                   <tr key={i} className="hover:bg-slate-50/50 dark:hover:bg-white/5 transition-colors">
+                                      {row.map((cell, j) => (
+                                         <td key={j} className="p-6 text-sm font-medium text-slate-700 dark:text-slate-300">{cell}</td>
+                                      ))}
+                                   </tr>
+                                ))}
+                             </tbody>
+                          </table>
+                       </div>
+                    )}
 
                    {block.type === 'graph' && block.metadata?.chartData && (
                       <div className="my-14 p-10 bg-[#f8fafc] dark:bg-slate-800 rounded-[2.5rem] border border-slate-100 dark:border-white/5 shadow-xl overflow-hidden">

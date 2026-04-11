@@ -65,7 +65,7 @@ export default function Login() {
   return (
     <GoogleOAuthProvider clientId={process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "mock-client-id"}>
       <div className="bg-deep-sea min-h-screen flex flex-col relative overflow-hidden">
-        <Navbar />
+        {/* <Navbar /> */}
         
         {/* Background Pattern */}
         <NetworkBackground />
@@ -150,7 +150,7 @@ export default function Login() {
             </div>
           </div>
         </main>
-        <Footer />
+        {/* <Footer /> */}
       </div>
     </GoogleOAuthProvider>
   );

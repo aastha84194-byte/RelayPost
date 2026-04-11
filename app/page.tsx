@@ -25,7 +25,7 @@ function HomeContent() {
   const [trending, setTrending] = React.useState<Article[]>([]);
   const [expert, setExpert] = React.useState<Article[]>([]);
   const [insights, setInsights] = React.useState<Article[]>([]);
-  const [hero, setHero] = React.useState<Article | null>(null);
+  const [heroes, setHeroes] = React.useState<Article[]>([]);
   const [isLoading, setIsLoading] = React.useState(true);
 
   React.useEffect(() => {
@@ -39,8 +39,8 @@ function HomeContent() {
        ]);
        setTrending(t);
        setExpert(e);
-       setInsights(i);
-       setHero(h.length > 0 ? h[0] : null);
+       console.log("Hero articles in frontend:", h);
+       setHeroes(h);
        setIsLoading(false);
     };
     fetchData();
@@ -84,7 +84,7 @@ function HomeContent() {
                 </div>
               ) : (
                 <>
-                  <HeroSection article={hero} />
+                  {heroes.length > 0 && <HeroSection articles={heroes} />}
                   {trending.length > 0 && <TrendingNow articles={trending} />}
                   {insights.length > 0 && <LatestInsights articles={insights} />}
                   {!category && <TechSpotlight />}

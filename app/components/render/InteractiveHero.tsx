@@ -83,6 +83,7 @@ export default function InteractiveHero({ imageSrc = "/quantum-hero.png" }: Inte
             fill 
             className="object-cover opacity-60 group-hover:opacity-80 transition-opacity duration-700 scale-105 group-hover:scale-100 transition-transform duration-1000"
             priority
+            unoptimized
           />
           
           {/* Inner Light/Pulse Overlay */}

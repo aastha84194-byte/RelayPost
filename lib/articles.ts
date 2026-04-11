@@ -64,7 +64,7 @@ const MOCK_EXPERT_ARTICLES: Article[] = [
 ];
 
 
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE || "https://content-servive.onrender.com";
+const API_BASE = process.env.NEXT_PUBLIC_API_BASE || "http://localhost:8001";
 
 export async function getAllArticles(category?: string): Promise<Article[]> {
   try {
@@ -129,7 +129,7 @@ export async function getArticlesBySection(section: string, category?: string): 
     if (category) url.searchParams.append("category", category);
 
     const res = await fetch(url.toString(), { 
-      next: { revalidate: 60 } 
+      cache: 'no-store' 
     });
     if (!res.ok) return section === "ExpertAnalysis" ? MOCK_EXPERT_ARTICLES : [];
     const data = await res.json();

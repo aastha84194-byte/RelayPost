@@ -16,6 +16,7 @@ import MediaLibrary from "../../components/MediaLibrary";
 import FloatingToolbar from "../../components/FloatingToolbar";
 import BlockPicker from "../../components/BlockPicker";
 import toast from "react-hot-toast";
+import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, LineChart, Line, Cell } from 'recharts';
 
 const FONT_OPTIONS = ["Inter", "Merriweather", "JetBrains Mono", "Outfit"];
 
@@ -251,10 +252,12 @@ export default function AdvancedEditorPage() {
 
   return (
     <div className="flex h-screen bg-[#F8FAFC] overflow-hidden font-sans relative">
-      <FloatingToolbar 
-        onFormat={(cmd, val) => document.execCommand(cmd, false, val)} 
-        onAIRewrite={handleAIRewrite}
-      />
+      {!isPreview && (
+        <FloatingToolbar 
+          onFormat={(cmd, val) => document.execCommand(cmd, false, val)} 
+          onAIRewrite={handleAIRewrite}
+        />
+      )}
       
       <AnimatePresence>
         {showMediaLibrary.open && (
@@ -1038,31 +1041,74 @@ export default function AdvancedEditorPage() {
                           )}
                         </div>
                       );
-                      if (block.type === 'graph') {
+                      if (block.type === 'graph' && block.metadata?.chartData) {
                         return (
-                         <div key={block.id} className="my-12 p-8 bg-slate-50 rounded-[2.5rem] border border-slate-100 flex flex-col items-center justify-center text-center gap-4">
-                            <div className="w-16 h-16 bg-indigo-600 rounded-2xl flex items-center justify-center text-white shadow-xl shadow-indigo-100">
-                               <BarChart3 size={32} />
+                         <div key={block.id} className="my-12 p-8 bg-white rounded-[2.5rem] border border-slate-100 shadow-xl">
+                            <div className="flex justify-between items-center mb-6">
+                               <div className="space-y-1">
+                                  <h4 className="text-sm font-black text-slate-800 uppercase tracking-tight">{block.metadata?.caption || 'Data Visualization'}</h4>
+                                  <p className="text-[9px] text-slate-400 font-bold tracking-widest uppercase">Live Preview Rendering</p>
+                               </div>
+                               <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center text-white">
+                                  <BarChart3 size={16} />
+                               </div>
                             </div>
-                            <div>
-                               <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Interactive Component Block</p>
-                               <p className="text-sm font-black text-slate-800">Dynamic {block.metadata?.chartType || 'Bar'} Visualization</p>
-                            </div>
-                            <div className="py-2 px-4 bg-white rounded-full border border-slate-100 shadow-sm">
-                               <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{block.metadata?.chartData?.length || 0} Data Nodes Parsed</p>
+                            <div className="w-full h-[250px]">
+                               <ResponsiveContainer width="100%" height="100%">
+                                  {block.metadata.chartType === 'line' ? (
+                                    <LineChart data={block.metadata.chartData}>
+                                       <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#F1F5F9" />
+                                       <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 9, fill: '#94A3B8' }} />
+                                       <YAxis hide />
+                                       <Tooltip contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 30px rgba(0,0,0,0.05)', fontSize: '10px' }} />
+                                       <Line type="monotone" dataKey="value" stroke="#6366f1" strokeWidth={3} dot={{ r: 4, fill: '#6366f1' }} activeDot={{ r: 6 }} />
+                                    </LineChart>
+                                  ) : (
+                                    <BarChart data={block.metadata.chartData}>
+                                       <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#F1F5F9" />
+                                       <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 9, fill: '#94A3B8' }} />
+                                       <YAxis hide />
+                                       <Tooltip cursor={{fill: 'transparent'}} contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 30px rgba(0,0,0,0.05)', fontSize: '10px' }} />
+                                       <Bar dataKey="value" radius={[6, 6, 0, 0]}>
+                                          {block.metadata.chartData.map((_: any, index: number) => (
+                                            <Cell key={index} fill={index % 2 === 0 ? '#6366f1' : '#818cf8'} />
+                                          ))}
+                                       </Bar>
+                                    </BarChart>
+                                  )}
+                               </ResponsiveContainer>
                             </div>
                          </div>
                         );
                       }
                       if (block.type === 'table') {
                         return (
-                          <div key={block.id} className="my-8 rounded-2xl border border-slate-100 overflow-hidden bg-slate-50 p-8 flex flex-col items-center gap-4">
-                             <TableIcon size={32} className="text-indigo-400" />
-                             <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Tabular Data Component Active</p>
-                             <div className="flex gap-2">
-                                {block.metadata?.tableData?.headers?.map((h: string, i: number) => (
-                                   <span key={i} className="text-[9px] font-black px-2 py-0.5 bg-white border border-slate-200 rounded uppercase text-slate-500">{h}</span>
-                                ))}
+                          <div key={block.id} className="my-8 rounded-2xl border border-slate-100 overflow-hidden bg-white shadow-lg">
+                             <div className="bg-slate-50 px-6 py-3 border-b border-slate-100 flex items-center justify-between">
+                                <div className="flex items-center gap-2">
+                                   <TableIcon size={14} className="text-indigo-600" />
+                                   <span className="text-[10px] font-black uppercase tracking-widest text-slate-500">Live Data Table</span>
+                                </div>
+                             </div>
+                             <div className="overflow-x-auto">
+                                <table className="w-full text-left border-collapse">
+                                   <thead>
+                                      <tr className="bg-slate-50/50">
+                                         {block.metadata?.tableData?.headers?.map((h: string, i: number) => (
+                                            <th key={i} className="px-6 py-4 text-[9px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-100">{h}</th>
+                                         ))}
+                                      </tr>
+                                   </thead>
+                                   <tbody className="divide-y divide-slate-50">
+                                      {block.metadata?.tableData?.rows?.map((row: string[], i: number) => (
+                                         <tr key={i}>
+                                            {row.map((cell, j) => (
+                                               <td key={j} className="px-6 py-4 text-xs font-medium text-slate-600">{cell}</td>
+                                            ))}
+                                         </tr>
+                                      ))}
+                                   </tbody>
+                                </table>
                              </div>
                           </div>
                         );
