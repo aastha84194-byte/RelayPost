@@ -92,7 +92,7 @@ export default function ArticlesManagement() {
            "Authorization": `Bearer ${token}`,
            "Content-Type": "application/json"
          },
-         body: JSON.stringify({ section, order })
+         body: JSON.stringify({ homepage_section: section, section_order: order })
        });
        if(res.ok) {
          setShowPlacementModal(false);
@@ -307,7 +307,7 @@ export default function ArticlesManagement() {
                         className="w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-black uppercase tracking-widest focus:ring-4 focus:ring-indigo-500/10 outline-none transition-all"
                       >
                          <option value="">None (Hidden from Homepage)</option>
-                         <option value="Spotlight">Spotlight (Hero)</option>
+                         <option value="Hero">Spotlight (Hero)</option>
                          <option value="TrendingNow">Trending Now</option>
                          <option value="ExpertAnalysis">Expert Analysis</option>
                          <option value="LatestInsights">Latest Insights</option>
