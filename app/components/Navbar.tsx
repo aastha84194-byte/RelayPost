@@ -52,11 +52,10 @@ function NavbarCategoryFilters() {
               key={cat.name}
               type="button"
               onClick={() => handleCategoryClick(cat.name)}
-              className={`flex items-center gap-2 px-4 py-2 rounded-full whitespace-nowrap text-sm font-medium transition-all shadow-sm border ${
-                isActive
-                  ? "bg-indigo-600 text-white border-indigo-600 ring-4 ring-indigo-500/10 scale-105"
-                  : "bg-white text-gray-500 border-gray-200 hover:text-indigo-600 hover:border-indigo-600"
-              }`}
+              className={`flex items-center gap-2 px-4 py-2 rounded-full whitespace-nowrap text-sm font-medium transition-all shadow-sm border ${isActive
+                ? "bg-indigo-600 text-white border-indigo-600 ring-4 ring-indigo-500/10 scale-105"
+                : "bg-white text-gray-500 border-gray-200 hover:text-indigo-600 hover:border-indigo-600"
+                } dark:border-slate-800 dark:text-slate-400 dark:shadow-none`}
             >
               <Icon size={14} className={isActive ? "text-white" : "text-gray-400"} />
               {cat.name}
@@ -116,11 +115,11 @@ export default function Navbar() {
   return (
     <>
       <SearchOverlay isOpen={searchOpen} onClose={() => setSearchOpen(false)} />
-      
+
       <div className="fixed top-0 w-full z-50 pointer-events-none flex justify-center md:px-4">
-        <motion.header 
+        <motion.header
           className="md:pt-4 w-full flex justify-center pointer-events-auto"
-          animate={{ 
+          animate={{
             width: isScrolled ? "800px" : "1280px",
             maxWidth: "100%"
           }}
@@ -138,7 +137,7 @@ export default function Navbar() {
                 </div>
                 <AnimatePresence mode="wait">
                   {!isScrolled && (
-                    <motion.div 
+                    <motion.div
                       initial={{ opacity: 0, x: -10 }}
                       animate={{ opacity: 1, x: 0 }}
                       exit={{ opacity: 0, x: -10 }}
@@ -157,7 +156,7 @@ export default function Navbar() {
                 {navItems.map((item) => {
                   const Icon = item.icon;
                   return (
-                    <Link 
+                    <Link
                       key={item.name}
                       href={item.href}
                       className="relative px-3 py-2 text-slate-300 hover:text-white transition-all group rounded-lg overflow-hidden flex items-center justify-center min-w-[40px]"
@@ -187,7 +186,7 @@ export default function Navbar() {
                           </motion.span>
                         )}
                       </AnimatePresence>
-                      <motion.div 
+                      <motion.div
                         className="absolute bottom-1 left-1/2 -translate-x-1/2 w-0 h-0.5 bg-indigo-500 rounded-full group-hover:w-4 transition-all"
                       />
                     </Link>
@@ -197,30 +196,27 @@ export default function Navbar() {
 
               {/* Action icons */}
               <div className="flex items-center gap-2 md:gap-4">
-                <div 
+                <div
                   className="relative hidden xl:block"
+                  title={isScrolled ? "Search" : undefined}
                 >
-                   <button 
-                    onClick={() => setSearchOpen(true)}
-                    className={`flex items-center gap-3 transition-all bg-slate-800/50 border border-white/10 rounded-full hover:bg-slate-700/50 hover:text-white ${
-                        isScrolled 
-                        ? "w-10 h-10 justify-center text-slate-300" 
-                        : "w-48 py-2 px-4 text-sm text-slate-400 shadow-inner"
-                    }`}
-                   >
-                     <Search size={18} className="flex-shrink-0" />
-                     {!isScrolled && <span>Search...</span>}
-                   </button>
+                  <input
+                    className={`bg-slate-800/50 border-none rounded-full py-2 pl-4 pr-10 text-sm text-white focus:ring-2 focus:ring-indigo-500 focus:outline-none transition-all placeholder-slate-400 shadow-inner ${isScrolled ? "w-10 opacity-0 pointer-events-none" : "w-48 opacity-100"
+                      }`}
+                    placeholder="Search..."
+                    type="text"
+                  />
+                  <Search size={18} className={`absolute right-3 top-1/2 -translate-y-1/2 text-slate-300 cursor-pointer hover:text-white transition-colors ${isScrolled ? "scale-110" : "scale-100"}`} />
                 </div>
 
                 {/* Mobile Search Icon */}
-                <button 
+                <button
                   onClick={() => setSearchOpen(true)}
                   className="flex xl:hidden w-9 h-9 md:w-10 md:h-10 items-center justify-center text-slate-400 hover:text-white transition-all rounded-full bg-white/5 border border-white/10"
                 >
-                   <Search size={18} />
+                  <Search size={18} />
                 </button>
-                
+
                 <ThemeToggle />
 
                 {isLoggedIn ? (
@@ -230,16 +226,16 @@ export default function Navbar() {
                     </Link>
                   ) : (
                     <div className="relative" ref={dropdownRef}>
-                      <button 
+                      <button
                         onClick={() => setDropdownOpen(!dropdownOpen)}
                         className="w-9 h-9 md:w-10 md:h-10 rounded-full bg-slate-800 flex items-center justify-center text-slate-400 hover:text-white transition-colors focus:ring-2 focus:ring-indigo-500 outline-none"
                       >
                         <User size={18} />
                       </button>
-                      
+
                       <AnimatePresence>
                         {dropdownOpen && (
-                          <motion.div 
+                          <motion.div
                             initial={{ opacity: 0, y: 10, scale: 0.95 }}
                             animate={{ opacity: 1, y: 0, scale: 1 }}
                             exit={{ opacity: 0, y: 10, scale: 0.95 }}
@@ -250,7 +246,7 @@ export default function Navbar() {
                               <p className="text-xs text-slate-400">Signed in as</p>
                               <p className="text-sm font-semibold text-white truncate">User</p>
                             </div>
-                            
+
                             <Link href="/profile" className="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-300 hover:text-white hover:bg-slate-700/50 transition-colors">
                               <Settings size={16} className="text-slate-400" /> Profile
                             </Link>
@@ -263,9 +259,9 @@ export default function Navbar() {
                             <Link href="/profile/contributions" className="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-300 hover:text-white hover:bg-slate-700/50 transition-colors">
                               <Edit3 size={16} className="text-slate-400" /> Contributions
                             </Link>
-                            
+
                             <div className="border-t border-slate-700/50 mt-1 pt-1">
-                              <button 
+                              <button
                                 onClick={() => {
                                   import("js-cookie").then((Cookies) => {
                                     Cookies.default.remove("access_token");
@@ -316,9 +312,17 @@ export default function Navbar() {
               onClick={() => setMobileMenuOpen(false)}
               className="absolute top-6 right-6 flex w-9 h-9 items-center justify-center text-white"
             >
-               <X size={24} /> 
+              <X size={24} />
             </button>
             <div className="flex flex-col gap-6 mb-12">
+              <div className="relative mb-4">
+                <input
+                  className="bg-slate-800 border border-slate-700 rounded-2xl py-4 pl-6 pr-12 text-lg text-white focus:ring-2 focus:ring-indigo-500 w-full focus:outline-none transition-all placeholder-slate-500 shadow-xl"
+                  placeholder="Universal Search..."
+                  type="text"
+                />
+                <Search size={22} className="absolute right-5 top-1/2 -translate-y-1/2 text-slate-500" />
+              </div>
               <Link onClick={() => setMobileMenuOpen(false)} className="text-2xl font-bold text-white flex items-center justify-between" href="/">Home</Link>
               <Link onClick={() => setMobileMenuOpen(false)} className="text-2xl font-bold text-slate-300" href="/categories">Categories</Link>
               <Link onClick={() => setMobileMenuOpen(false)} className="text-2xl font-bold text-slate-300" href="/about">About Us</Link>

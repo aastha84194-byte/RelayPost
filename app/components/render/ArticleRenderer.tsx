@@ -220,8 +220,8 @@ export default function ArticleRenderer({ article }: ArticleRendererProps) {
                    {block.type === 'bullet_list' && (
                      <ul className="space-y-4 mb-8 pl-6 list-outside">
                         {(block.metadata?.items || []).map((item: string, i: number) => (
-                           <li key={i} className="relative pl-6 text-lg text-slate-700 dark:text-slate-300">
-                             <span className="absolute left-0 top-3 w-1.5 h-1.5 bg-brand rounded-full shadow-sm shadow-brand/50" />
+                           <li key={i} className="relative pl-6 text-lg text-slate-700 dark:text-slate-300 dark:text-slate-200 transition-colors duration-300">
+                             <span className="absolute left-0 top-3 w-1.5 h-1.5 bg-brand rounded-full shadow-sm shadow-brand/50 dark:shadow-none transition-colors duration-300" />
                              {item}
                            </li>
                         ))}
@@ -231,7 +231,7 @@ export default function ArticleRenderer({ article }: ArticleRendererProps) {
                    {block.type === 'numbered_list' && (
                      <ol className="space-y-4 mb-8 pl-6 list-decimal">
                         {(block.metadata?.items || []).map((item: string, i: number) => (
-                           <li key={i} className="pl-2 text-lg text-slate-700 dark:text-slate-300 font-medium">
+                           <li key={i} className="pl-2 text-lg text-slate-700 dark:text-slate-300 font-medium dark:text-slate-200 transition-colors duration-300">
                              {item}
                            </li>
                         ))}
@@ -290,7 +290,7 @@ export default function ArticleRenderer({ article }: ArticleRendererProps) {
                       <div className="my-14 p-10 bg-[#f8fafc] dark:bg-slate-800 rounded-[2.5rem] border border-slate-100 dark:border-white/5 shadow-xl overflow-hidden">
                         <div className="flex justify-between items-center mb-10">
                            <div className="space-y-1">
-                              <h4 className="text-xl font-black text-slate-800 dark:text-white tracking-tight uppercase">{block.metadata?.caption || 'Data Analysis'}</h4>
+                              <h4 className="text-xl font-black text-slate-800 dark:text-white tracking-tight uppercase dark:text-slate-100 transition-colors duration-300">{block.metadata?.caption || 'Data Analysis'}</h4>
                               <p className="text-[10px] text-slate-400 font-bold tracking-widest uppercase">{block.metadata?.altText || 'Executive Insight'}</p>
                            </div>
                            <div className="text-right">
@@ -347,12 +347,12 @@ export default function ArticleRenderer({ article }: ArticleRendererProps) {
                         block.metadata?.calloutType === 'warning' ? 'bg-amber-50/50 border-amber-100 dark:bg-amber-900/10 dark:border-amber-500/20' :
                         'bg-indigo-50/50 border-indigo-100 dark:bg-indigo-900/10 dark:border-indigo-500/20'
                       }`}>
-                         <div className="w-12 h-12 rounded-2xl bg-white dark:bg-slate-800 shadow-sm flex items-center justify-center shrink-0">
+                         <div className="w-12 h-12 rounded-2xl bg-white dark:bg-slate-800 shadow-sm flex items-center justify-center shrink-0 dark:bg-slate-900 dark:shadow-none transition-colors duration-300">
                             <span className="text-2xl">{block.metadata?.icon || '💡'}</span>
                          </div>
                          <div>
                             <p className="text-lg font-bold text-slate-900 dark:text-white mb-1 tracking-tight">{block.metadata?.title || 'Editorial Note'}</p>
-                            <p className="text-slate-600 dark:text-slate-400 leading-relaxed">{block.content}</p>
+                            <p className="text-slate-600 dark:text-slate-400 leading-relaxed dark:text-slate-300 transition-colors duration-300">{block.content}</p>
                          </div>
                       </div>
                    )}
@@ -363,7 +363,7 @@ export default function ArticleRenderer({ article }: ArticleRendererProps) {
                          {(block.metadata?.questions || []).map((faq: any, i: number) => (
                             <div key={i} className="p-6 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-100 dark:border-slate-800">
                                <p className="font-bold text-slate-900 dark:text-white mb-2">{faq.question}</p>
-                               <p className="text-slate-600 dark:text-slate-400 text-sm leading-relaxed">{faq.answer}</p>
+                               <p className="text-slate-600 dark:text-slate-400 text-sm leading-relaxed dark:text-slate-300 transition-colors duration-300">{faq.answer}</p>
                             </div>
                          ))}
                       </div>
@@ -375,7 +375,7 @@ export default function ArticleRenderer({ article }: ArticleRendererProps) {
                          <div className="relative z-10 space-y-6">
                             <h3 className="text-3xl font-black text-white tracking-tight">{block.metadata?.title || 'Connect with Intelligence'}</h3>
                             <p className="text-white/80 max-w-lg mx-auto leading-relaxed">{block.content}</p>
-                            <button className="px-10 py-4 bg-white text-brand font-black uppercase tracking-widest text-[10px] rounded-full hover:scale-105 transition-all shadow-xl">
+                            <button className="px-10 py-4 bg-white text-brand font-black uppercase tracking-widest text-[10px] rounded-full hover:scale-105 transition-all shadow-xl dark:bg-slate-900">
                                {block.metadata?.buttonText || 'Contact Us'}
                             </button>
                          </div>
@@ -405,7 +405,7 @@ export default function ArticleRenderer({ article }: ArticleRendererProps) {
           <div className="mt-20 pt-12 border-t border-slate-100 dark:border-white/5 flex flex-wrap items-center justify-between gap-8">
              <div className="flex flex-wrap gap-2">
                 {article.secondary_keywords?.map(tag => (
-                   <span key={tag} className="px-4 py-2 bg-[#f0f2f5] dark:bg-slate-800 text-slate-500 dark:text-slate-400 text-[10px] font-black rounded-full hover:bg-brand hover:text-white transition-all cursor-pointer uppercase tracking-widest shadow-sm">
+                   <span key={tag} className="px-4 py-2 bg-[#f0f2f5] dark:bg-slate-800 text-slate-500 dark:text-slate-400 text-[10px] font-black rounded-full hover:bg-brand hover:text-white transition-all cursor-pointer uppercase tracking-widest shadow-sm dark:shadow-none">
                       #{tag}
                    </span>
                 ))}
@@ -420,7 +420,7 @@ export default function ArticleRenderer({ article }: ArticleRendererProps) {
                   onClick={handleLike}
                   className={`flex items-center gap-2 px-6 py-2 rounded-full font-black text-[10px] uppercase tracking-widest transition-all shadow-sm ${
                     liked ? 'bg-brand text-white' : 'bg-brand/5 text-brand hover:bg-brand hover:text-white'
-                  }`}
+                  } dark:shadow-none`}
                 >
                    <ThumbsUp size={16} /> {liked ? 'Insightful' : `${likesCount} Likes`}
                 </button>
@@ -443,7 +443,7 @@ export default function ArticleRenderer({ article }: ArticleRendererProps) {
                     href={`/${item.category_name?.toLowerCase().replace(/ /g, '-') || 'general'}/${item.slug}`} 
                     className="flex gap-4 group cursor-pointer"
                   >
-                     <div className="w-20 h-20 rounded-2xl overflow-hidden shrink-0 shadow-md">
+                     <div className="w-20 h-20 rounded-2xl overflow-hidden shrink-0 shadow-md dark:shadow-none transition-colors duration-300">
                         <img src={item.hero_image || "https://images.unsplash.com/photo-1544411047-c491574abb46?w=400&q=80"} alt="Thumb" className="w-full h-full object-cover group-hover:scale-110 transition-all duration-500" />
                      </div>
                      <div className="space-y-1">
@@ -468,7 +468,7 @@ export default function ArticleRenderer({ article }: ArticleRendererProps) {
                 <p className="text-slate-100/70 text-sm leading-relaxed font-medium">
                   Curated reports by members to provide deep-dive editorial without corporate bias. Join our network.
                 </p>
-                <button className="w-full py-5 bg-white text-brand font-black uppercase tracking-widest text-[10px] rounded-2xl shadow-xl hover:translate-y-[-2px] transition-all">
+                <button className="w-full py-5 bg-white text-brand font-black uppercase tracking-widest text-[10px] rounded-2xl shadow-xl hover:translate-y-[-2px] transition-all dark:bg-slate-900">
                   Become a Member
                 </button>
              </div>
@@ -478,7 +478,7 @@ export default function ArticleRenderer({ article }: ArticleRendererProps) {
              <h3 className="text-[11px] font-black text-slate-400 uppercase tracking-[0.2em] px-2">Trending Briefs</h3>
              <div className="flex flex-wrap gap-2 px-2">
                 {['#Geopolitics', '#TradeRoutes', '#AIInPolicy', '#SupplyChainAI'].map(tag => (
-                   <span key={tag} className="px-4 py-2 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 text-[10px] font-black rounded-xl shadow-sm cursor-pointer hover:text-brand transition-colors">
+                   <span key={tag} className="px-4 py-2 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 text-[10px] font-black rounded-xl shadow-sm cursor-pointer hover:text-brand transition-colors dark:bg-slate-900 dark:text-slate-300 dark:shadow-none">
                       {tag}
                    </span>
                 ))}
@@ -519,7 +519,7 @@ export default function ArticleRenderer({ article }: ArticleRendererProps) {
                           {comment.author_role || 'Verified Contribution'}
                        </p>
                     </div>
-                    <p className="text-slate-700 dark:text-slate-300 leading-relaxed font-medium">
+                    <p className="text-slate-700 dark:text-slate-300 leading-relaxed font-medium dark:text-slate-200 transition-colors duration-300">
                        {comment.content}
                     </p>
                     <p className="text-[9px] text-slate-400 font-bold uppercase tracking-widest pt-2">
@@ -551,7 +551,7 @@ export default function ArticleRenderer({ article }: ArticleRendererProps) {
                     value={reflectionContent}
                     onChange={(e) => setReflectionContent(e.target.value)}
                     placeholder="Share your expert insights on this dispatch..."
-                    className="w-full h-32 p-6 bg-slate-50 dark:bg-slate-800 border-none rounded-2xl focus:ring-2 focus:ring-brand outline-none text-slate-800 dark:text-white resize-none"
+                    className="w-full h-32 p-6 bg-slate-50 dark:bg-slate-800 border-none rounded-2xl focus:ring-2 focus:ring-brand outline-none text-slate-800 dark:text-white resize-none dark:text-slate-100 transition-colors duration-300"
                     disabled={isSubmitting}
                   />
                   <div className="flex justify-between items-center">
@@ -617,7 +617,7 @@ export default function ArticleRenderer({ article }: ArticleRendererProps) {
                </button>
             </div>
          </div>
-         <div className="max-w-7xl mx-auto px-8 pt-12 flex justify-center text-[9px] font-black text-slate-500 uppercase tracking-[0.3em] text-center">
+         <div className="max-w-7xl mx-auto px-8 pt-12 flex justify-center text-[9px] font-black text-slate-500 uppercase tracking-[0.3em] text-center dark:text-slate-400 transition-colors duration-300">
             © 2026 RelayPost Intelligence Network. All rights reserved. Registered trademark of Lux Intel Group.
          </div>
       </footer>

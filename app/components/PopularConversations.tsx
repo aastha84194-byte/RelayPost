@@ -5,8 +5,8 @@ import { User } from 'lucide-react';
 
 export default function PopularConversations() {
   return (
-    <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
-      <h3 className="text-lg font-bold text-dark-bg mb-5">Popular Conversations</h3>
+    <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm dark:bg-slate-900 dark:border-slate-800 dark:shadow-none transition-colors duration-300">
+      <h3 className="text-lg font-bold text-dark-bg mb-5 dark:text-white transition-colors duration-300">Popular Conversations</h3>
       <div className="flex flex-col gap-5">
         {[
           { title: "Market Volatility: The End of Consoles?", listeners: "45 Active readers" },
@@ -24,8 +24,8 @@ export default function PopularConversations() {
           >
             <span className="text-3xl font-black text-[#e0e7ff] group-hover:text-brand transition-colors">{i+1}</span>
             <div>
-              <h4 className="font-bold text-dark-bg text-sm leading-snug group-hover:text-brand transition-colors">{item.title}</h4>
-              <p className="text-xs text-gray-500 mt-1 flex items-center gap-1 group-hover:text-gray-700 transition-colors">
+              <h4 className="font-bold text-dark-bg text-sm leading-snug group-hover:text-brand transition-colors dark:text-white">{item.title}</h4>
+              <p className="text-xs text-gray-500 mt-1 flex items-center gap-1 group-hover:text-gray-700 transition-colors dark:text-slate-400">
                 <User size={10} /> {item.listeners}
               </p>
             </div>

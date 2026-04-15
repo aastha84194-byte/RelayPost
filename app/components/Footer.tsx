@@ -52,7 +52,7 @@ export default function Footer() {
               Sign up for exclusive content and monthly contributions to the site.
             </p>
             <div className="flex items-center bg-dark-surface rounded-full p-1 border border-gray-700/50 focus-within:border-brand/50 transition-colors max-w-sm">
-              <span className="pl-4 text-gray-500">$</span>
+              <span className="pl-4 text-gray-500 dark:text-slate-400 transition-colors duration-300">$</span>
               <input 
                 type="number" 
                 placeholder="/ monthly" 
@@ -66,7 +66,7 @@ export default function Footer() {
         </div>
 
         {/* Bottom Bar */}
-        <div className="pt-8 border-t border-gray-800 flex flex-col md:flex-row items-center justify-between text-xs text-gray-500">
+        <div className="pt-8 border-t border-gray-800 flex flex-col md:flex-row items-center justify-between text-xs text-gray-500 dark:text-slate-400 transition-colors duration-300">
           <p>Copyright © 2026 Editorial Intelligence</p>
           <div className="flex gap-6 mt-4 md:mt-0">
             <Link href="#" className="hover:text-gray-300 transition-colors">Privacy</Link>

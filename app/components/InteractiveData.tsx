@@ -16,18 +16,18 @@ export default function InteractiveData() {
   return (
     <section>
       <div className="mb-4">
-        <h2 className="text-xl md:text-2xl font-bold text-dark-bg mb-1 border-l-4 border-[#4f46e5] pl-3">Interactive Data</h2>
-        <p className="text-sm text-gray-500 ml-4">Live market trends with animated visualizations</p>
+        <h2 className="text-xl md:text-2xl font-bold text-dark-bg mb-1 border-l-4 border-[#4f46e5] pl-3 dark:text-white transition-colors duration-300">Interactive Data</h2>
+        <p className="text-sm text-gray-500 ml-4 dark:text-slate-400 transition-colors duration-300">Live market trends with animated visualizations</p>
       </div>
 
       <div className="overflow-hidden w-full relative pb-4">
         <div className="animate-marquee gap-3">
           {charts.map((chart, i) => (
-            <div key={i} className="w-[300px]  rounded-2xl shrink-0 bg-white p-5 border border-gray-200 overflow-hidden flex flex-col group cursor-pointer hover:bg-gray-50 hover:-translate-y-2 active:-translate-y-3 hover:shadow-xl hover:z-10 transition-all duration-300">
+            <div key={i} className="w-[300px]  rounded-2xl shrink-0 bg-white p-5 border border-gray-200 overflow-hidden flex flex-col group cursor-pointer hover:bg-gray-50 hover:-translate-y-2 active:-translate-y-3 hover:shadow-xl hover:z-10 transition-all duration-300 dark:bg-slate-900 dark:border-slate-800 dark:hover:bg-slate-800/50">
               <div className="flex justify-between items-start mb-2 relative z-10">
                 <div>
-                  <h4 className="text-[10px] font-bold text-gray-500 tracking-wider mb-1 uppercase">{chart.title}</h4>
-                  <p className="text-xl font-bold text-dark-bg leading-none">{chart.val}</p>
+                  <h4 className="text-[10px] font-bold text-gray-500 tracking-wider mb-1 uppercase dark:text-slate-400 transition-colors duration-300">{chart.title}</h4>
+                  <p className="text-xl font-bold text-dark-bg leading-none dark:text-white transition-colors duration-300">{chart.val}</p>
                 </div>
                 <div className={`p-1.5 rounded-full ${chart.bg} ${chart.color} group-hover:scale-110 transition-transform`}>
                   <chart.icon size={12} strokeWidth={3} />

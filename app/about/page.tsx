@@ -3,6 +3,8 @@
 import React from "react";
 import Image from "next/image";
 import { Search, Database, Globe, Network } from "lucide-react";
+import Navbar from "../components/Navbar";
+import Footer from "../components/Footer";
 
 export default function AboutPage() {
   const council = [
@@ -33,9 +35,11 @@ export default function AboutPage() {
   ];
 
   return (
-    <div className="pt-32 pb-24 w-full min-h-screen">
-      
-      {/* Header */}
+    <div className="bg-white dark:bg-slate-950 text-slate-900 dark:text-white min-h-screen flex flex-col">
+      <Navbar />
+      <main className="flex-grow pt-8 pb-24 w-full">
+        
+        {/* Header */}
       <section className="text-center px-8 max-w-4xl mx-auto mb-20">
         <span className="bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-300 font-bold uppercase tracking-widest text-[10px] px-3 py-1 rounded-full">
           Our Mission
@@ -156,6 +160,8 @@ export default function AboutPage() {
         </div>
       </section>
 
+      </main>
+      <Footer />
     </div>
   );
 }

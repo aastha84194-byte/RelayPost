@@ -36,7 +36,8 @@ export default function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
     // Fetch featured/trending articles for the empty state
     const fetchFeatured = async () => {
       try {
-        const res = await fetch(`http://localhost:8001/public/articles/trending?limit=3`);
+        const baseUrl = process.env.NEXT_PUBLIC_API_BASE || 'http://localhost:8001';
+        const res = await fetch(`${baseUrl}/public/articles/trending?limit=3`);
         const data = await res.json();
         setFeaturedArticles(data);
       } catch (e) {
@@ -61,7 +62,8 @@ export default function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
       }
       setIsLoading(true);
       try {
-        const res = await fetch(`http://localhost:8001/public/articles/search?q=${encodeURIComponent(query)}&limit=5`);
+        const baseUrl = process.env.NEXT_PUBLIC_API_BASE || 'http://localhost:8001';
+        const res = await fetch(`${baseUrl}/public/articles/search?q=${encodeURIComponent(query)}&limit=5`);
         const data = await res.json();
         setSuggestions(data);
       } catch (e) {

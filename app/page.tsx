@@ -47,7 +47,7 @@ function HomeContent() {
   }, [category]);
 
   return (
-    <div className="min-h-full flex flex-col font-sans bg-white md:bg-[#F8F9FB]">
+    <div className="min-h-full flex flex-col font-sans bg-white md:bg-[#F8F9FB] dark:bg-slate-900 dark:md:bg-[#0f172a] transition-colors duration-300">
       <Navbar />
       <main className="flex-grow">
         <div className="max-w-7xl mx-auto px-4 md:px-8 py-4">
@@ -111,7 +111,7 @@ function HomeContent() {
 
 function HomeFallback() {
   return (
-    <div className="min-h-full flex flex-col font-sans">
+    <div className="min-h-full flex flex-col font-sans bg-white md:bg-[#F8F9FB] dark:bg-slate-900 dark:md:bg-[#0f172a] transition-colors duration-300">
       <Navbar />
       <main className="flex-grow">
         <div className="max-w-7xl mx-auto px-4 md:px-8 py-20 text-center text-[10px] font-black uppercase tracking-widest text-slate-400 animate-pulse">

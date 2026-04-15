@@ -33,17 +33,17 @@ export default function TrendingNow({ articles }: { articles: Article[] }) {
       className="pause-on-hover"
     >
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-xl md:text-2xl font-bold text-dark-bg border-l-4 border-[#4f46e5] pl-3">Trending Now</h2>
+        <h2 className="text-xl md:text-2xl font-bold text-dark-bg border-l-4 border-[#4f46e5] pl-3 dark:text-white transition-colors duration-300">Trending Now</h2>
         <div className="flex gap-2">
           <button
             onClick={() => scroll('left')}
-            className="w-8 h-8 rounded-full flex items-center justify-center bg-white border border-gray-200 text-gray-500 hover:text-brand transition-colors shadow-sm"
+            className="w-8 h-8 rounded-full flex items-center justify-center bg-white border border-gray-200 text-gray-500 hover:text-brand transition-colors shadow-sm dark:bg-slate-900 dark:border-slate-800 dark:text-slate-400 dark:shadow-none"
           >
             <ChevronLeft size={18} />
           </button>
           <button
             onClick={() => scroll('right')}
-            className="w-8 h-8 rounded-full flex items-center justify-center bg-white border border-gray-200 text-gray-500 hover:text-brand transition-colors shadow-sm"
+            className="w-8 h-8 rounded-full flex items-center justify-center bg-white border border-gray-200 text-gray-500 hover:text-brand transition-colors shadow-sm dark:bg-slate-900 dark:border-slate-800 dark:text-slate-400 dark:shadow-none"
           >
             <ChevronRight size={18} />
           </button>
@@ -59,7 +59,7 @@ export default function TrendingNow({ articles }: { articles: Article[] }) {
             <Link 
               key={`${item.id}-${i}`} 
               href={`/${item.category_name?.toLowerCase().replace(/ /g, '-') || 'general'}/${item.slug}`}
-              className="w-[200px] md:w-[240px] shrink-0 bg-white border border-gray-200 shadow-sm hover:shadow-md transition-all duration-300 rounded-lg overflow-hidden group"
+              className="w-[200px] md:w-[240px] shrink-0 bg-white border border-gray-200 shadow-sm hover:shadow-md transition-all duration-300 rounded-lg overflow-hidden group dark:bg-slate-900 dark:border-slate-800 dark:shadow-none"
             >
               <div className="h-28 relative overflow-hidden">
                 <Image 
@@ -70,8 +70,8 @@ export default function TrendingNow({ articles }: { articles: Article[] }) {
                   className="object-cover group-hover:scale-110 transition-transform duration-500" 
                 />
               </div>
-              <div className="p-3 bg-white group-hover:bg-gray-50 transition-colors flex-grow">
-                <h3 className="font-bold text-dark-bg text-sm mb-1 leading-snug group-hover:text-brand transition-colors line-clamp-2">
+              <div className="p-3 bg-white group-hover:bg-gray-50 transition-colors flex-grow dark:bg-slate-900 dark:group-hover:bg-slate-800/50">
+                <h3 className="font-bold text-dark-bg text-sm mb-1 leading-snug group-hover:text-brand transition-colors line-clamp-2 dark:text-white">
                   {item.title}
                 </h3>
                 <p className="text-[10px] text-gray-400 mt-2 font-bold uppercase tracking-wider">

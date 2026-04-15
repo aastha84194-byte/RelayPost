@@ -33,17 +33,17 @@ export default function ExpertAnalysis({ articles }: { articles: Article[] }) {
       className="pause-on-hover"
     >
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-xl md:text-2xl font-bold text-dark-bg border-l-4 border-[#4f46e5] pl-3">Expert Analysis</h2>
+        <h2 className="text-xl md:text-2xl font-bold text-dark-bg border-l-4 border-[#4f46e5] pl-3 dark:text-white transition-colors duration-300">Expert Analysis</h2>
         <div className="flex gap-2">
           <button 
             onClick={() => scroll('left')}
-            className="w-8 h-8 rounded-full flex items-center justify-center bg-white border border-gray-200 text-gray-500 hover:text-brand transition-colors shadow-sm"
+            className="w-8 h-8 rounded-full flex items-center justify-center bg-white border border-gray-200 text-gray-500 hover:text-brand transition-colors shadow-sm dark:bg-slate-900 dark:border-slate-800 dark:text-slate-400 dark:shadow-none"
           >
             <ChevronLeft size={18} />
           </button>
           <button 
             onClick={() => scroll('right')}
-            className="w-8 h-8 rounded-full flex items-center justify-center bg-white border border-gray-200 text-gray-500 hover:text-brand transition-colors shadow-sm"
+            className="w-8 h-8 rounded-full flex items-center justify-center bg-white border border-gray-200 text-gray-500 hover:text-brand transition-colors shadow-sm dark:bg-slate-900 dark:border-slate-800 dark:text-slate-400 dark:shadow-none"
           >
             <ChevronRight size={18} />
           </button>
@@ -59,10 +59,10 @@ export default function ExpertAnalysis({ articles }: { articles: Article[] }) {
             <Link 
               key={`${item.id}-${i}`} 
               href={`/${item.category_name?.toLowerCase().replace(/ /g, '-') || 'general'}/${item.slug}`}
-              className="w-[300px] shrink-0 bg-white p-6 border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition-all duration-300 group"
+              className="w-[300px] shrink-0 bg-white p-6 border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition-all duration-300 group dark:bg-slate-900 dark:border-slate-800 dark:shadow-none"
             >
               <div className="flex items-center gap-3 mb-4">
-                <div className="w-10 h-10 rounded-full overflow-hidden shrink-0 border border-gray-100 flex items-center justify-center bg-slate-100">
+                <div className="w-10 h-10 rounded-full overflow-hidden shrink-0 border border-gray-100 flex items-center justify-center bg-slate-100 dark:border-slate-800 transition-colors duration-300">
                     <Image 
                       src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${item.author_id || i}`} 
                       width={40} 
@@ -73,14 +73,14 @@ export default function ExpertAnalysis({ articles }: { articles: Article[] }) {
                     />
                 </div>
                 <div>
-                  <h4 className="font-bold text-[13px] text-dark-bg">Expert Advisor</h4>
-                  <p className="text-[11px] text-gray-500 uppercase tracking-wider">{item.category_name || 'Analysis'}</p>
+                  <h4 className="font-bold text-[13px] text-dark-bg dark:text-white transition-colors duration-300">Expert Advisor</h4>
+                  <p className="text-[11px] text-gray-500 uppercase tracking-wider dark:text-slate-400 transition-colors duration-300">{item.category_name || 'Analysis'}</p>
                 </div>
               </div>
-              <h3 className="font-bold text-dark-bg mb-3 text-[15px] leading-tight group-hover:text-brand transition-colors line-clamp-2">
+              <h3 className="font-bold text-dark-bg mb-3 text-[15px] leading-tight group-hover:text-brand transition-colors line-clamp-2 dark:text-white">
                 {item.title}
               </h3>
-              <p className="text-xs text-gray-500 line-clamp-3 leading-relaxed">
+              <p className="text-xs text-gray-500 line-clamp-3 leading-relaxed dark:text-slate-400 transition-colors duration-300">
                 {item.excerpt || item.subtitle}
               </p>
             </Link>

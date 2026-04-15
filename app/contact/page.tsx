@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { Send, MapPin, Mail, Radio, Globe, Rss } from "lucide-react";
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE || "http://localhost:8001";
 
@@ -144,9 +145,9 @@ export default function ContactPage() {
               <p className="text-slate-500 dark:text-slate-400 text-sm leading-relaxed mb-4">
                 We are constantly seeking deep-dive intelligence reports and analytical briefings. If you have a scoop or a data-driven thesis, our editors want to see it.
               </p>
-              <a href="/contribute" className="text-primary dark:text-indigo-400 font-bold text-sm hover:underline flex items-center gap-1 group">
+              <Link href="/contribute" className="text-primary dark:text-indigo-400 font-bold text-sm hover:underline flex items-center gap-1 group">
                 Editorial Guidelines <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
-              </a>
+              </Link>
             </div>
           </div>
 

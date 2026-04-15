@@ -31,6 +31,7 @@ export default function ContributionsManagement() {
 
   useEffect(() => {
     fetchContributions();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filterStatus]);
 
   const fetchContributions = async () => {

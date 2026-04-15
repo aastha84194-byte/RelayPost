@@ -33,17 +33,17 @@ export default function LatestInsights({ articles }: { articles: Article[] }) {
       className="pause-on-hover"
     >
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-xl md:text-2xl font-bold text-dark-bg border-l-4 border-[#4f46e5] pl-3">Latest Insights</h2>
+        <h2 className="text-xl md:text-2xl font-bold text-dark-bg border-l-4 border-[#4f46e5] pl-3 dark:text-white transition-colors duration-300">Latest Insights</h2>
         <div className="flex gap-2">
           <button 
             onClick={() => scroll('left')}
-            className="w-8 h-8 rounded-full flex items-center justify-center bg-white border border-gray-200 text-gray-500 hover:text-brand transition-colors shadow-sm"
+            className="w-8 h-8 rounded-full flex items-center justify-center bg-white border border-gray-200 text-gray-500 hover:text-brand transition-colors shadow-sm dark:bg-slate-900 dark:border-slate-800 dark:text-slate-400 dark:shadow-none"
           >
             <ChevronLeft size={18} />
           </button>
           <button 
             onClick={() => scroll('right')}
-            className="w-8 h-8 rounded-full flex items-center justify-center bg-white border border-gray-200 text-gray-500 hover:text-brand transition-colors shadow-sm"
+            className="w-8 h-8 rounded-full flex items-center justify-center bg-white border border-gray-200 text-gray-500 hover:text-brand transition-colors shadow-sm dark:bg-slate-900 dark:border-slate-800 dark:text-slate-400 dark:shadow-none"
           >
             <ChevronRight size={18} />
           </button>
@@ -59,7 +59,7 @@ export default function LatestInsights({ articles }: { articles: Article[] }) {
             <Link 
               key={`${item.id}-${i}`} 
               href={`/${item.category_name?.toLowerCase().replace(/ /g, '-') || 'general'}/${item.slug}`}
-              className="w-[300px] shrink-0 bg-white p-4 border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition-all duration-300 group"
+              className="w-[300px] shrink-0 bg-white p-4 border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition-all duration-300 group dark:bg-slate-900 dark:border-slate-800 dark:shadow-none"
             >
               <div className="h-36 relative overflow-hidden mb-3 rounded-md">
                 <Image 
@@ -72,7 +72,7 @@ export default function LatestInsights({ articles }: { articles: Article[] }) {
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
               </div>
-              <h3 className="font-bold text-dark-bg text-sm mb-2 leading-snug group-hover:text-brand transition-colors line-clamp-2">
+              <h3 className="font-bold text-dark-bg text-sm mb-2 leading-snug group-hover:text-brand transition-colors line-clamp-2 dark:text-white">
                 {item.title}
               </h3>
               <p className="text-[10px] font-semibold text-gray-400 tracking-wider uppercase mt-auto">
