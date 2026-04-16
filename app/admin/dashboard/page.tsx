@@ -29,27 +29,27 @@ export default function AdminDashboard() {
         const contentRes = await fetch(`${API_BASE}/admin/stats/content`, {
           headers: { "Authorization": `Bearer ${token}` }
         });
-        const contentData = await contentRes.json();
+        const contentData = contentRes.ok ? await contentRes.json() : {};
 
         // Fetch Auth Stats
         const authRes = await fetch(`${AUTH_BASE}/admin/stats/auth`, {
           headers: { "Authorization": `Bearer ${token}` }
         });
-        const authData = await authRes.json();
+        const authData = authRes.ok ? await authRes.json() : {};
 
         // Fetch Recent Activity
         const activityRes = await fetch(`${API_BASE}/admin/activity`, {
           headers: { "Authorization": `Bearer ${token}` }
         });
-        const activityData = await activityRes.json();
+        const activityData = activityRes.ok ? await activityRes.json() : [];
 
         setStats({
-          articles: contentData.total_articles,
-          views: contentData.total_views,
-          publishers: authData.publisher_count,
-          totalUsers: authData.total_users
+          articles: contentData.total_articles ?? 0,
+          views: contentData.total_views ?? 0,
+          publishers: authData.publisher_count ?? 0,
+          totalUsers: authData.total_users ?? 0
         });
-        setActivity(activityData);
+        setActivity(Array.isArray(activityData) ? activityData : []);
       } catch (e) {
         console.error("Dashboard fetch failed", e);
       } finally {
@@ -90,7 +90,7 @@ export default function AdminDashboard() {
           </div>
           <div className="relative z-10">
             <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4">Total Articles</p>
-            <p className="text-4xl font-black text-slate-800 tracking-tighter mb-2">{stats.articles.toLocaleString()}</p>
+            <p className="text-4xl font-black text-slate-800 tracking-tighter mb-2">{stats.articles?.toLocaleString() ?? 0}</p>
             <span className="text-[10px] font-bold text-emerald-500 bg-emerald-50 px-2 py-1 rounded-lg">+12% from last cycle</span>
           </div>
         </motion.div>

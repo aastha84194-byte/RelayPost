@@ -4,15 +4,15 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
-import { getCategories, getAllArticles, toggleFollow, getUserFollows, getUserIdentifier } from "@/lib/articles";
+import { getPublicKeywords, getArticlesByKeyword, toggleFollow, getUserFollows, getUserIdentifier } from "@/lib/articles";
 import { Article } from "@/lib/types";
 import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
-import { Sparkles, Bookmark, BookmarkCheck } from "lucide-react";
+import { Zap, Bookmark, BookmarkCheck } from "lucide-react";
 
-export default function CategoryDetailPage() {
-  const { slug } = useParams();
+export default function KeywordDetailPage() {
+  const { tag } = useParams();
   const [articles, setArticles] = useState<Article[]>([]);
-  const [category, setCategory] = useState<any>(null);
+  const [keyword, setKeyword] = useState<any>(null);
   const [isFollowed, setIsFollowed] = useState(false);
   const [userId, setUserId] = useState("");
   const [isLoading, setIsLoading] = useState(true);
@@ -28,22 +28,27 @@ export default function CategoryDetailPage() {
   const rotateY = useTransform(smoothX, [0, 1], [-4, 4]);
 
   useEffect(() => {
-    if (!slug) return;
+    if (!tag) return;
     const id = getUserIdentifier();
     setUserId(id);
 
+    // Using decodeURIComponent because tags can have spaces/special chars in URL
+    const decodedTag = decodeURIComponent(tag as string);
+
     Promise.all([
-      getCategories(),
-      getAllArticles(slug as string),
+      getPublicKeywords(),
+      getArticlesByKeyword(decodedTag, 1, 50),
       getUserFollows(id)
-    ]).then(([cats, arts, follows]) => {
-      const currentCat = cats.find((c: any) => c.slug === slug);
-      setCategory(currentCat);
-      setArticles(arts);
-      setIsFollowed(follows.some((f: any) => f.target_id === currentCat?.id));
+    ]).then(([kws, artData, follows]) => {
+      const currentKw = kws.find((k: any) => k.tag.toLowerCase() === decodedTag.toLowerCase());
+      setKeyword(currentKw);
+      setArticles(artData.items || []);
+      if (currentKw) {
+        setIsFollowed(follows.some((f: any) => f.target_id === currentKw.id));
+      }
       setIsLoading(false);
     });
-  }, [slug]);
+  }, [tag]);
 
   const handleMouseMove = (e: React.MouseEvent) => {
     if (!containerRef.current) return;
@@ -55,23 +60,23 @@ export default function CategoryDetailPage() {
   };
 
   const handleToggleFollow = async () => {
-    if (!category) return;
-    const res = await toggleFollow(userId, category.id, 'category');
+    if (!keyword) return;
+    const res = await toggleFollow(userId, keyword.id, 'keyword');
     setIsFollowed(!!res);
   };
 
-  const displayName = category?.name || (slug as string)?.split("-").map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(" ");
+  const displayName = keyword?.tag || decodeURIComponent(tag as string);
 
   return (
     <div className="bg-white dark:bg-slate-950 text-slate-900 dark:text-white min-h-screen flex flex-col font-['Inter']">
       <Navbar />
       
       <main className="flex-grow pb-32">
-        {/* AntiGravity Hero Header */}
-        <div className="relative bg-slate-900 dark:bg-slate-950 py-32 overflow-hidden">
+        {/* Topic Hero Header */}
+        <div className="relative bg-indigo-950 py-32 overflow-hidden">
           <div className="absolute inset-0 opacity-40">
-             <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-indigo-600/20 blur-[150px] rounded-full -translate-y-1/2 translate-x-1/2"></div>
-             <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-purple-600/10 blur-[120px] rounded-full translate-y-1/2 -translate-x-1/2"></div>
+             <div className="absolute top-0 left-0 w-[800px] h-[800px] bg-indigo-600/20 blur-[150px] rounded-full -translate-y-1/2 -translate-x-1/2"></div>
+             <div className="absolute bottom-0 right-0 w-[600px] h-[600px] bg-blue-600/10 blur-[120px] rounded-full translate-y-1/2 translate-x-1/2"></div>
           </div>
 
           <div className="max-w-7xl mx-auto px-8 relative z-10 flex flex-col md:flex-row md:items-end justify-between gap-12">
@@ -79,10 +84,10 @@ export default function CategoryDetailPage() {
               <motion.div
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="inline-flex items-center gap-2 mb-8 px-5 py-2 bg-indigo-500/10 border border-indigo-500/20 rounded-full text-indigo-400"
+                className="inline-flex items-center gap-2 mb-8 px-5 py-2 bg-indigo-500/10 border border-indigo-500/20 rounded-full text-indigo-300"
               >
-                <Sparkles size={14} className="animate-pulse" />
-                <span className="text-[10px] font-black uppercase tracking-[0.3em]">Research Corridor</span>
+                <Zap size={14} className="fill-current" />
+                <span className="text-[10px] font-black uppercase tracking-[0.3em]">Knowledge Node</span>
               </motion.div>
 
               <motion.h1 
@@ -91,7 +96,7 @@ export default function CategoryDetailPage() {
                 transition={{ delay: 0.1 }}
                 className="text-7xl md:text-9xl font-black tracking-tighter text-white uppercase leading-[0.8] mb-8"
               >
-                {displayName}
+                #{displayName}
               </motion.h1>
 
               <motion.p 
@@ -100,7 +105,7 @@ export default function CategoryDetailPage() {
                 transition={{ delay: 0.2 }}
                 className="text-slate-400 text-xl font-medium max-w-xl italic leading-relaxed"
               >
-                {category?.description || `High-density intelligence synthesis focusing on upcoming breakthroughs and critical shifts within the ${displayName} ecosystem.`}
+                {keyword?.description || `Live intelligence stream capturing the latest shifts, research, and expert signals within the ${displayName} corridor.`}
               </motion.p>
             </div>
 
@@ -108,18 +113,13 @@ export default function CategoryDetailPage() {
                initial={{ opacity: 0, scale: 0.9 }}
                animate={{ opacity: 1, scale: 1 }}
                transition={{ delay: 0.3 }}
-               className="flex flex-col items-start md:items-end gap-4"
+               className="flex flex-col items-start md:items-end gap-6"
             >
-               <div className="flex justify-center items-center mb-2">
-                 <div className="h-12 font-black text-white flex justify-center items-center">Followed by</div>
-                 {/* {[1,2,3,4].map(v => <div key={v} className={`w-12 h-12 rounded-full border-4 border-slate-900 bg-slate-${v*2}00`} />)} */}
-                 <div className="w-12 h-12 rounded-full border-4 border-slate-900 bg-indigo-600 flex items-center justify-center text-[10px] font-black text-white">+8K</div>
-               </div>
                <button 
                 onClick={handleToggleFollow}
                 className={`group flex items-center gap-3 px-10 py-5 rounded-full font-black text-[10px] uppercase tracking-[0.2em] transition-all shadow-2xl ${isFollowed ? 'bg-white text-slate-900' : 'bg-indigo-600 text-white hover:bg-indigo-500 shadow-indigo-600/20'}`}
                >
-                 {isFollowed ? 'Channel Followed' : 'Follow Corridor'}
+                 {isFollowed ? 'Node Followed' : 'Follow Node'}
                  {isFollowed ? <BookmarkCheck size={16} /> : <Bookmark size={16} />}
                </button>
             </motion.div>
@@ -128,7 +128,7 @@ export default function CategoryDetailPage() {
           <div className="absolute bottom-0 left-0 w-full h-32 bg-gradient-to-t from-white dark:from-slate-950 to-transparent"></div>
         </div>
 
-        {/* Content Corridor */}
+        {/* Intelligence Grid */}
         <div 
           ref={containerRef}
           onMouseMove={handleMouseMove}
@@ -159,7 +159,7 @@ export default function CategoryDetailPage() {
                     </div>
                     
                     <div className="px-2" style={{ transform: "translateZ(30px)" }}>
-                      <span className="text-[10px] font-black text-indigo-600 dark:text-indigo-400 uppercase tracking-[0.2em] mb-4 block">{displayName}</span>
+                      <span className="text-[10px] font-black text-indigo-600 dark:text-indigo-400 uppercase tracking-[0.2em] mb-4 block">#{displayName}</span>
                       <h3 className="text-2xl font-black leading-tight text-slate-900 dark:text-white group-hover:text-indigo-600 transition-colors tracking-tighter uppercase mb-4">
                         {article.title}
                       </h3>
@@ -173,10 +173,10 @@ export default function CategoryDetailPage() {
             </div>
           ) : (
             <div className="text-center py-40 rounded-[4rem] bg-slate-50 dark:bg-slate-900 border-2 border-dashed border-slate-200 dark:border-white/10">
-              <span className="material-symbols-outlined text-slate-300 dark:text-slate-700 text-8xl mb-8">dashboard_customize</span>
-              <p className="text-slate-400 dark:text-slate-500 font-black uppercase tracking-widest text-lg mb-8">No intelligence found in this node.</p>
+              <span className="material-symbols-outlined text-slate-300 dark:text-slate-700 text-8xl mb-8">category</span>
+              <p className="text-slate-400 dark:text-slate-500 font-black uppercase tracking-widest text-lg mb-8">No articles found in this knowledge node.</p>
               <Link href="/categories" className="px-10 py-5 bg-indigo-600 text-white rounded-full font-black uppercase tracking-widest text-[10px] shadow-xl shadow-indigo-600/20 active:scale-95 transition-all">
-                Return to Discovery Corridor
+                Access Discovery Corridors
               </Link>
             </div>
           )}
