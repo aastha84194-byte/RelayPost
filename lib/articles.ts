@@ -80,6 +80,24 @@ export async function getAllArticles(category?: string): Promise<Article[]> {
   }
 }
 
+export async function getPaginatedArticles(page: number = 1, size: number = 25, token?: string): Promise<any> {
+
+    try {
+        const headers: Record<string, string> = {};
+        if (token) headers["Authorization"] = `Bearer ${token}`;
+        const res = await fetch(`${API_BASE}/admin/articles?page=${page}&size=${size}`, {
+            headers,
+            cache: 'no-store'
+        });
+        if (!res.ok) return { items: [], total: 0, pages: 0 };
+        return await res.json();
+    } catch (err) {
+        console.error("Failed to fetch paginated articles", err);
+        return { items: [], total: 0, pages: 0 };
+    }
+}
+
+
 export async function getTrendingArticles(): Promise<Article[]> {
   try {
     const res = await fetch(`${API_BASE}/public/articles/trending`, { next: { revalidate: 60 } });
@@ -214,6 +232,36 @@ export async function deleteArticle(id: string, token?: string): Promise<any> {
   }
 }
 
+export async function restoreArticle(id: string, token?: string): Promise<any> {
+  try {
+    const headers: Record<string, string> = {};
+    if (token) headers["Authorization"] = `Bearer ${token}`;
+
+    const res = await fetch(`${API_BASE}/admin/articles/${id}/restore`, {
+      method: "POST",
+      headers
+    });
+    return await res.json();
+  } catch (err) {
+    console.error("Failed to restore article", err);
+    return null;
+  }
+}
+
+export async function getArticlesByKeyword(tag: string, page: number = 1, size: number = 20): Promise<any> {
+    try {
+        const res = await fetch(`${API_BASE}/public/articles/keyword/${tag}?page=${page}&size=${size}`, {
+            cache: 'no-store'
+        });
+        if (!res.ok) return { items: [], total: 0, pages: 0 };
+        return await res.json();
+    } catch (err) {
+        console.error("Failed to fetch articles by keyword", err);
+        return { items: [], total: 0, pages: 0 };
+    }
+}
+
+
 export async function getCategories(): Promise<any[]> {
     try {
       const res = await fetch(`${API_BASE}/public/categories`, { next: { revalidate: 60 } });
@@ -224,3 +272,81 @@ export async function getCategories(): Promise<any[]> {
       return [];
     }
 }
+
+export async function getHomepageCategorySections(): Promise<Record<string, { slug: string, articles: Article[] }>> {
+    try {
+        const res = await fetch(`${API_BASE}/public/homepage/category-sections`, { 
+            cache: 'no-store' 
+        });
+        if (!res.ok) return {};
+        return await res.json();
+    } catch (err) {
+        console.error("Failed to fetch home category sections", err);
+        return {};
+    }
+}
+
+export async function getPublicKeywords(limit?: number): Promise<any[]> {
+    try {
+        const url = new URL(`${API_BASE}/public/keywords`);
+        if (limit) url.searchParams.append("limit", limit.toString());
+        const res = await fetch(url.toString(), { next: { revalidate: 60 } });
+        if (!res.ok) return [];
+        return await res.json();
+    } catch (err) {
+        console.error("Failed to fetch keywords", err);
+        return [];
+    }
+}
+
+// --- Discovery & Interactivity ---
+
+export async function subscribeToNewsletter(email: string): Promise<any> {
+    try {
+        const res = await fetch(`${API_BASE}/public/newsletter/subscribe`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email })
+        });
+        return await res.json();
+    } catch (err) {
+        console.error("Failed to subscribe to newsletter", err);
+        return null;
+    }
+}
+
+export async function toggleFollow(user_id: string, target_id: string, target_type: 'category' | 'keyword'): Promise<any> {
+    try {
+        const res = await fetch(`${API_BASE}/public/follow/toggle`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ user_id, target_id, target_type })
+        });
+        return await res.json();
+    } catch (err) {
+        console.error("Failed to toggle follow", err);
+        return null;
+    }
+}
+
+export async function getUserFollows(user_id: string): Promise<any[]> {
+    try {
+        const res = await fetch(`${API_BASE}/public/follows/${user_id}`, { cache: 'no-store' });
+        if (!res.ok) return [];
+        return await res.json();
+    } catch (err) {
+        console.error("Failed to fetch user follows", err);
+        return [];
+    }
+}
+
+export function getUserIdentifier(): string {
+    if (typeof window === 'undefined') return '';
+    let id = localStorage.getItem('rp_user_id');
+    if (!id) {
+        id = crypto.randomUUID();
+        localStorage.setItem('rp_user_id', id);
+    }
+    return id;
+}
+

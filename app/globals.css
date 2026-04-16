@@ -134,10 +134,12 @@ h1, h2, h3 {
 }
 
 /* Hide scrollbar for category nav */
-.hide-scrollbar::-webkit-scrollbar {
+.hide-scrollbar::-webkit-scrollbar,
+.no-scrollbar::-webkit-scrollbar {
   display: none;
 }
-.hide-scrollbar {
+.hide-scrollbar,
+.no-scrollbar {
   -ms-overflow-style: none; /* IE and Edge */
   scrollbar-width: none; /* Firefox */
 }
@@ -164,7 +166,14 @@ h1, h2, h3 {
   animation: marquee-reverse 35s linear infinite;
 }
 
+.animate-marquee-slow {
+  display: flex;
+  width: max-content;
+  animation: marquee 60s linear infinite;
+}
+
 .pause-on-hover:hover .animate-marquee,
-.pause-on-hover:hover .animate-marquee-reverse {
+.pause-on-hover:hover .animate-marquee-reverse,
+.pause-on-hover:hover .animate-marquee-slow {
   animation-play-state: paused;
 }

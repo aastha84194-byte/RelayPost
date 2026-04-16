@@ -12,7 +12,8 @@ import TheBriefing from './components/TheBriefing';
 import CommunityPulse from './components/CommunityPulse';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
-import { getArticlesBySection } from '@/lib/articles';
+import CategoryArticleSection from './components/CategoryArticleSection';
+import { getArticlesBySection, getHomepageCategorySections } from '@/lib/articles';
 import { Article } from '@/lib/types';
 import { useSearchParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -26,21 +27,24 @@ function HomeContent() {
   const [expert, setExpert] = React.useState<Article[]>([]);
   const [insights, setInsights] = React.useState<Article[]>([]);
   const [heroes, setHeroes] = React.useState<Article[]>([]);
+  const [categorySections, setCategorySections] = React.useState<Record<string, { slug: string, articles: Article[] }>>({});
   const [isLoading, setIsLoading] = React.useState(true);
 
   React.useEffect(() => {
     setIsLoading(true);
     const fetchData = async () => {
-       const [t, e, i, h] = await Promise.all([
+       const [t, e, i, h, cats] = await Promise.all([
           getArticlesBySection("TrendingNow", category || undefined),
           getArticlesBySection("ExpertAnalysis", category || undefined),
           getArticlesBySection("LatestInsights", category || undefined),
-          getArticlesBySection("Hero", category || undefined)
+          getArticlesBySection("Hero", category || undefined),
+          getHomepageCategorySections()
        ]);
        setTrending(t);
        setExpert(e);
-       console.log("Hero articles in frontend:", h);
+       setInsights(i);
        setHeroes(h);
+       setCategorySections(cats);
        setIsLoading(false);
     };
     fetchData();
@@ -77,7 +81,7 @@ function HomeContent() {
 
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
             {/* LEFT COLUMN - 8 columns wide */}
-            <div className="lg:col-span-8 flex flex-col gap-12">
+            <div className="lg:col-span-8 flex flex-col gap-8">
               {isLoading ? (
                 <div className="py-20 text-center text-[10px] font-black uppercase tracking-widest text-slate-400 animate-pulse">
                    Synchronizing Intelligence Stream...
@@ -89,6 +93,14 @@ function HomeContent() {
                   {insights.length > 0 && <LatestInsights articles={insights} />}
                   {!category && <TechSpotlight />}
                   {expert.length > 0 && <ExpertAnalysis articles={expert} />}
+                  {!category && Object.entries(categorySections).map(([name, data]) => (
+                    <CategoryArticleSection 
+                      key={name}
+                      title={name}
+                      slug={data.slug}
+                      articles={data.articles}
+                    />
+                  ))}
                   {!category && <InteractiveData />}
                 </>
               )}
