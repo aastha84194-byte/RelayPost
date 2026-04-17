@@ -1,18 +1,19 @@
 "use client";
 
 import React from "react";
-import { 
-  Type, Image as ImageIcon, BarChart3, 
-  Table as TableIcon, Quote as QuoteIcon, 
-  Minus, List as ListIcon, Video, 
-  Code as CodeIcon, MessageSquare, HelpCircle, 
-  Zap, AlignLeft, LayoutGrid 
+import {
+  Type, Image as ImageIcon, BarChart3,
+  Table as TableIcon, Quote as QuoteIcon,
+  Minus, List as ListIcon, Video,
+  Code as CodeIcon, MessageSquare, HelpCircle,
+  Zap, AlignLeft, LayoutGrid
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { SectionType } from "@/lib/types";
 
 interface BlockPickerProps {
   onAdd: (type: SectionType) => void;
+  variant?: 'grid' | 'navbar';
 }
 
 const BLOCK_TYPES = [
@@ -31,27 +32,59 @@ const BLOCK_TYPES = [
   { id: 'divider', icon: Minus, label: 'Space', color: 'bg-slate-200', desc: 'Visual separator' }
 ];
 
-export default function BlockPicker({ onAdd }: BlockPickerProps) {
+export default function BlockPicker({ onAdd, variant = 'grid' }: BlockPickerProps) {
+  if (variant === 'navbar') {
+    return (
+      <div className="flex items-center gap-1 p-1.5 bg-white/80 backdrop-blur-md border border-slate-200 rounded-2xl shadow-xl overflow-x-auto no-scrollbar">
+        {BLOCK_TYPES.map((block) => (
+          <motion.button
+            key={block.id}
+            whileHover={{ scale: 1.1, y: -2 }}
+            whileTap={{ scale: 0.9 }}
+            onClick={() => onAdd(block.id as SectionType)}
+            className="group relative flex flex-col items-center justify-center min-w-[44px] h-10 rounded-xl hover:bg-slate-50 transition-all border border-transparent hover:border-slate-100"
+            title={block.label}
+          >
+            <div className={`w-8 h-8 ${block.color} rounded-lg flex items-center justify-center text-white shadow-sm group-hover:shadow-indigo-200 transition-all`}>
+              <block.icon size={16} />
+            </div>
+            
+            {/* Tooltip */}
+            <div className="absolute -bottom-10 left-1/2 -translate-x-1/2 px-3 py-1.5 bg-slate-900 text-white text-[9px] font-black uppercase tracking-widest rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-[100] shadow-2xl">
+              {block.label}
+              <div className="absolute -top-1 left-1/2 -translate-x-1/2 border-l-4 border-r-4 border-b-4 border-transparent border-b-slate-900" />
+            </div>
+          </motion.button>
+        ))}
+        <div className="h-6 w-[px] bg-slate-200 mx-2" />
+        <div className="px-3 flex flex-col justify-center min-w-fit">
+           <span className="text-[8px] font-black text-indigo-600 uppercase tracking-tighter whitespace-nowrap">Canvas</span>
+           <span className="text-[8px] font-bold text-slate-400 uppercase tracking-tighter whitespace-nowrap">Toolkit</span>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="bg-white border-2 border-slate-900 rounded-[3rem] p-8 mt-12 shadow-[0_32px_64px_-12px_rgba(0,0,0,0.15)] relative overflow-hidden group">
       <div className="absolute top-0 right-0 p-8 text-slate-100 -mr-8 -mt-8 pointer-events-none group-hover:text-indigo-50 transition-all duration-700">
-         <LayoutGrid size={120} />
+        <LayoutGrid size={120} />
       </div>
-      
+
       <div className="relative z-10">
         <div className="flex items-center justify-between mb-8">
-           <div>
-              <h4 className="text-sm font-black text-slate-900 uppercase tracking-[0.3em] mb-1">Canvas Tools</h4>
-              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-relaxed">Drag to reorder after adding to stream</p>
-           </div>
-           <div className="px-4 py-1.5 bg-slate-900 text-white rounded-full text-[9px] font-black uppercase tracking-widest hidden md:block">
-              {BLOCK_TYPES.length} Active Blocks
-           </div>
+          <div>
+            <h4 className="text-sm font-black text-slate-900 uppercase tracking-[0.3em] mb-1">Canvas Tools</h4>
+            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-relaxed">Drag to reorder after adding to stream</p>
+          </div>
+          <div className="px-4 py-1.5 bg-slate-900 text-white rounded-full text-[9px] font-black uppercase tracking-widest hidden md:block">
+            {BLOCK_TYPES.length} Active Blocks
+          </div>
         </div>
 
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           {BLOCK_TYPES.map((block) => (
-            <motion.button 
+            <motion.button
               key={block.id}
               whileHover={{ scale: 1.02, y: -2 }}
               whileTap={{ scale: 0.98 }}
@@ -59,11 +92,11 @@ export default function BlockPicker({ onAdd }: BlockPickerProps) {
               className="flex items-center gap-4 p-4 bg-slate-50 hover:bg-white border border-slate-100 hover:border-indigo-600/30 rounded-2xl transition-all group/btn text-left hover:shadow-xl hover:shadow-indigo-500/10"
             >
               <div className={`w-12 h-12 ${block.color} rounded-2xl flex items-center justify-center text-white shadow-lg group-hover/btn:scale-110 transition-transform`}>
-                 <block.icon size={20} />
+                <block.icon size={20} />
               </div>
               <div className="flex-1 truncate">
-                 <p className="text-[10px] font-black text-slate-800 uppercase tracking-widest mb-0.5">{block.label}</p>
-                 <p className="text-[9px] font-bold text-slate-400 group-hover/btn:text-indigo-400 transition-colors uppercase truncate">{block.desc}</p>
+                <p className="text-[10px] font-black text-slate-800 uppercase tracking-widest mb-0.5">{block.label}</p>
+                <p className="text-[9px] font-bold text-slate-400 group-hover/btn:text-indigo-400 transition-colors uppercase truncate">{block.desc}</p>
               </div>
             </motion.button>
           ))}
