@@ -197,16 +197,18 @@ export default function Navbar() {
               {/* Action icons */}
               <div className="flex items-center gap-2 md:gap-4">
                 <div
-                  className="relative hidden xl:block"
+                  className="relative hidden xl:block cursor-pointer"
                   title={isScrolled ? "Search" : undefined}
+                  onClick={() => setSearchOpen(true)}
                 >
                   <input
-                    className={`bg-slate-800/50 border-none rounded-full py-2 pl-4 pr-10 text-sm text-white focus:ring-2 focus:ring-indigo-500 focus:outline-none transition-all placeholder-slate-400 shadow-inner ${isScrolled ? "w-10 opacity-0 pointer-events-none" : "w-48 opacity-100"
+                    readOnly
+                    className={`bg-slate-800/50 border-none rounded-full py-2 pl-4 pr-10 text-sm text-white focus:ring-2 focus:ring-indigo-500 focus:outline-none transition-all placeholder-slate-400 shadow-inner cursor-pointer ${isScrolled ? "w-10 opacity-0 pointer-events-none" : "w-48 opacity-100"
                       }`}
                     placeholder="Search..."
                     type="text"
                   />
-                  <Search size={18} className={`absolute right-3 top-1/2 -translate-y-1/2 text-slate-300 cursor-pointer hover:text-white transition-colors ${isScrolled ? "scale-110" : "scale-100"}`} />
+                  <Search size={18} className={`absolute right-3 top-1/2 -translate-y-1/2 text-slate-300 pointer-events-none transition-colors ${isScrolled ? "scale-110" : "scale-100"}`} />
                 </div>
 
                 {/* Mobile Search Icon */}
