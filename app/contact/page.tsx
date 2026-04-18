@@ -155,19 +155,19 @@ export default function ContactPage() {
           <div className="bg-[#1e2335] dark:bg-[#0f121d] rounded-3xl p-10 text-white space-y-8">
             <h3 className="text-lg font-bold">Bureau Locations</h3>
             
-            <div className="flex gap-4 items-start">
+            {/* <div className="flex gap-4 items-start">
               <MapPin size={20} className="text-indigo-400 mt-1 shrink-0" />
               <div>
                 <p className="font-bold text-sm">Central Intelligence Hub</p>
                 <p className="text-slate-400 text-xs mt-1">1400 Crystal City, Suite 900 Arlington, VA 22202, US</p>
               </div>
-            </div>
+            </div> */}
 
             <div className="flex gap-4 items-start">
               <Mail size={20} className="text-indigo-400 mt-1 shrink-0" />
               <div>
                 <p className="font-bold text-sm">Digital Dispatch</p>
-                <p className="text-slate-400 text-xs mt-1">ops@relaypost.intelligence</p>
+                <p className="text-slate-400 text-xs mt-1">kartikkalra2712@gmail.com</p>
               </div>
             </div>
 
