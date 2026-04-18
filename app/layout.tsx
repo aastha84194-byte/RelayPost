@@ -6,7 +6,7 @@ import { ThemeProvider } from './components/ThemeProvider';
 export const metadata: Metadata = {
   metadataBase: new URL('https://relay-post.vercel.app'),
   title: {
-    default: 'RelayPos',
+    default: 'RelayPost',
     template: '%s | RelayPost',
   },
   description: 'Scale your insights with AI-driven content discovery, dynamic analysis, and real-time curation across business, technology, and science.',
