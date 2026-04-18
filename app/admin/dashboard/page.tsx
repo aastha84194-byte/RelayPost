@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
-import { CopyPlus, TrendingUp, Users, Activity, FileText } from "lucide-react";
+import { CopyPlus, TrendingUp, Users, Activity, FileText, Pause, Play, Brain, Cpu } from "lucide-react";
 import Cookies from "js-cookie";
 import { motion } from "framer-motion";
 const AUTH_BASE = process.env.NEXT_PUBLIC_AUTH_BASE || "http://localhost:8000";
@@ -19,6 +19,29 @@ export default function AdminDashboard() {
   });
   const [activity, setActivity] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isProcessing, setIsProcessing] = useState(false);
+
+  const handleAutomationAction = async (endpoint: string, successMessage: string) => {
+    setIsProcessing(true);
+    const token = Cookies.get("access_token");
+    try {
+      const res = await fetch(`${API_BASE}${endpoint}`, {
+        method: "POST",
+        headers: { "Authorization": `Bearer ${token}` }
+      });
+      if (res.ok) {
+        alert(successMessage);
+      } else {
+        const err = await res.json();
+        alert(`Error: ${err.detail || "Failed to execute"}`);
+      }
+    } catch (e) {
+      console.error(e);
+      alert("Network error");
+    } finally {
+      setIsProcessing(false);
+    }
+  };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -126,6 +149,40 @@ export default function AdminDashboard() {
             <span className="text-[10px] font-bold text-slate-400 bg-slate-50 px-2 py-1 rounded-lg">Operational stability high</span>
           </div>
         </motion.div>
+      </div>
+
+      <div className="bg-white rounded-[2rem] border border-slate-100 shadow-xl p-8 mb-12 relative overflow-hidden">
+         <div className="absolute top-0 right-0 p-8 opacity-5">
+            <Cpu size={180} />
+         </div>
+         <div className="relative z-10">
+            <h2 className="text-xl font-black text-slate-800 tracking-tight uppercase mb-6 flex items-center gap-2">
+              <Cpu className="text-indigo-600" size={24} /> Engine Control
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <button 
+                onClick={() => handleAutomationAction('/admin/automation/pause', 'Automation scheduler paused')}
+                disabled={isProcessing}
+                className="flex items-center justify-center gap-2 bg-amber-100 text-amber-700 hover:bg-amber-200 border border-amber-200 px-6 py-4 rounded-2xl font-bold transition-all disabled:opacity-50"
+              >
+                <Pause size={18} /> Pause Generation
+              </button>
+              <button 
+                onClick={() => handleAutomationAction('/admin/automation/resume', 'Automation scheduler resumed')}
+                disabled={isProcessing}
+                className="flex items-center justify-center gap-2 bg-emerald-100 text-emerald-700 hover:bg-emerald-200 border border-emerald-200 px-6 py-4 rounded-2xl font-bold transition-all disabled:opacity-50"
+              >
+                <Play size={18} /> Resume Generation
+              </button>
+              <button 
+                onClick={() => handleAutomationAction('/admin/automation/learning/trigger', 'Self-learning loop triggered')}
+                disabled={isProcessing}
+                className="flex items-center justify-center gap-2 bg-indigo-100 text-indigo-700 hover:bg-indigo-200 border border-indigo-200 px-6 py-4 rounded-2xl font-bold transition-all disabled:opacity-50"
+              >
+                <Brain size={18} /> Trigger Learning Engine
+              </button>
+            </div>
+         </div>
       </div>
       
       <div className="bg-slate-900 rounded-[2.5rem] border border-slate-800 shadow-2xl p-10 relative overflow-hidden">

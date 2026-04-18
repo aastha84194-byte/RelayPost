@@ -4,8 +4,50 @@ import { Toaster } from 'react-hot-toast';
 import { ThemeProvider } from './components/ThemeProvider';
 
 export const metadata: Metadata = {
-  title: 'Editorial Intelligence',
-  description: 'Scale your insights with the Digital Curator',
+  metadataBase: new URL('https://relay-post.vercel.app'),
+  title: {
+    default: 'RelayPost | The Premier Digital Curator',
+    template: '%s | RelayPost',
+  },
+  description: 'Scale your insights with AI-driven content discovery, dynamic analysis, and real-time curation across business, technology, and science.',
+  keywords: [
+    'RelayPost',
+    'Digital Curator',
+    'News Aggregator',
+    'Automated Insights',
+    'Technology News'
+  ],
+  authors: [{ name: 'RelayPost Team' }],
+  creator: 'RelayPost',
+  publisher: 'RelayPost',
+  openGraph: {
+    type: 'website',
+    locale: 'en_US',
+    url: '/',
+    title: 'RelayPost | The Premier Digital Curator',
+    description: 'Scale your insights with AI-driven content discovery, dynamic analysis, and real-time curation across business, technology, and science.',
+    siteName: 'RelayPost',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'RelayPost | The Premier Digital Curator',
+    description: 'Scale your insights with AI-driven content discovery, dynamic analysis, and real-time curation across business, technology, and science.',
+    creator: '@RelayPost',
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
+  icons: {
+    icon: '/favicon.ico',
+  },
 };
 
 export default function RootLayout({
