@@ -129,8 +129,8 @@ export default function Navbar() {
             <nav className={`bg-[#0f172a]/80 backdrop-blur-[12px] border-b md:border border-white/10 px-4 md:px-6 py-3 flex items-center justify-between shadow-lg transition-all ${isScrolled ? "md:rounded-full" : "rounded-none md:rounded-full"}`}>
               {/* Logo */}
               <Link href="/" className="flex items-center gap-2 group flex-shrink-0">
-                <div className="w-8 h-8 md:w-9 md:h-9 bg-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-500/20 group-hover:scale-105 transition-transform duration-300">
-                  <span className="text-white font-bold text-xl">E</span>
+                <div className="w-8 h-8 md:w-9 md:h-9 bg-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-500/20 group-hover:scale-105 transition-transform duration-300 overflow-hidden">
+                  <img src="/favicon.ico" alt="Logo" className="w-full h-full object-cover" />
                 </div>
                 <div className="flex md:hidden flex-col leading-tight">
                   <span className="text-white font-bold text-base tracking-tight">RelayPost</span>
