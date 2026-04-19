@@ -25,7 +25,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       // Basic JWT decode for the payload
       const payloadBase64 = token.split(".")[1];
       const decodedPayload = JSON.parse(atob(payloadBase64));
-      
+
       if (decodedPayload.role === "admin" || decodedPayload.role === "ADMIN" || decodedPayload.role === "publisher" || decodedPayload.role === "PUBLISHER") {
         setRole(decodedPayload.role.toUpperCase());
         setIsAuthorized(true);
@@ -112,7 +112,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           <Link href="/admin/categories" className="flex items-center gap-3 px-3 py-2 text-gray-600 hover:bg-gray-50 hover:text-indigo-600 rounded-lg transition-colors font-medium text-sm">
             <Tags size={18} /> Categories & Tags
           </Link>
-          
+
           {role === 'ADMIN' && (
             <>
               <Link href="/admin/users" className="flex items-center gap-3 px-3 py-2 text-gray-600 hover:bg-gray-50 hover:text-indigo-600 rounded-lg transition-colors font-medium text-sm">
@@ -137,12 +137,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
           {role === 'ADMIN' && (
             <div className="pt-4 mt-4 border-t border-gray-100">
-              <button 
-                onClick={handleTriggerAutomation} 
+              <button
+                onClick={handleTriggerAutomation}
                 className="w-full flex items-center justify-between px-3 py-2 text-indigo-700 bg-indigo-50 hover:bg-indigo-100 rounded-lg transition-colors font-semibold text-sm"
               >
                 <div className="flex items-center gap-3">
-                   <Zap size={18} className="fill-indigo-700" /> Run Content Engine
+                  <Zap size={18} className="fill-indigo-700" /> Run Content Engine
                 </div>
               </button>
             </div>
@@ -150,13 +150,13 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         </nav>
 
         <div className="p-4 border-t border-gray-100 space-y-2">
-           <Link href="/" className="w-full flex items-center gap-2 px-3 py-2 text-gray-500 hover:text-gray-800 text-xs font-semibold rounded-lg transition-colors border border-gray-200 justify-center">
-             <ChevronLeft size={14} /> Back to Live Site
-           </Link>
-           <button 
-             onClick={handleLogout}
-             className="w-full flex items-center justify-center gap-2 px-3 py-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors font-medium text-sm"
-           >
+          <Link href="/" className="w-full flex items-center gap-2 px-3 py-2 text-gray-500 hover:text-gray-800 text-xs font-semibold rounded-lg transition-colors border border-gray-200 justify-center">
+            <ChevronLeft size={14} /> Back to Live Site
+          </Link>
+          <button
+            onClick={handleLogout}
+            className="w-full flex items-center justify-center gap-2 px-3 py-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors font-medium text-sm"
+          >
             <LogOut size={16} /> Logout
           </button>
         </div>

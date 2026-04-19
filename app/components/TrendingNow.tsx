@@ -56,18 +56,18 @@ export default function TrendingNow({ articles }: { articles: Article[] }) {
           className="flex gap-4 animate-marquee-reverse no-scrollbar"
         >
           {displayArticles.map((item, i) => (
-            <Link 
-              key={`${item.id}-${i}`} 
+            <Link
+              key={`${item.id}-${i}`}
               href={`/${item.category_name?.toLowerCase().replace(/ /g, '-') || 'general'}/${item.slug}`}
               className="w-[200px] md:w-[240px] shrink-0 bg-white border border-gray-200 shadow-sm hover:shadow-md transition-all duration-300 rounded-lg overflow-hidden group dark:bg-slate-900 dark:border-slate-800 dark:shadow-none"
             >
               <div className="h-28 relative overflow-hidden">
-                <Image 
-                  src={item.hero_image || "/anne-nygard-x07ELaNFt34-unsplash.jpg"} 
-                  alt={item.title} 
-                  fill 
+                <Image
+                  src={item.hero_image || "/anne-nygard-x07ELaNFt34-unsplash.jpg"}
+                  alt={item.title}
+                  fill
                   sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                  className="object-cover group-hover:scale-110 transition-transform duration-500" 
+                  className="object-cover group-hover:scale-110 transition-transform duration-500"
                 />
               </div>
               <div className="p-3 bg-white group-hover:bg-gray-50 transition-colors flex-grow dark:bg-slate-900 dark:group-hover:bg-slate-800/50">
