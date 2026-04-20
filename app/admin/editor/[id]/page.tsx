@@ -333,7 +333,7 @@ export default function AdvancedEditorPage() {
    return (
       <div className="flex h-screen bg-[#F1F5F9] overflow-hidden font-sans relative">
          {/* Global System Header */}
-         <div className="fixed top-0 left-0 right-0 h-16 bg-white/80 backdrop-blur-2xl border-b border-slate-200 z-[200] flex items-center justify-between px-8">
+         <div className="fixed top-0 left-64 right-0 h-16 bg-white/80 backdrop-blur-2xl border-b border-slate-200 z-[100] flex items-center justify-between px-8">
             <div className="flex items-center gap-4">
                {/* Left side is now empty/minimal to allow more focus */}
             </div>
@@ -1252,7 +1252,7 @@ export default function AdvancedEditorPage() {
                                        className: `font-black text-slate-900 tracking-tight outline-none ${block.metadata?.level === 1 ? 'text-5xl' : block.metadata?.level === 2 ? 'text-3xl' : 'text-xl'}`, 
                                        style: s,
                                        contentEditable: !isPreview,
-                                       suppressContentEditableWarning,
+                                       suppressContentEditableWarning: true,
                                        onFocus: () => setActiveBlockId(block.id),
                                        onInput: (e: React.FormEvent<HTMLElement>) => {
                                           const target = e.currentTarget as HTMLElement;

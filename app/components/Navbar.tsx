@@ -129,8 +129,8 @@ export default function Navbar() {
             <nav className={`bg-[#0f172a]/80 backdrop-blur-[12px] border-b md:border border-white/10 px-4 md:px-6 py-3 flex items-center justify-between shadow-lg transition-all ${isScrolled ? "md:rounded-full" : "rounded-none md:rounded-full"}`}>
               {/* Logo */}
               <Link href="/" className="flex items-center gap-2 group flex-shrink-0">
-                <div className="w-8 h-8 md:w-9 md:h-9 bg-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-500/20 group-hover:scale-105 transition-transform duration-300">
-                  <span className="text-white font-bold text-xl">E</span>
+                <div className="w-8 h-8 md:w-9 md:h-9 bg-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-500/20 group-hover:scale-105 transition-transform duration-300 overflow-hidden">
+                  <img src="/favicon.ico" alt="Logo" className="w-full h-full object-cover" />
                 </div>
                 <div className="flex md:hidden flex-col leading-tight">
                   <span className="text-white font-bold text-base tracking-tight">RelayPost</span>
@@ -197,16 +197,18 @@ export default function Navbar() {
               {/* Action icons */}
               <div className="flex items-center gap-2 md:gap-4">
                 <div
-                  className="relative hidden xl:block"
+                  className="relative hidden xl:block cursor-pointer"
                   title={isScrolled ? "Search" : undefined}
+                  onClick={() => setSearchOpen(true)}
                 >
                   <input
-                    className={`bg-slate-800/50 border-none rounded-full py-2 pl-4 pr-10 text-sm text-white focus:ring-2 focus:ring-indigo-500 focus:outline-none transition-all placeholder-slate-400 shadow-inner ${isScrolled ? "w-10 opacity-0 pointer-events-none" : "w-48 opacity-100"
+                    readOnly
+                    className={`bg-slate-800/50 border-none rounded-full py-2 pl-4 pr-10 text-sm text-white focus:ring-2 focus:ring-indigo-500 focus:outline-none transition-all placeholder-slate-400 shadow-inner cursor-pointer ${isScrolled ? "w-10 opacity-0 pointer-events-none" : "w-48 opacity-100"
                       }`}
                     placeholder="Search..."
                     type="text"
                   />
-                  <Search size={18} className={`absolute right-3 top-1/2 -translate-y-1/2 text-slate-300 cursor-pointer hover:text-white transition-colors ${isScrolled ? "scale-110" : "scale-100"}`} />
+                  <Search size={18} className={`absolute right-3 top-1/2 -translate-y-1/2 text-slate-300 pointer-events-none transition-colors ${isScrolled ? "scale-110" : "scale-100"}`} />
                 </div>
 
                 {/* Mobile Search Icon */}
