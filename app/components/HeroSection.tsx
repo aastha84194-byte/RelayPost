@@ -19,28 +19,28 @@ export default function HeroSection({ articles = [] }: { articles?: Article[] })
   }, [articles.length]);
 
   if (!articles || articles.length === 0) return null;
-  
+
   const currentArticle = articles[currentIndex];
 
   return (
     <div className="relative w-full rounded-none md:rounded-2xl overflow-hidden min-h-[400px] md:min-h-[460px] group shadow-xl -mx-4 md:mx-0">
       <AnimatePresence initial={false}>
         <motion.div
-           key={currentArticle.id}
-           initial={{ x: '100%' }}
-           animate={{ x: 0 }}
-           exit={{ x: '-100%' }}
-           transition={{ 
-             x: { type: "spring", stiffness: 300, damping: 30 },
-             opacity: { duration: 0.2 }
-           }}
-           className="absolute inset-0"
+          key={currentArticle.id}
+          initial={{ x: '100%' }}
+          animate={{ x: 0 }}
+          exit={{ x: '-100%' }}
+          transition={{
+            x: { type: "spring", stiffness: 300, damping: 30 },
+            opacity: { duration: 0.2 }
+          }}
+          className="absolute inset-0"
         >
           <div className="absolute inset-0">
-            <Image 
-              src={currentArticle.hero_image || "/jeremy-thomas-E0AHdsENmDg-unsplash.jpg"} 
-              alt={currentArticle.title} 
-              fill 
+            <Image
+              src={currentArticle.hero_image || "/jeremy-thomas-E0AHdsENmDg-unsplash.jpg"}
+              alt={currentArticle.title}
+              fill
               sizes="100vw"
               priority
               unoptimized
@@ -48,11 +48,11 @@ export default function HeroSection({ articles = [] }: { articles?: Article[] })
             />
             <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-gray-900/70 to-transparent" />
           </div>
-          
+
           <ParticleEffect />
-          
+
           <div className="absolute bottom-0 left-0 right-0 p-8 md:p-12 lg:p-16 z-20 pointer-events-none">
-            <motion.h1 
+            <motion.h1
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
@@ -60,7 +60,7 @@ export default function HeroSection({ articles = [] }: { articles?: Article[] })
             >
               {currentArticle.title}
             </motion.h1>
-            <motion.p 
+            <motion.p
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3 }}
@@ -74,7 +74,7 @@ export default function HeroSection({ articles = [] }: { articles?: Article[] })
               transition={{ delay: 0.4 }}
               className="pointer-events-auto inline-block"
             >
-              <Link 
+              <Link
                 href={`/${currentArticle.category_name?.toLowerCase().replace(/ /g, '-') || 'general'}/${currentArticle.slug}`}
                 className="bg-brand hover:bg-brand-dark text-white px-8 py-3 rounded-full font-bold text-xs md:text-sm inline-flex items-center gap-2 transition-all shadow-xl shadow-brand/20 active:scale-95 uppercase tracking-widest"
               >
@@ -93,9 +93,8 @@ export default function HeroSection({ articles = [] }: { articles?: Article[] })
             <button
               key={idx}
               onClick={() => setCurrentIndex(idx)}
-              className={`h-1.5 rounded-full transition-all duration-300 ${
-                idx === currentIndex ? 'w-6 bg-white' : 'w-2 bg-white/50 hover:bg-white/80'
-              }`}
+              className={`h-1.5 rounded-full transition-all duration-300 ${idx === currentIndex ? 'w-6 bg-white' : 'w-2 bg-white/50 hover:bg-white/80'
+                }`}
               aria-label={`Go to slide ${idx + 1}`}
             />
           ))}

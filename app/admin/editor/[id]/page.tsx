@@ -19,6 +19,22 @@ import BlockPicker from "../../components/BlockPicker";
 import toast from "react-hot-toast";
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, LineChart, Line, Cell } from 'recharts';
 
+export const BLOCK_TYPES = [
+   { id: 'heading', icon: TypeIcon, label: 'Heading', color: 'bg-indigo-500', desc: 'H1-H6 titles' },
+   { id: 'paragraph', icon: AlignLeft, label: 'Text', color: 'bg-slate-500', desc: 'Standard content' },
+   { id: 'image', icon: ImageIcon, label: 'Media', color: 'bg-emerald-500', desc: 'Images & GIFs' },
+   { id: 'quote', icon: QuoteIcon, label: 'Quote', color: 'bg-amber-500', desc: 'Expert insights' },
+   { id: 'bullet_list', icon: ListIcon, label: 'List', color: 'bg-blue-500', desc: 'Bulleted info' },
+   { id: 'graph', icon: BarChart3, label: 'Visual', color: 'bg-rose-500', desc: 'Data charts' },
+   { id: 'table', icon: TableIcon, label: 'Table', color: 'bg-cyan-500', desc: 'Grid data' },
+   { id: 'code_block', icon: CodeIcon, label: 'Code', color: 'bg-slate-900', desc: 'Syntax display' },
+   { id: 'faq_block', icon: MessageSquare, label: 'FAQ', color: 'bg-violet-500', desc: 'Q&A sections' },
+   { id: 'callout', icon: HelpCircle, label: 'Insight', color: 'bg-orange-500', desc: 'Featured notes' },
+   { id: 'cta_block', icon: Zap, label: 'Action', color: 'bg-red-500', desc: 'Click buttons' },
+   { id: 'youtube_embed', icon: Video, label: 'Video', color: 'bg-pink-500', desc: 'YT/Vimeo frames' },
+   { id: 'divider', icon: Minus, label: 'Space', color: 'bg-slate-200', desc: 'Visual separator' }
+];
+
 const FONT_OPTIONS = ["Inter", "Merriweather", "JetBrains Mono", "Outfit"];
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE || "http://localhost:8001";
@@ -32,6 +48,8 @@ export default function AdvancedEditorPage() {
    const [activeTab, setActiveTab] = useState<"content" | "seo" | "settings">("content");
    const [isPreview, setIsPreview] = useState(false);
    const [activeBlockId, setActiveBlockId] = useState<string | null>(null);
+   const [hoveredBlockId, setHoveredBlockId] = useState<string | null>(null);
+   const [slashMenu, setSlashMenu] = useState<{ open: boolean, top: number, left: number, filter: string, selectedIndex: number }>({ open: false, top: 0, left: 0, filter: "", selectedIndex: 0 });
    const [viewport, setViewport] = useState<'desktop' | 'tablet' | 'mobile'>('desktop');
 
    const [article, setArticle] = useState<Article>({
@@ -223,6 +241,35 @@ export default function AdvancedEditorPage() {
       }));
    };
 
+   useEffect(() => {
+      if (!slashMenu.open) return;
+
+      const handleKey = (e: KeyboardEvent) => {
+         if (e.key === 'ArrowDown') {
+            e.preventDefault();
+            setSlashMenu(prev => ({ ...prev, selectedIndex: Math.min(prev.selectedIndex + 1, BLOCK_TYPES.length - 1) }));
+         } else if (e.key === 'ArrowUp') {
+            e.preventDefault();
+            setSlashMenu(prev => ({ ...prev, selectedIndex: Math.max(prev.selectedIndex - 1, 0) }));
+         } else if (e.key === 'Enter') {
+            e.preventDefault();
+            const block = BLOCK_TYPES[slashMenu.selectedIndex];
+            const activeBlock = article.content_blocks.find(b => b.id === activeBlockId);
+            if (activeBlock) {
+               const index = article.content_blocks.indexOf(activeBlock);
+               updateBlock(activeBlockId!, { content: activeBlock.content.replace('/', '') });
+               addBlock(block.id as any, index + 1);
+            }
+            setSlashMenu(prev => ({ ...prev, open: false }));
+         } else if (e.key === 'Escape') {
+            setSlashMenu(prev => ({ ...prev, open: false }));
+         }
+      };
+
+      window.addEventListener('keydown', handleKey);
+      return () => window.removeEventListener('keydown', handleKey);
+   }, [slashMenu.open, slashMenu.selectedIndex, activeBlockId, article.content_blocks]);
+
    const handleAIRewrite = async (intent: string) => {
       const sel = window.getSelection();
       if (!sel || sel.isCollapsed) return;
@@ -261,8 +308,78 @@ export default function AdvancedEditorPage() {
       } catch (e) { console.error("AI Rewrite failed", e); }
    };
 
+   const getEditorialStats = () => {
+      const allText = article.content_blocks.map(b => b.content).join(" ").replace(/<[^>]*>?/gm, '');
+      const words = allText.split(/\s+/).filter(Boolean);
+      const wordCount = words.length;
+      const readTime = Math.ceil(wordCount / 200);
+      
+      // Simplified Readability (Grade Level)
+      const sentences = allText.split(/[.!?]+/).filter(Boolean).length || 1;
+      const syllables = words.reduce((acc, word) => acc + (word.match(/[aeiouy]{1,2}/gi)?.length || 1), 0);
+      const score = wordCount > 0 ? (206.835 - 1.015 * (wordCount / sentences) - 84.6 * (syllables / wordCount)) : 100;
+      
+      let level = "Beginner";
+      if (score < 30) level = "Expert (Academic)";
+      else if (score < 60) level = "Advanced (Pro)";
+      else if (score < 90) level = "Intermediate (Clear)";
+      else level = "Universal (Plain)";
+
+      return { wordCount, readTime, score: Math.max(0, Math.min(100, Math.round(score))), level };
+   };
+
+   const stats = getEditorialStats();
+
    return (
-      <div className="flex h-screen bg-[#F8FAFC] overflow-hidden font-sans relative">
+      <div className="flex h-screen bg-[#F1F5F9] overflow-hidden font-sans relative">
+         {/* Global System Header */}
+         <div className="fixed top-0 left-64 right-0 h-16 bg-white/80 backdrop-blur-2xl border-b border-slate-200 z-[100] flex items-center justify-between px-8">
+            <div className="flex items-center gap-4">
+               {/* Left side is now empty/minimal to allow more focus */}
+            </div>
+
+
+            <div className="flex items-center gap-6">
+               <div className="flex items-center gap-2 px-4 py-1.5 bg-slate-50 rounded-xl border border-slate-200/50 mr-4">
+                  <span className="text-[9px] font-black text-slate-900 uppercase tracking-widest">Canvas Tools</span>
+                  <span className="text-slate-300">/</span>
+                  <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Interactive Suite</span>
+               </div>
+               <div className="border-l border-slate-200 pl-6 mr-2">
+                  <BlockPicker onAdd={addBlock} variant="navbar" />
+               </div>
+               <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-xl border border-slate-200">
+                  {[
+                     { id: 'desktop', icon: Monitor },
+                     { id: 'tablet', icon: Tablet },
+                     { id: 'mobile', icon: Smartphone }
+                  ].map(v => (
+                     <button
+                        key={v.id}
+                        onClick={() => setViewport(v.id as any)}
+                        className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all ${viewport === v.id ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
+                     >
+                        <v.icon size={14} />
+                     </button>
+                  ))}
+               </div>
+               
+               <div className="w-[1px] h-8 bg-slate-200" />
+               
+               <div className="flex items-center gap-4">
+                  <button className="text-slate-400 hover:text-slate-900 transition-colors" title="Omni Search">
+                     <Search size={18} />
+                  </button>
+                  <button className="text-slate-400 hover:text-slate-900 transition-colors" title="System Settings">
+                     <SettingsIcon size={18} />
+                  </button>
+                  <div className="w-8 h-8 rounded-full bg-slate-200 border border-slate-300 flex items-center justify-center overflow-hidden cursor-pointer hover:border-indigo-500 transition-colors">
+                     <div className="w-full h-full bg-indigo-600 flex items-center justify-center text-white text-[10px] font-black">P</div>
+                  </div>
+               </div>
+            </div>
+         </div>
+
          {!isPreview && (
             <FloatingToolbar
                onFormat={(cmd, val) => document.execCommand(cmd, false, val)}
@@ -283,50 +400,77 @@ export default function AdvancedEditorPage() {
             )}
          </AnimatePresence>
 
-         {/* Editor Sidebar */}
-         <div className={`w-[480px] bg-white border-r border-slate-200 flex flex-col shadow-2xl z-20 flex-shrink-0 transition-all ${isPreview ? '-ml-[480px]' : 'ml-0'}`}>
+         {/* Editor Sidebar Card */}
+         <div className={`w-[450px] m-6 mt-32 bg-white rounded-[1.5rem] border border-slate-200/50 flex flex-col shadow-[0_20px_50px_rgba(0,0,0,0.05)] z-20 flex-shrink-0 transition-all duration-500 overflow-hidden h-[calc(100vh-100px)] ${isPreview ? '-ml-[500px] opacity-0' : 'opacity-100'}`}>
 
-            {/* Header */}
-            <div className="p-5 border-b border-slate-100 flex items-center justify-between bg-white">
-               <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-indigo-200">
-                     <Edit3 size={20} />
+            {/* Control Center Header */}
+            <div className="p-5 border-b border-slate-100 flex items-center justify-between bg-white relative overflow-hidden">
+               {/* <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-indigo-600 via-purple-500 to-indigo-600 opacity-50" /> */}
+               
+               <div className="flex items-center gap-4 relative z-10">
+                  <div className="w-12 h-12 bg-indigo-600 rounded-2xl flex items-center justify-center text-white shadow-xl shadow-indigo-100 relative group">
+                     <Edit3 size={20} className="group-hover:rotate-12 transition-transform" />
+                     {isSaving && (
+                        <span className="absolute -top-1 -right-1 w-4 h-4 bg-emerald-500 rounded-full border-2 border-white animate-bounce flex items-center justify-center">
+                           <span className="w-1.5 h-1.5 bg-white rounded-full animate-pulse" />
+                        </span>
+                     )}
                   </div>
                   <div>
-                     <h1 className="text-lg font-black text-slate-800 leading-tight tracking-tight">Post Builder</h1>
-                     <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">v2.0 Advanced CMS</p>
+                     <h2 className="text-[11px] font-black text-slate-900 uppercase tracking-[0.25em] mb-1">Editor Alpha</h2>
+                     <div className="flex items-center gap-2">
+                        <div className={`w-1.5 h-1.5 rounded-full ${isSaving ? 'bg-emerald-500' : 'bg-slate-300'} transition-colors`} />
+                        <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest leading-none">
+                           {isSaving ? 'Intelligence Syncing...' : 'Canvas Persistent'}
+                        </span>
+                     </div>
                   </div>
                </div>
-               <div className="flex gap-2">
-                  <button
+
+               <div className="flex items-center gap-2 relative z-10">
+                  <motion.button
+                     whileHover={{ scale: 1.02 }}
+                     whileTap={{ scale: 0.98 }}
                      onClick={() => handleSave("draft")}
                      disabled={isSaving}
-                     className="px-3 py-2 text-[10px] font-black uppercase tracking-widest text-slate-500 border border-slate-200 rounded-lg hover:bg-slate-50 transition-all"
+                     className="px-4 py-2.5 text-[10px] font-black uppercase tracking-widest text-slate-500 bg-slate-50 border border-slate-200 rounded-xl hover:bg-slate-100 hover:text-slate-900 transition-all shadow-sm"
                   >
-                     {isSaving ? "..." : "Draft"}
-                  </button>
-                  <button
+                     {isSaving ? "Sync" : "Draft"}
+                  </motion.button>
+                  <motion.button
+                     whileHover={{ scale: 1.05 }}
+                     whileTap={{ scale: 0.95 }}
                      onClick={() => handleSave("published")}
-                     className="px-4 py-2 text-[10px] font-black uppercase tracking-widest text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-200"
+                     className="px-6 py-2.5 text-[10px] font-black uppercase tracking-widest text-white bg-indigo-600 rounded-xl hover:bg-indigo-700 transition-all shadow-[0_10px_20px_-5px_rgba(79,70,229,0.4)]"
                   >
                      Publish
-                  </button>
+                  </motion.button>
                </div>
             </div>
 
-            {/* Tab Navigation */}
-            <div className="flex border-b border-slate-100 bg-slate-50/50 px-6 pt-4 gap-8">
+            {/* High-Fidelity Tab Navigation */}
+            <div className="flex bg-slate-50 border-b border-slate-100 p-2 gap-1">
                {[
-                  { id: 'content', label: 'Blocks', icon: Layout },
-                  { id: 'seo', label: 'SEO & AI', icon: Search },
-                  { id: 'settings', label: 'Config', icon: SettingsIcon }
+                  { id: 'content', label: 'Canvas', icon: Layout },
+                  { id: 'seo', label: 'Intelligence', icon: Search },
+                  { id: 'settings', label: 'Workflow', icon: SettingsIcon }
                ].map(tab => (
                   <button
                      key={tab.id}
                      onClick={() => setActiveTab(tab.id as any)}
-                     className={`pb-3 text-[11px] font-black uppercase tracking-widest border-b-2 transition-all flex items-center gap-2 ${activeTab === tab.id ? "border-indigo-600 text-indigo-600" : "border-transparent text-slate-400 hover:text-slate-600"}`}
+                     className={`flex-1 relative py-2.5 rounded-xl transition-all duration-300 flex items-center justify-center gap-2 group`}
                   >
-                     <tab.icon size={14} /> {tab.label}
+                     {activeTab === tab.id && (
+                        <motion.div 
+                           layoutId="activeTabPill"
+                           className="absolute inset-0 bg-white shadow-sm border border-slate-200 rounded-xl"
+                           transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+                        />
+                     )}
+                     <tab.icon size={12} className={`relative z-10 transition-colors ${activeTab === tab.id ? "text-indigo-600" : "text-slate-400 group-hover:text-slate-600"}`} />
+                     <span className={`relative z-10 text-[9px] font-black uppercase tracking-widest transition-colors ${activeTab === tab.id ? "text-slate-900" : "text-slate-400 group-hover:text-slate-600"}`}>
+                        {tab.label}
+                     </span>
                   </button>
                ))}
             </div>
@@ -413,7 +557,7 @@ export default function AdvancedEditorPage() {
                                     <div className="flex-1 truncate">
                                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{block.type}</p>
                                        <p className="text-xs text-slate-800 font-bold truncate">
-                                          {typeof block.content === 'string' ? block.content : `${block.type} Data Object`}
+                                          {typeof block.content === 'string' ? block.content.replace(/<[^>]*>?/gm, '') : `${block.type} Data Object`}
                                        </p>
                                     </div>
                                     <button
@@ -739,6 +883,51 @@ export default function AdvancedEditorPage() {
                {/* SEO & AI TAB */}
                {activeTab === "seo" && (
                   <div className="space-y-6">
+                     {/* Strategic Integrity Meter */}
+                     <div className="p-8 bg-slate-900 rounded-[2.5rem] text-white shadow-2xl relative overflow-hidden border border-white/5">
+                        <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-600/20 rounded-full blur-[80px] -mr-32 -mt-32" />
+                        
+                        <div className="relative z-10">
+                           <div className="flex items-center justify-between mb-8">
+                              <div>
+                                 <h4 className="text-xs font-black text-indigo-400 uppercase tracking-[0.3em] mb-1">Impact Score</h4>
+                                 <div className="flex items-baseline gap-2">
+                                    <span className="text-5xl font-black tracking-tighter">{stats.score}</span>
+                                    <span className="text-indigo-400 font-bold uppercase text-[10px] tracking-widest">/ 100</span>
+                                 </div>
+                              </div>
+                              <div className="text-right">
+                                 <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Target Audience</p>
+                                 <p className="text-sm font-black text-emerald-400 uppercase tracking-tight">{stats.level}</p>
+                              </div>
+                           </div>
+
+                           <div className="grid grid-cols-2 gap-4">
+                              <div className="p-4 bg-white/5 rounded-2xl border border-white/5">
+                                 <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest mb-1">Volume</p>
+                                 <p className="text-lg font-black">{stats.wordCount.toLocaleString()} <span className="text-[10px] text-slate-400 font-bold">WORDS</span></p>
+                              </div>
+                              <div className="p-4 bg-white/5 rounded-2xl border border-white/5">
+                                 <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest mb-1">Pace</p>
+                                 <p className="text-lg font-black">{stats.readTime} <span className="text-[10px] text-slate-400 font-bold">MIN READ</span></p>
+                              </div>
+                           </div>
+
+                           <div className="mt-8 space-y-2">
+                              <div className="flex justify-between text-[8px] font-black uppercase tracking-widest text-slate-500">
+                                 <span>Optimization Density</span>
+                                 <span>{Math.min(100, Math.round(stats.score * 1.2))}%</span>
+                              </div>
+                              <div className="h-1.5 w-full bg-slate-800 rounded-full overflow-hidden">
+                                 <motion.div 
+                                    initial={{ width: 0 }}
+                                    animate={{ width: `${stats.score}%` }}
+                                    className="h-full bg-gradient-to-r from-indigo-600 to-indigo-400"
+                                 />
+                              </div>
+                           </div>
+                        </div>
+                     </div>
                      <div className="p-6 bg-indigo-600 rounded-3xl text-white shadow-xl shadow-indigo-100 flex items-start gap-4 relative overflow-hidden group">
                         <div className="absolute top-0 right-0 w-24 h-24 bg-white/5 rounded-full blur-2xl -mr-8 -mt-8" />
                         <Sparkles className="mt-1 shrink-0" size={24} />
@@ -968,38 +1157,8 @@ export default function AdvancedEditorPage() {
             </div>
          </div>
 
-         {/* Interactive Preview Canvas */}
-         <div className={`flex-1 relative bg-slate-100 flex flex-col justify-start transition-all duration-500 overflow-hidden`}>
-            
-            {/* Top Navigation Bar / Canvas Tools */}
-            <div className="z-[100] px-8 py-3 bg-white/50 backdrop-blur-xl border-b border-slate-200 flex items-center justify-between sticky top-0">
-               <div className="flex items-center gap-6">
-                  <div className="flex flex-col">
-                     <span className="text-[10px] font-black text-slate-900 uppercase tracking-[0.2em]">Canvas Toolbar</span>
-                     <span className="text-[8px] font-bold text-slate-400 uppercase tracking-widest">Interactive Block Suite</span>
-                  </div>
-                  <BlockPicker onAdd={addBlock} variant="navbar" />
-               </div>
-               
-               <div className="flex items-center gap-3">
-                  <div className="h-8 w-[1px] bg-slate-200 mx-2" />
-                  <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-xl border border-slate-200">
-                     {[
-                        { id: 'desktop', icon: Monitor },
-                        { id: 'tablet', icon: Tablet },
-                        { id: 'mobile', icon: Smartphone }
-                     ].map(v => (
-                        <button
-                           key={v.id}
-                           onClick={() => setViewport(v.id as any)}
-                           className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all ${viewport === v.id ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
-                        >
-                           <v.icon size={14} />
-                        </button>
-                     ))}
-                  </div>
-               </div>
-            </div>
+         {/* Interactive Preview Canvas card */}
+         <div className={`flex-1 m-6 ml-0 mt-20 bg-white rounded-[2.5rem] shadow-[0_20px_50px_rgba(0,0,0,0.05)] border border-slate-200/50 flex flex-col justify-start transition-all duration-500 overflow-hidden h-[calc(100vh-100px)] relative`}>
 
             {/* Minimal Preview Frame */}
             <div className={`flex-1 overflow-y-auto custom-scrollbar p-6 md:p-12 ${article.theme === 'intelligence' ? 'bg-slate-950' : article.theme === 'sports' ? 'bg-orange-50' : 'bg-slate-100'}`}>
@@ -1009,21 +1168,33 @@ export default function AdvancedEditorPage() {
                   'max-w-[420px]'
                } ${article.theme === 'intelligence' ? 'ring-1 ring-white/10 dark-theme' : ''}`}>
 
-                  {/* Context Header */}
-                  <div className="bg-slate-900 text-white flex items-center justify-between px-8 py-4 border-b border-white/5">
-                     <div className="flex items-center gap-3">
-                        <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                        <span className="text-[10px] font-black uppercase tracking-[0.3em]">Live Render Stream</span>
+                  {/* Premium Context Header */}
+                  <div className="bg-slate-950/90 backdrop-blur-xl text-white flex items-center justify-between px-8 py-4 border-b border-white/5 relative overflow-hidden">
+                     <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-indigo-500/50 to-transparent" />
+                     
+                     <div className="flex items-center gap-3 relative z-10">
+                        <div className="flex items-center gap-1.5 px-3 py-1 bg-emerald-500/10 border border-emerald-500/20 rounded-full">
+                           <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                           <span className="text-[9px] font-black uppercase tracking-[0.2em] text-emerald-400">Live Render</span>
+                        </div>
+                        <span className="text-[8px] font-bold text-slate-500 uppercase tracking-widest px-2 border-l border-white/10 hidden md:block">Stream ID: {articleId.slice(0, 8)}</span>
                      </div>
-                     <div className="flex items-center gap-4">
-                        <button
+                     
+                     <div className="flex items-center gap-4 relative z-10">
+                        <motion.button
+                           whileHover={{ scale: 1.05 }}
+                           whileTap={{ scale: 0.95 }}
                            onClick={() => setIsPreview(!isPreview)}
-                           className="flex items-center gap-2 bg-white/10 hover:bg-white/20 px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest transition-all"
+                           className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 px-5 py-2 rounded-full text-[9px] font-black uppercase tracking-widest transition-all shadow-lg shadow-indigo-900/40"
                         >
-                           <Eye size={12} /> {isPreview ? 'Editor View' : 'Full Immersion'}
-                        </button>
-                        <div className="w-8 h-8 rounded-full bg-slate-800 border border-white/10 flex items-center justify-center">
+                           {isPreview ? <Edit3 size={11} /> : <Eye size={11} />}
+                           {isPreview ? 'Back to Editor' : 'Full Immersion'}
+                        </motion.button>
+                        <div className="w-9 h-9 rounded-full bg-white/5 border border-white/10 flex items-center justify-center hover:bg-white/10 transition-colors cursor-help group relative">
                            <Layout size={14} className="text-slate-400" />
+                           <div className="absolute top-full mt-2 right-0 px-3 py-1.5 bg-slate-900 text-[8px] font-black uppercase tracking-widest rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap shadow-2xl border border-white/5 pointer-events-none">
+                              Structure View
+                           </div>
                         </div>
                      </div>
                   </div>
@@ -1066,9 +1237,48 @@ export default function AdvancedEditorPage() {
 
                            const renderBlock = () => {
                               switch (block.type) {
-                                 case 'paragraph': return <p className="text-lg text-slate-600 leading-relaxed font-medium" style={s}>{block.content}</p>;
-                                 case 'heading': return React.createElement(`h${block.metadata?.level || 2}`, { className: `font-black text-slate-900 tracking-tight ${block.metadata?.level === 1 ? 'text-5xl' : block.metadata?.level === 2 ? 'text-3xl' : 'text-xl'}`, style: s }, block.content);
-                                 case 'quote': return <blockquote className="border-l-[6px] border-indigo-600 pl-8 italic text-2xl text-slate-700 font-serif my-6" style={s}>"{block.content}"</blockquote>;
+                                 case 'paragraph': 
+                                    return <p 
+                                       className="text-lg text-slate-600 leading-relaxed font-medium outline-none" 
+                                       style={s}
+                                       contentEditable={!isPreview}
+                                       suppressContentEditableWarning
+                                       onFocus={() => setActiveBlockId(block.id)}
+                                       onInput={(e) => updateBlock(block.id, { content: e.currentTarget.innerHTML })}
+                                       dangerouslySetInnerHTML={{ __html: block.content }}
+                                    />;
+                                 case 'heading': 
+                                    return React.createElement(`h${block.metadata?.level || 2}`, { 
+                                       className: `font-black text-slate-900 tracking-tight outline-none ${block.metadata?.level === 1 ? 'text-5xl' : block.metadata?.level === 2 ? 'text-3xl' : 'text-xl'}`, 
+                                       style: s,
+                                       contentEditable: !isPreview,
+                                       suppressContentEditableWarning: true,
+                                       onFocus: () => setActiveBlockId(block.id),
+                                       onInput: (e: React.FormEvent<HTMLElement>) => {
+                                          const target = e.currentTarget as HTMLElement;
+                                          const text = target.innerText;
+                                          if (text.endsWith('/')) {
+                                             const sel = window.getSelection();
+                                             if (sel && sel.rangeCount > 0) {
+                                                const range = sel.getRangeAt(0);
+                                                const rect = range.getBoundingClientRect();
+                                                setSlashMenu({ open: true, top: rect.top + window.scrollY + 20, left: rect.left + window.scrollX, filter: "", selectedIndex: 0 });
+                                             }
+                                          }
+                                          updateBlock(block.id, { content: target.innerHTML });
+                                       },
+                                       dangerouslySetInnerHTML: { __html: block.content }
+                                    });
+                                 case 'quote': 
+                                    return <blockquote 
+                                       className="border-l-[6px] border-indigo-600 pl-8 italic text-2xl text-slate-700 font-serif my-6 outline-none" 
+                                       style={s}
+                                       contentEditable={!isPreview}
+                                       suppressContentEditableWarning
+                                       onFocus={() => setActiveBlockId(block.id)}
+                                       onInput={(e) => updateBlock(block.id, { content: e.currentTarget.innerHTML })}
+                                       dangerouslySetInnerHTML={{ __html: block.content }}
+                                    />;
                                  case 'image': return (
                                     <div className="my-6 rounded-[2rem] overflow-hidden shadow-xl">
                                        {block.content ? <img src={block.content} className="w-full h-auto" /> : (
@@ -1127,13 +1337,36 @@ export default function AdvancedEditorPage() {
                                     </div>
                                  )}
 
-                                 <div className="group/block relative p-4 rounded-3xl hover:bg-slate-50/50 transition-colors">
-                                    {/* Content */}
+                                 <motion.div 
+                                    layout
+                                    initial={{ opacity: 0, y: 20 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    exit={{ opacity: 0, scale: 0.95 }}
+                                    onMouseEnter={() => setHoveredBlockId(block.id)}
+                                    onMouseLeave={() => setHoveredBlockId(null)}
+                                    className={`group/block relative p-4 rounded-3xl transition-all duration-300 ${activeBlockId === block.id ? 'bg-white shadow-[0_20px_50px_rgba(0,0,0,0.05)] ring-1 ring-slate-100' : 'hover:bg-slate-50/50'}`}
+                                 >
+                                    {/* Gutter Toolbar (Left) */}
+                                    {!isPreview && (
+                                       <div className={`absolute -left-12 top-6 flex flex-col items-center gap-1 transition-all duration-300 ${hoveredBlockId === block.id || activeBlockId === block.id ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-2 pointer-events-none'}`}>
+                                          <button className="w-8 h-8 flex items-center justify-center text-slate-300 hover:text-indigo-600 cursor-grab active:cursor-grabbing transition-colors">
+                                             <GripVertical size={16} />
+                                          </button>
+                                          <button 
+                                             onClick={() => addBlock('paragraph', index + 1)}
+                                             className="w-6 h-6 bg-white border border-slate-200 text-slate-400 rounded-lg flex items-center justify-center hover:bg-indigo-600 hover:text-white hover:border-indigo-600 shadow-sm transition-all"
+                                          >
+                                             <Plus size={12} />
+                                          </button>
+                                       </div>
+                                    )}
+
+                                    {/* Content Area */}
                                     {renderBlock()}
                                     
-                                    {/* Block Actions (Floating) */}
+                                    {/* Right Side Actions (Delete/Settings) */}
                                     {!isPreview && (
-                                       <div className="absolute -right-4 top-1/2 -translate-y-1/2 opacity-0 group-hover/block:opacity-100 transition-opacity flex flex-col gap-2 z-50">
+                                       <div className={`absolute -right-4 top-6 flex flex-col gap-2 transition-all duration-300 ${hoveredBlockId === block.id ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-2 pointer-events-none'}`}>
                                           <button 
                                              onClick={() => removeBlock(block.id)}
                                              className="w-8 h-8 bg-white border border-slate-200 text-red-500 rounded-full flex items-center justify-center hover:bg-red-50 hover:border-red-200 shadow-sm transition-all"
@@ -1148,7 +1381,7 @@ export default function AdvancedEditorPage() {
                                           </button>
                                        </div>
                                     )}
-                                 </div>
+                                 </motion.div>
 
                                  {/* In-Between Zone */}
                                  <div 
@@ -1168,6 +1401,54 @@ export default function AdvancedEditorPage() {
                   </div>
                </div>
             </div>
+
+            {/* Slash Command Menu Overlay */}
+            <AnimatePresence>
+               {slashMenu.open && (
+                  <motion.div
+                     initial={{ opacity: 0, scale: 0.95, y: 10 }}
+                     animate={{ opacity: 1, scale: 1, y: 0 }}
+                     exit={{ opacity: 0, scale: 0.95, y: 10 }}
+                     style={{ 
+                        position: 'fixed', 
+                        top: slashMenu.top, 
+                        left: slashMenu.left,
+                        zIndex: 999 
+                     }}
+                     className="bg-slate-900 border border-white/10 rounded-2xl shadow-2xl overflow-hidden min-w-[200px] backdrop-blur-xl"
+                  >
+                     <div className="p-2 border-b border-white/5 bg-white/5">
+                        <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest px-2">Select Block</span>
+                     </div>
+                     <div className="max-h-[300px] overflow-y-auto no-scrollbar p-1">
+                        {BLOCK_TYPES.map((block, idx) => (
+                           <button
+                              key={block.id}
+                              onMouseEnter={() => setSlashMenu(prev => ({ ...prev, selectedIndex: idx }))}
+                              onClick={() => {
+                                 const activeBlock = article.content_blocks.find(b => b.id === activeBlockId);
+                                 if (activeBlock) {
+                                    const index = article.content_blocks.indexOf(activeBlock);
+                                    updateBlock(activeBlockId!, { content: activeBlock.content.replace('/', '') });
+                                    addBlock(block.id as any, index + 1);
+                                 }
+                                 setSlashMenu({ ...slashMenu, open: false, selectedIndex: 0 });
+                              }}
+                              className={`w-full flex items-center gap-3 p-2 rounded-xl transition-colors text-left group ${slashMenu.selectedIndex === idx ? 'bg-indigo-600' : 'hover:bg-white/5'}`}
+                           >
+                              <div className={`w-8 h-8 ${block.color} rounded-lg flex items-center justify-center text-white ${slashMenu.selectedIndex === idx ? 'shadow-inner scale-95' : ''}`}>
+                                 <block.icon size={14} />
+                              </div>
+                              <div className="flex-1">
+                                 <p className={`text-[10px] font-black uppercase tracking-tight ${slashMenu.selectedIndex === idx ? 'text-white' : 'text-slate-200'}`}>{block.label}</p>
+                                 <p className={`text-[8px] font-bold uppercase tracking-widest ${slashMenu.selectedIndex === idx ? 'text-indigo-200' : 'text-slate-500'}`}>{block.desc}</p>
+                              </div>
+                           </button>
+                        ))}
+                     </div>
+                  </motion.div>
+               )}
+            </AnimatePresence>
          </div>
       </div>
    );

@@ -17,7 +17,7 @@ interface ArticleRendererProps {
 
 const FONT_CLASSES: Record<string, string> = {
   "Inter": "font-sans",
-  "Merriweather": "font-serif text-slate-800 dark:text-slate-100",
+  "Merriweather": "font-serif",
   "JetBrains Mono": "font-mono text-sm",
   "Outfit": "font-sans tracking-tight",
 };
@@ -129,7 +129,7 @@ export default function ArticleRenderer({ article }: ArticleRendererProps) {
               {/* Template badge removed for cleaner look */}
             </div>
             
-            <h1 className="text-xl md:text-4xl lg:text-4xl font-black text-white leading-tight md:leading-[1.1] tracking-tight drop-shadow-2xl">
+            <h1 className="text-3xl md:text-5xl lg:text-7xl font-black text-white leading-tight md:leading-[1.1] tracking-tighter drop-shadow-2xl">
               {article.title}
             </h1>
             
@@ -201,16 +201,17 @@ export default function ArticleRenderer({ article }: ArticleRendererProps) {
                  >
                    
                    {block.type === 'heading' && React.createElement(`h${block.metadata?.level || 2}`, {
-                      className: `font-black tracking-tight ${themeClasses.heading} ${
-                        block.metadata?.level === 1 ? 'text-5xl md:text-6xl mb-12' :
-                        block.metadata?.level === 3 ? 'text-3xl mb-6' : 'text-xl mb-4'
+                      className: `font-black tracking-tighter ${themeClasses.heading} ${
+                        block.metadata?.level === 1 ? 'text-4xl md:text-6xl mb-12' :
+                        block.metadata?.level === 3 ? 'text-2xl md:text-3xl mb-6' : 
+                        'text-xl md:text-2xl mb-4'
                       }`,
                       style: blockStyle
                    }, block.content)}
 
                    {block.type === 'paragraph' && (
                      <p 
-                       className={`text-xl md:text-2xl ${themeClasses.text} leading-[1.7] mb-8 ${idx === 0 ? `first-letter:text-7xl first-letter:font-black first-letter:${themeClasses.accent.split(' ')[0]} first-letter:mr-3 first-letter:float-left` : ''}`} 
+                       className={`text-lg md:text-xl ${themeClasses.text} leading-[1.8] mb-8 ${idx === 0 ? `first-letter:text-7xl first-letter:font-black first-letter:${themeClasses.accent.split(' ')[0]} first-letter:mr-3 first-letter:float-left` : ''}`} 
                        style={blockStyle}
                      >
                        {block.content}
@@ -241,7 +242,7 @@ export default function ArticleRenderer({ article }: ArticleRendererProps) {
                    {block.type === 'quote' && (
                       <div className="my-16 relative">
                          <QuoteIcon className="absolute -top-6 -left-6 w-20 h-20 text-brand/10 -rotate-12" />
-                         <blockquote className="relative z-10 text-3xl md:text-4xl font-serif italic text-slate-800 dark:text-slate-100 leading-tight text-center max-w-2xl mx-auto">
+                         <blockquote className="relative z-10 text-2xl md:text-3xl font-serif italic text-slate-800 dark:text-slate-100 leading-snug text-center max-w-3xl mx-auto">
                             "{block.content}"
                          </blockquote>
                          {block.metadata?.caption && (
