@@ -1,5 +1,5 @@
 "use client";
-import React, { useRef } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import Image from 'next/image';
 import { ChevronLeft, ChevronRight, ArrowUpRight } from 'lucide-react';
 import { Article } from '@/lib/types';
@@ -14,27 +14,85 @@ interface CategoryArticleSectionProps {
 
 export default function CategoryArticleSection({ title, slug, articles }: CategoryArticleSectionProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
+  const [direction, setDirection] = useState<1 | -1>(1);
+  const isHovered = useRef(false);
+  const isPaused = useRef(false);
+  const pauseTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  const scroll = (direction: 'left' | 'right') => {
+  let marqueeArticles = [...articles];
+  if (marqueeArticles.length > 0) {
+    while (marqueeArticles.length < 12) {
+      marqueeArticles = [...marqueeArticles, ...articles];
+    }
+  }
+  // Use 3 sets for seamless bidirectional infinite scroll
+  const displayArticles = [...marqueeArticles, ...marqueeArticles, ...marqueeArticles];
+
+  useEffect(() => {
+    if (scrollRef.current) {
+      const setWidth = scrollRef.current.scrollWidth / 3;
+      scrollRef.current.scrollLeft = setWidth;
+    }
+  }, [articles]);
+
+  useEffect(() => {
+    let animationFrameId: number;
+    let lastTimestamp: number;
+
+    const animateScroll = (timestamp: number) => {
+      if (!lastTimestamp) lastTimestamp = timestamp;
+      const deltaTime = timestamp - lastTimestamp;
+      lastTimestamp = timestamp;
+
+      if (scrollRef.current) {
+        if (!isHovered.current && !isPaused.current) {
+          const speed = 0.03 * deltaTime; // slightly slower for CategoryArticleSection
+          scrollRef.current.scrollLeft += speed * direction;
+        }
+
+        const { scrollLeft, scrollWidth } = scrollRef.current;
+        const setWidth = scrollWidth / 3;
+
+        if (scrollLeft >= setWidth * 2) {
+           scrollRef.current.scrollLeft -= setWidth;
+        } else if (scrollLeft <= 0) {
+           scrollRef.current.scrollLeft += setWidth;
+        }
+      }
+
+      animationFrameId = requestAnimationFrame(animateScroll);
+    };
+
+    animationFrameId = requestAnimationFrame(animateScroll);
+
+    return () => cancelAnimationFrame(animationFrameId);
+  }, [direction]);
+
+  const changeDirectionAndScroll = (newDirection: 'left' | 'right') => {
+    setDirection(newDirection === 'left' ? -1 : 1);
+    
+    isPaused.current = true;
+    if (pauseTimeoutRef.current) clearTimeout(pauseTimeoutRef.current);
+    pauseTimeoutRef.current = setTimeout(() => (isPaused.current = false), 800);
+
     if (scrollRef.current) {
       const scrollAmount = 324;
       scrollRef.current.scrollBy({ 
-        left: direction === 'left' ? -scrollAmount : scrollAmount, 
+        left: newDirection === 'left' ? -scrollAmount : scrollAmount, 
         behavior: 'smooth' 
       });
     }
   };
 
-  if (articles.length === 0) return null;
+  const handleWheel = (e: React.WheelEvent) => {
+    if (e.deltaX > 0 || e.deltaY > 0) {
+      setDirection(1);
+    } else if (e.deltaX < 0 || e.deltaY < 0) {
+      setDirection(-1);
+    }
+  };
 
-  // Duplication logic to ensure the content exceeds screen width for marquee
-  let marqueeArticles = [...articles];
-  // We need enough items to fill a large screen (e.g., at least 12 items)
-  while (marqueeArticles.length > 0 && marqueeArticles.length < 12) {
-    marqueeArticles = [...marqueeArticles, ...articles];
-  }
-  // Duplicate the entire sequence once more to create a seamless loop for the 0% -> -50% animation
-  const displayArticles = [...marqueeArticles, ...marqueeArticles];
+  if (articles.length === 0) return null;
 
   return (
     <motion.section
@@ -42,14 +100,10 @@ export default function CategoryArticleSection({ title, slug, articles }: Catego
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
       transition={{ duration: 0.7, ease: "easeOut" }}
-      className="py-6 pause-on-hover"
+      className="py-6"
     >
       <div className="flex items-end justify-between mb-3 md:mb-6 px-1">
         <div>
-           {/* <div className="flex items-center gap-2 mb-1">
-              <div className="w-1 h-4 bg-indigo-600 rounded-full" />
-              <span className="text-[10px] font-black uppercase tracking-[0.2em] text-indigo-600 dark:text-indigo-400">Intelligence Cluster</span>
-           </div> */}
            <h2 className="text-2xl md:text-3xl font-black text-slate-800 dark:text-white tracking-tight uppercase">{title}</h2>
         </div>
         
@@ -62,14 +116,14 @@ export default function CategoryArticleSection({ title, slug, articles }: Catego
            </Link>
            <div className="flex gap-2">
             <button 
-              onClick={() => scroll('left')}
-              className="w-9 h-9 rounded-xl flex items-center justify-center bg-white border border-slate-100 text-slate-400 hover:text-indigo-600 hover:border-indigo-100 transition-all shadow-sm dark:bg-slate-800 dark:border-slate-700 dark:shadow-none"
+              onClick={() => changeDirectionAndScroll('left')}
+              className={`w-9 h-9 rounded-xl flex items-center justify-center border transition-all shadow-sm ${direction === -1 ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white border-slate-100 text-slate-400 hover:text-indigo-600 hover:border-indigo-100 dark:bg-slate-800 dark:border-slate-700 dark:shadow-none'}`}
             >
               <ChevronLeft size={20} />
             </button>
             <button 
-              onClick={() => scroll('right')}
-              className="w-9 h-9 rounded-xl flex items-center justify-center bg-white border border-slate-100 text-slate-400 hover:text-indigo-600 hover:border-indigo-100 transition-all shadow-sm dark:bg-slate-800 dark:border-slate-700 dark:shadow-none"
+              onClick={() => changeDirectionAndScroll('right')}
+              className={`w-9 h-9 rounded-xl flex items-center justify-center border transition-all shadow-sm ${direction === 1 ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white border-slate-100 text-slate-400 hover:text-indigo-600 hover:border-indigo-100 dark:bg-slate-800 dark:border-slate-700 dark:shadow-none'}`}
             >
               <ChevronRight size={20} />
             </button>
@@ -77,9 +131,13 @@ export default function CategoryArticleSection({ title, slug, articles }: Catego
         </div>
       </div>
       
-      <div ref={scrollRef} className="relative group/scroll overflow-hidden w-full pb-2 scroll-smooth">
+      <div className="relative group/scroll w-full pb-2 scroll-smooth">
         <div 
-          className="flex gap-6 animate-marquee-slow"
+          ref={scrollRef}
+          onMouseEnter={() => (isHovered.current = true)}
+          onMouseLeave={() => (isHovered.current = false)}
+          onWheel={handleWheel}
+          className="flex gap-6 overflow-x-auto hide-scrollbar"
         >
           {displayArticles.map((item, i) => (
             <Link 
