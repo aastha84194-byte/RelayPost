@@ -4,7 +4,7 @@ import React, { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { ShieldCheck, Lock, User, ArrowRight, Loader2 } from "lucide-react";
 import { motion } from "framer-motion";
-const AUTH_BASE = process.env.NEXT_PUBLIC_AUTH_BASE || "http://localhost:8000";
+import { AUTH_BASE } from "@/lib/config";
 
 
 export default function InviteSignup() {

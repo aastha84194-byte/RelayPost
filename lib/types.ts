@@ -129,3 +129,26 @@ export interface Keyword {
   id: string;
   tag: string;
 }
+
+export interface NewsArticle {
+  id: number;
+  title: string;
+  description?: string;
+  content?: string;
+  source_name?: string;
+  author?: string;
+  url: string;
+  image_url?: string;
+  published_at?: string;
+  category?: string;
+  keywords?: string[];
+  cluster_id?: number;
+  ai_summary?: string;
+  slug?: string;
+  meta_title?: string;
+  meta_description?: string;
+  is_verified?: boolean;
+  full_analysis?: string;
+  related_sources?: { id: number, source_name: string, url: string }[];
+  created_at: string;
+}

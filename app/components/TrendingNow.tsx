@@ -13,6 +13,29 @@ export default function TrendingNow({ articles }: { articles: Article[] }) {
   const isPaused = useRef(false);
   const pauseTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
+  const [isTabVisible, setIsTabVisible] = useState(true);
+  const [isIntersecting, setIsIntersecting] = useState(false);
+
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      setIsTabVisible(document.visibilityState === 'visible');
+    };
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    return () => document.removeEventListener("visibilitychange", handleVisibilityChange);
+  }, []);
+
+  useEffect(() => {
+    if (!scrollRef.current) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setIsIntersecting(entry.isIntersecting);
+      },
+      { threshold: 0.05 }
+    );
+    observer.observe(scrollRef.current);
+    return () => observer.disconnect();
+  }, []);
+
   useEffect(() => {
     if (scrollRef.current) {
       // Start in the middle set to allow scrolling left immediately
@@ -31,7 +54,7 @@ export default function TrendingNow({ articles }: { articles: Article[] }) {
       lastTimestamp = timestamp;
 
       if (scrollRef.current) {
-        if (!isHovered.current && !isPaused.current) {
+        if (!isHovered.current && !isPaused.current && isTabVisible && isIntersecting) {
           const speed = 0.05 * deltaTime; // 50px per second
           scrollRef.current.scrollLeft += speed * direction;
         }
@@ -53,7 +76,7 @@ export default function TrendingNow({ articles }: { articles: Article[] }) {
     animationFrameId = requestAnimationFrame(animateScroll);
 
     return () => cancelAnimationFrame(animationFrameId);
-  }, [direction]);
+  }, [direction, isTabVisible, isIntersecting]);
 
   const changeDirectionAndScroll = (newDirection: 'left' | 'right') => {
     setDirection(newDirection === 'left' ? -1 : 1);

@@ -9,7 +9,7 @@ import {
 import Cookies from "js-cookie";
 import { motion, AnimatePresence } from "framer-motion";
 import toast from "react-hot-toast";
-const AUTH_BASE = process.env.NEXT_PUBLIC_AUTH_BASE || "http://localhost:8000";
+import { AUTH_BASE } from "@/lib/config";
 
 
 interface User {

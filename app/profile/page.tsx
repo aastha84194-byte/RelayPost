@@ -5,7 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Edit2, Share2, Sparkles, Clock, Users, CreditCard, Plus } from "lucide-react";
 import { Article } from "@/lib/types";
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE || "http://localhost:8001";
+import { API_BASE } from "@/lib/config";
 
 
 export default function ProfileDashboard() {

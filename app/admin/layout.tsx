@@ -4,8 +4,8 @@ import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Cookies from "js-cookie";
 import Link from "next/link";
-import { LayoutDashboard, FileText, Settings, Users, Tags, LogOut, ChevronLeft, Inbox, Zap } from "lucide-react";
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE || "http://localhost:8001";
+import { LayoutDashboard, FileText, Settings, Users, Tags, LogOut, ChevronLeft, Inbox, Zap, Globe } from "lucide-react";
+import { API_BASE } from "@/lib/config";
 
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -108,6 +108,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           </Link>
           <Link href="/admin/articles" className="flex items-center gap-3 px-3 py-2 text-gray-600 hover:bg-gray-50 hover:text-indigo-600 rounded-lg transition-colors font-medium text-sm">
             <FileText size={18} /> Articles
+          </Link>
+          <Link href="/admin/news" className="flex items-center gap-3 px-3 py-2 text-gray-600 hover:bg-gray-50 hover:text-indigo-600 rounded-lg transition-colors font-medium text-sm">
+            <Globe size={18} /> News Ingestion
           </Link>
           <Link href="/admin/categories" className="flex items-center gap-3 px-3 py-2 text-gray-600 hover:bg-gray-50 hover:text-indigo-600 rounded-lg transition-colors font-medium text-sm">
             <Tags size={18} /> Categories & Tags
