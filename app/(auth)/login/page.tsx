@@ -8,8 +8,7 @@ import toast from 'react-hot-toast';
 import NetworkBackground from '../../components/NetworkBackground';
 import Navbar from '../../components/Navbar';
 import Footer from '../../components/Footer';
-
-const AUTH_BASE = process.env.NEXT_PUBLIC_AUTH_BASE || "http://localhost:8000";
+import { AUTH_BASE } from "@/lib/config";
 
 export default function Login() {
   const [formData, setFormData] = useState({ email: '', password: '' });

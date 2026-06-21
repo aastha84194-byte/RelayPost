@@ -19,6 +19,29 @@ export default function CategoryArticleSection({ title, slug, articles }: Catego
   const isPaused = useRef(false);
   const pauseTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
+  const [isTabVisible, setIsTabVisible] = useState(true);
+  const [isIntersecting, setIsIntersecting] = useState(false);
+
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      setIsTabVisible(document.visibilityState === 'visible');
+    };
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    return () => document.removeEventListener("visibilitychange", handleVisibilityChange);
+  }, []);
+
+  useEffect(() => {
+    if (!scrollRef.current) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setIsIntersecting(entry.isIntersecting);
+      },
+      { threshold: 0.05 }
+    );
+    observer.observe(scrollRef.current);
+    return () => observer.disconnect();
+  }, []);
+
   let marqueeArticles = [...articles];
   if (marqueeArticles.length > 0) {
     while (marqueeArticles.length < 12) {
@@ -45,7 +68,7 @@ export default function CategoryArticleSection({ title, slug, articles }: Catego
       lastTimestamp = timestamp;
 
       if (scrollRef.current) {
-        if (!isHovered.current && !isPaused.current) {
+        if (!isHovered.current && !isPaused.current && isTabVisible && isIntersecting) {
           const speed = 0.03 * deltaTime; // slightly slower for CategoryArticleSection
           scrollRef.current.scrollLeft += speed * direction;
         }
@@ -66,7 +89,7 @@ export default function CategoryArticleSection({ title, slug, articles }: Catego
     animationFrameId = requestAnimationFrame(animateScroll);
 
     return () => cancelAnimationFrame(animationFrameId);
-  }, [direction]);
+  }, [direction, isTabVisible, isIntersecting]);
 
   const changeDirectionAndScroll = (newDirection: 'left' | 'right') => {
     setDirection(newDirection === 'left' ? -1 : 1);

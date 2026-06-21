@@ -5,6 +5,7 @@ import { Search, X, History, TrendingUp, ArrowRight, FileText, Clock, Trash2 } f
 import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { API_BASE } from "@/lib/config";
 
 interface SearchOverlayProps {
   isOpen: boolean;
@@ -36,8 +37,7 @@ export default function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
     // Fetch featured/trending articles for the empty state
     const fetchFeatured = async () => {
       try {
-        const baseUrl = process.env.NEXT_PUBLIC_API_BASE || 'http://localhost:8001';
-        const res = await fetch(`${baseUrl}/public/articles/trending?limit=3`);
+        const res = await fetch(`${API_BASE}/public/articles/trending?limit=3`);
         const data = await res.json();
         setFeaturedArticles(data);
       } catch (e) {
@@ -62,8 +62,7 @@ export default function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
       }
       setIsLoading(true);
       try {
-        const baseUrl = process.env.NEXT_PUBLIC_API_BASE || 'http://localhost:8001';
-        const res = await fetch(`${baseUrl}/public/articles/search?q=${encodeURIComponent(query)}&limit=5`);
+        const res = await fetch(`${API_BASE}/public/articles/search?q=${encodeURIComponent(query)}&limit=5`);
         const data = await res.json();
         setSuggestions(data);
       } catch (e) {

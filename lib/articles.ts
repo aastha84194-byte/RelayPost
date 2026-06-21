@@ -1,4 +1,5 @@
 import { Article } from './types';
+import { API_BASE, NEWS_API_BASE } from './config';
 
 const MOCK_EXPERT_ARTICLES: Article[] = [
   {
@@ -62,9 +63,6 @@ const MOCK_EXPERT_ARTICLES: Article[] = [
     published_at: new Date().toISOString(),
   }
 ];
-
-
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE || "http://localhost:8001";
 
 export async function getAllArticles(category?: string): Promise<Article[]> {
   try {
@@ -273,9 +271,16 @@ export async function getCategories(): Promise<any[]> {
     }
 }
 
-export async function getHomepageCategorySections(): Promise<Record<string, { slug: string, articles: Article[] }>> {
+export async function getHomepageCategorySections(limit?: number, categories?: string[]): Promise<Record<string, { slug: string, articles: Article[] }>> {
     try {
-        const res = await fetch(`${API_BASE}/public/homepage/category-sections`, { 
+        const url = new URL(`${API_BASE}/public/homepage/category-sections`);
+        if (limit !== undefined) {
+            url.searchParams.append("limit", limit.toString());
+        }
+        if (categories && categories.length > 0) {
+            categories.forEach(cat => url.searchParams.append("categories", cat));
+        }
+        const res = await fetch(url.toString(), { 
             cache: 'no-store' 
         });
         if (!res.ok) return {};
@@ -349,4 +354,110 @@ export function getUserIdentifier(): string {
     }
     return id;
 }
+
+export async function getNewsLive(limit: number = 20): Promise<NewsArticle[]> {
+  try {
+    const res = await fetch(`${NEWS_API_BASE}/live?limit=${limit}`, { 
+      cache: 'no-store' 
+    });
+    if (!res.ok) return [];
+    return await res.json();
+  } catch (err) {
+    console.error("Failed to fetch live news", err);
+    return [];
+  }
+}
+
+export async function getNewsBySlug(slug: string): Promise<NewsArticle | null> {
+  try {
+    const res = await fetch(`${NEWS_API_BASE}/slug/${slug}`, { 
+      cache: 'no-store' 
+    });
+    if (!res.ok) return null;
+    return await res.json();
+  } catch (err) {
+    console.error(`Failed to fetch news slug ${slug}`, err);
+    return null;
+  }
+}
+
+export async function getNewsByCategory(category: string, limit: number = 20, skip: number = 0): Promise<{ items: NewsArticle[], total: number }> {
+    try {
+      const res = await fetch(`${NEWS_API_BASE}/categories/${category}?limit=${limit}&skip=${skip}`, { 
+        cache: 'no-store' 
+      });
+      if (!res.ok) return { items: [], total: 0 };
+      const data = await res.json();
+      return { items: data.items, total: data.total };
+    } catch (err) {
+      console.error(`Failed to fetch news category ${category}`, err);
+      return { items: [], total: 0 };
+    }
+}
+
+export async function getNewsCategories(): Promise<string[]> {
+  try {
+    const res = await fetch(`${NEWS_API_BASE}/meta/categories`, { 
+      next: { revalidate: 300 } 
+    });
+    if (!res.ok) return [];
+    return await res.json();
+  } catch (err) {
+    console.error("Failed to fetch news categories", err);
+    return [];
+  }
+}
+
+export async function getAllNewsAdmin(limit: number = 50, skip: number = 0): Promise<NewsArticle[]> {
+  try {
+    const res = await fetch(`${NEWS_API_BASE}/live?limit=${limit}&skip=${skip}`, { 
+      cache: 'no-store' 
+    });
+    if (!res.ok) return [];
+    return await res.json();
+  } catch (err) {
+    console.error("Failed to fetch all news admin", err);
+    return [];
+  }
+}
+
+export async function getNewsByIdAdmin(id: string): Promise<NewsArticle | null> {
+  try {
+    const res = await fetch(`${NEWS_API_BASE}/id/${id}`, { 
+      cache: 'no-store' 
+    });
+    if (!res.ok) return null;
+    return await res.json();
+  } catch (err) {
+    console.error("Failed to fetch news by id", err);
+    return null;
+  }
+}
+
+export async function deleteNewsAdmin(id: number): Promise<any> {
+  try {
+    const res = await fetch(`${NEWS_API_BASE}/admin/${id}`, { method: "DELETE" });
+    return await res.json();
+  } catch (err) {
+    console.error("Failed to delete news", err);
+    return null;
+  }
+}
+
+export async function updateNewsAdmin(id: number, data: Partial<NewsArticle>): Promise<any> {
+  try {
+    const res = await fetch(`${NEWS_API_BASE}/admin/${id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data)
+    });
+    return await res.json();
+  } catch (err) {
+    console.error("Failed to update news", err);
+    return null;
+  }
+}
+
+import { NewsArticle } from './types';
+
 

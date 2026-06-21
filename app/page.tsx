@@ -8,11 +8,12 @@ import ExpertAnalysis from './components/ExpertAnalysis';
 import InteractiveData from './components/InteractiveData';
 import PopularConversations from './components/PopularConversations';
 import GoUnlimited from './components/GoUnlimited';
+import Navbar from './components/Navbar';
 import TheBriefing from './components/TheBriefing';
 import CommunityPulse from './components/CommunityPulse';
-import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import CategoryArticleSection from './components/CategoryArticleSection';
+import LiveInsightsSidebar from './components/LiveInsightsSidebar';
 import { getArticlesBySection, getHomepageCategorySections } from '@/lib/articles';
 import { Article } from '@/lib/types';
 import { useSearchParams } from 'next/navigation';
@@ -38,7 +39,7 @@ function HomeContent() {
           getArticlesBySection("ExpertAnalysis", category || undefined),
           getArticlesBySection("LatestInsights", category || undefined),
           getArticlesBySection("Hero", category || undefined),
-          getHomepageCategorySections()
+          getHomepageCategorySections(5)
        ]);
        setTrending(t);
        setExpert(e);
@@ -108,6 +109,7 @@ function HomeContent() {
 
             {/* RIGHT COLUMN - Sidebar - 4 columns wide */}
             <div className="lg:col-span-4 flex flex-col pl-0 lg:pl-4">
+              <LiveInsightsSidebar />
               <PopularConversations />
               <GoUnlimited />
               <TheBriefing />

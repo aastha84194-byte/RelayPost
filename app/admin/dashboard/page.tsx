@@ -2,12 +2,10 @@
 
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
-import { CopyPlus, TrendingUp, Users, Activity, FileText, Pause, Play, Brain, Cpu } from "lucide-react";
+import { CopyPlus, TrendingUp, Users, Activity, FileText, Pause, Play, Brain, Cpu, Globe, Zap } from "lucide-react";
 import Cookies from "js-cookie";
 import { motion } from "framer-motion";
-const AUTH_BASE = process.env.NEXT_PUBLIC_AUTH_BASE || "http://localhost:8000";
-
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE || "http://localhost:8001";
+import { AUTH_BASE, API_BASE, NEWS_API_BASE } from "@/lib/config";
 
 
 export default function AdminDashboard() {
@@ -38,6 +36,28 @@ export default function AdminDashboard() {
     } catch (e) {
       console.error(e);
       alert("Network error");
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  const handleNewsEngineAction = async (endpoint: string, successMessage: string) => {
+    setIsProcessing(true);
+    const token = Cookies.get("access_token");
+    try {
+      const res = await fetch(`${NEWS_API_BASE}${endpoint}`, {
+        method: "POST",
+        headers: { "Authorization": `Bearer ${token}` }
+      });
+      if (res.ok) {
+        alert(successMessage);
+      } else {
+        const err = await res.json();
+        alert(`Error: ${err.message || "Failed to execute"}`);
+      }
+    } catch (e) {
+      console.error(e);
+      alert("Network error: News Service unreachable");
     } finally {
       setIsProcessing(false);
     }
@@ -151,35 +171,76 @@ export default function AdminDashboard() {
         </motion.div>
       </div>
 
-      <div className="bg-white rounded-[2rem] border border-slate-100 shadow-xl p-8 mb-12 relative overflow-hidden">
+      <div className="bg-white rounded-[2rem] border border-slate-100 shadow-xl p-8 mb-8 relative overflow-hidden">
          <div className="absolute top-0 right-0 p-8 opacity-5">
             <Cpu size={180} />
          </div>
          <div className="relative z-10">
             <h2 className="text-xl font-black text-slate-800 tracking-tight uppercase mb-6 flex items-center gap-2">
-              <Cpu className="text-indigo-600" size={24} /> Engine Control
+              <Cpu className="text-indigo-600" size={24} /> Neural Content Engine
             </h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               <button 
                 onClick={() => handleAutomationAction('/admin/automation/pause', 'Automation scheduler paused')}
                 disabled={isProcessing}
-                className="flex items-center justify-center gap-2 bg-amber-100 text-amber-700 hover:bg-amber-200 border border-amber-200 px-6 py-4 rounded-2xl font-bold transition-all disabled:opacity-50"
+                className="flex items-center justify-center gap-2 bg-amber-50 text-amber-700 hover:bg-amber-100 border border-amber-100 px-6 py-4 rounded-2xl font-bold transition-all disabled:opacity-50 text-xs uppercase tracking-widest"
               >
-                <Pause size={18} /> Pause Generation
+                <Pause size={14} /> Pause Generation
               </button>
               <button 
                 onClick={() => handleAutomationAction('/admin/automation/resume', 'Automation scheduler resumed')}
                 disabled={isProcessing}
-                className="flex items-center justify-center gap-2 bg-emerald-100 text-emerald-700 hover:bg-emerald-200 border border-emerald-200 px-6 py-4 rounded-2xl font-bold transition-all disabled:opacity-50"
+                className="flex items-center justify-center gap-2 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-100 px-6 py-4 rounded-2xl font-bold transition-all disabled:opacity-50 text-xs uppercase tracking-widest"
               >
-                <Play size={18} /> Resume Generation
+                <Play size={14} /> Resume Generation
               </button>
               <button 
                 onClick={() => handleAutomationAction('/admin/automation/learning/trigger', 'Self-learning loop triggered')}
                 disabled={isProcessing}
-                className="flex items-center justify-center gap-2 bg-indigo-100 text-indigo-700 hover:bg-indigo-200 border border-indigo-200 px-6 py-4 rounded-2xl font-bold transition-all disabled:opacity-50"
+                className="flex items-center justify-center gap-2 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 border border-indigo-100 px-6 py-4 rounded-2xl font-bold transition-all disabled:opacity-50 text-xs uppercase tracking-widest"
               >
-                <Brain size={18} /> Trigger Learning Engine
+                <Activity size={14} /> Trigger Learning
+              </button>
+              <button 
+                onClick={() => handleAutomationAction('/admin/automation/placement/trigger', 'Homepage placement curation triggered')}
+                disabled={isProcessing}
+                className="flex items-center justify-center gap-2 bg-indigo-600 text-white hover:bg-indigo-700 px-6 py-4 rounded-2xl font-bold transition-all disabled:opacity-50 shadow-lg shadow-indigo-100 text-xs uppercase tracking-widest"
+              >
+                <Brain size={14} /> Curate Placement
+              </button>
+            </div>
+         </div>
+      </div>
+
+      <div className="bg-white rounded-[2rem] border border-slate-100 shadow-xl p-8 mb-12 relative overflow-hidden">
+         <div className="absolute top-0 right-0 p-8 opacity-5">
+            <Globe size={180} />
+         </div>
+         <div className="relative z-10">
+            <h2 className="text-xl font-black text-slate-800 tracking-tight uppercase mb-6 flex items-center gap-2">
+              <Globe className="text-indigo-600" size={24} /> News Intelligence Engine
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <button 
+                onClick={() => handleNewsEngineAction('/admin/engine/pause', 'News scheduler paused')}
+                disabled={isProcessing}
+                className="flex items-center justify-center gap-2 bg-slate-50 text-slate-700 hover:bg-slate-100 border border-slate-200 px-6 py-4 rounded-2xl font-bold transition-all disabled:opacity-50 text-xs uppercase tracking-widest"
+              >
+                <Pause size={14} /> Stop Fed
+              </button>
+              <button 
+                onClick={() => handleNewsEngineAction('/admin/engine/resume', 'News scheduler resumed')}
+                disabled={isProcessing}
+                className="flex items-center justify-center gap-2 bg-slate-50 text-slate-700 hover:bg-slate-100 border border-slate-200 px-6 py-4 rounded-2xl font-bold transition-all disabled:opacity-50 text-xs uppercase tracking-widest"
+              >
+                <Play size={14} /> Start Feed
+              </button>
+              <button 
+                onClick={() => handleNewsEngineAction('/admin/engine/trigger', 'News engine manually triggered')}
+                disabled={isProcessing}
+                className="flex items-center justify-center gap-2 bg-indigo-600 text-white hover:bg-indigo-700 px-6 py-4 rounded-2xl font-bold transition-all disabled:opacity-50 shadow-lg shadow-indigo-100 text-xs uppercase tracking-widest"
+              >
+                <Zap size={14} /> Trigger Engine
               </button>
             </div>
          </div>

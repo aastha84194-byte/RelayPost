@@ -6,7 +6,7 @@ import {
   Check, Loader2, Globe, HardDrive 
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE || "http://localhost:8001";
+import { API_BASE } from "@/lib/config";
 
 
 interface MediaLibraryProps {

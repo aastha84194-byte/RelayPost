@@ -9,8 +9,7 @@ import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion';
 import NetworkBackground from '../../components/NetworkBackground';
 import Navbar from '../../components/Navbar';
 import Footer from '../../components/Footer';
-
-const AUTH_BASE = process.env.NEXT_PUBLIC_AUTH_BASE || "http://localhost:8000";
+import { AUTH_BASE } from "@/lib/config";
 
 export default function Register() {
   const [formData, setFormData] = useState({ name: '', email: '', password: '', confirm: '' });

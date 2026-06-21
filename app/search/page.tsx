@@ -6,6 +6,7 @@ import { Search, ArrowRight, Clock, User, Hash, AlertTriangle } from "lucide-rea
 import Link from "next/link";
 import { motion } from "framer-motion";
 import Navbar from "../components/Navbar";
+import { API_BASE } from "@/lib/config";
 
 function SearchResults() {
   const searchParams = useSearchParams();
@@ -18,8 +19,7 @@ function SearchResults() {
       if (!query) return;
       setLoading(true);
       try {
-        const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8001";
-        const res = await fetch(`${baseUrl}/public/articles/search?q=${encodeURIComponent(query)}&limit=20`);
+        const res = await fetch(`${API_BASE}/public/articles/search?q=${encodeURIComponent(query)}&limit=20`);
         const data = await res.json();
         setResults(data);
       } catch (e) {
