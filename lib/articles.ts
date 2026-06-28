@@ -408,22 +408,25 @@ export async function getNewsCategories(): Promise<string[]> {
   }
 }
 
-export async function getAllNewsAdmin(limit: number = 50, skip: number = 0): Promise<NewsArticle[]> {
+export async function getAllNewsAdmin(limit: number = 50, skip: number = 0): Promise<{ items: NewsArticle[], total: number }> {
   try {
-    const res = await fetch(`${NEWS_API_BASE}/live?limit=${limit}&skip=${skip}`, { 
+    const res = await fetch(`${NEWS_API_BASE}/live?limit=${limit}&skip=${skip}&is_admin=true`, { 
       cache: 'no-store' 
     });
-    if (!res.ok) return [];
-    return await res.json();
+    if (!res.ok) return { items: [], total: 0 };
+    const data = await res.json();
+    // Backend returns an array; total comes from X-Total-Count header or we estimate
+    const total = parseInt(res.headers.get('X-Total-Count') || '0', 10) || data.length;
+    return { items: Array.isArray(data) ? data : [], total };
   } catch (err) {
     console.error("Failed to fetch all news admin", err);
-    return [];
+    return { items: [], total: 0 };
   }
 }
 
 export async function getNewsByIdAdmin(id: string): Promise<NewsArticle | null> {
   try {
-    const res = await fetch(`${NEWS_API_BASE}/id/${id}`, { 
+    const res = await fetch(`${NEWS_API_BASE}/id/${id}?is_admin=true`, { 
       cache: 'no-store' 
     });
     if (!res.ok) return null;

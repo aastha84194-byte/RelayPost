@@ -10,13 +10,14 @@ export default function Footer() {
           
           {/* Logo & Description */}
           <div className="col-span-2 md:col-span-1">
-            <Link href="/" className="flex items-center gap-2 mb-4">
-              <div className="w-8 h-8 rounded-lg bg-brand flex items-center justify-center font-bold text-xl text-white">
-                E
+            <Link href="/" className="flex items-center gap-2 mb-4 group">
+              <div className="w-8 h-8 md:w-9 md:h-9 bg-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-500/20 group-hover:scale-105 transition-transform duration-300 overflow-hidden">
+                <img src="/favicon.ico" alt="Logo" className="w-full h-full object-cover" />
               </div>
-              <span className="font-semibold text-lg tracking-tight text-white">
-                Editorial<br/><span className="text-gray-400 text-sm leading-none block">Intelligence</span>
-              </span>
+              <div className="flex flex-col leading-tight">
+                <span className="text-white font-bold text-lg tracking-tight">Relay</span>
+                <span className="text-indigo-400 text-[10px] font-semibold uppercase tracking-widest">Post</span>
+              </div>
             </Link>
             <p className="text-sm text-gray-400 mb-6 max-w-sm">
               Premium, modern redesign of an article posting homepage platform with rich interactivity.
@@ -67,7 +68,7 @@ export default function Footer() {
 
         {/* Bottom Bar */}
         <div className="pt-8 border-t border-gray-800 flex flex-col md:flex-row items-center justify-between text-xs text-gray-500 dark:text-slate-400 transition-colors duration-300">
-          <p>Copyright © 2026 Editorial Intelligence</p>
+          <p>Copyright © 2026 RelayPost</p>
           <div className="flex gap-6 mt-4 md:mt-0">
             <Link href="#" className="hover:text-gray-300 transition-colors">Privacy</Link>
             <Link href="#" className="hover:text-gray-300 transition-colors">Contact</Link>
