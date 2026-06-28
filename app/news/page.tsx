@@ -21,19 +21,19 @@ function NewsContent() {
     const fetchData = async () => {
       setIsLoading(true);
       try {
-        const [liveNews, cats] = await Promise.all([
-          getNewsLive(10),
-          getNewsCategories()
-        ]);
+        const MAIN_CATEGORIES = ['World News', 'Politics', 'Business', 'Technology', 'Science', 'Health', 'Sports', 'Entertainment'];
+        const liveNews = await getNewsLive(10);
         
         setSpotlight(liveNews.slice(0, 4));
-        setCategories(cats);
+        setCategories(MAIN_CATEGORIES);
 
         // Fetch first few articles for each category
         const catMap: Record<string, NewsArticle[]> = {};
-        await Promise.all(cats.map(async (cat) => {
+        await Promise.all(MAIN_CATEGORIES.map(async (cat) => {
           const res = await getNewsByCategory(cat, 6);
-          catMap[cat] = res.items;
+          if (res.items && res.items.length > 0) {
+            catMap[cat] = res.items;
+          }
         }));
         setCategoryData(catMap);
       } catch (err) {
@@ -73,26 +73,28 @@ function NewsContent() {
 
         {/* Categories Section */}
         {categories.map((cat) => (
-          <section key={cat} className="mb-20">
-            <div className="flex items-center justify-between mb-8 pb-4 border-b border-slate-200 dark:border-slate-800">
-              <div className="flex items-center gap-4">
-                <div className="p-2 bg-slate-100 dark:bg-slate-800 rounded-xl">
-                  <Layers size={18} className="text-indigo-600" />
+          categorydata[cat] && categorydata[cat].length > 0 && (
+            <section key={cat} className="mb-20">
+              <div className="flex items-center justify-between mb-8 pb-4 border-b border-slate-200 dark:border-slate-800">
+                <div className="flex items-center gap-4">
+                  <div className="p-2 bg-slate-100 dark:bg-slate-800 rounded-xl">
+                    <Layers size={18} className="text-indigo-600" />
+                  </div>
+                  <h2 className="text-2xl font-black text-slate-900 dark:text-white uppercase tracking-tight">{cat}</h2>
                 </div>
-                <h2 className="text-2xl font-black text-slate-900 dark:text-white uppercase tracking-tight">{cat}</h2>
+                <button className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-indigo-600 transition-colors">
+                  View Full Feed
+                  <ArrowRight size={14} />
+                </button>
               </div>
-              <button className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-indigo-600 transition-colors">
-                View Full Feed
-                <ArrowRight size={14} />
-              </button>
-            </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {(categorydata[cat] || []).map((item) => (
-                <NewsCard key={item.id} article={item} onClick={openModal} />
-              ))}
-            </div>
-          </section>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {categorydata[cat].map((item) => (
+                  <NewsCard key={item.id} article={item} onClick={openModal} />
+                ))}
+              </div>
+            </section>
+          )
         ))}
       </main>
 
