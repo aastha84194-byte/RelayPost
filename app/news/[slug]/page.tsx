@@ -46,8 +46,26 @@ export default async function NewsDetailPage({ params }: Props) {
     notFound();
   }
 
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "NewsArticle",
+    "headline": article.meta_title || article.title,
+    "description": article.meta_description || article.ai_summary || article.description,
+    "image": article.image_url ? [article.image_url] : [],
+    "datePublished": article.published_at,
+    "author": [{
+      "@type": "Organization",
+      "name": article.source_name || "RelayPost",
+      "url": "https://relay-post.vercel.app"
+    }]
+  };
+
   return (
     <div className="min-h-screen bg-white dark:bg-slate-900 transition-colors duration-300">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <Navbar />
 
       <main className="max-w-4xl mx-auto px-4 md:px-8 py-12">
