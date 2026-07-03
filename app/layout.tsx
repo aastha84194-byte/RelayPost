@@ -15,7 +15,7 @@ export const metadata: Metadata = {
   description: 'Discover trending news and in-depth articles. Scale your insights with advanced content discovery, dynamic analysis, and real-time curation across business, technology, and science.',
   keywords: [
     'RelayPost',
-    'Digital Curator',
+    'Digital Publisher',
     'News Aggregator',
     'Automated Insights',
     'Technology News',
@@ -40,7 +40,7 @@ export const metadata: Metadata = {
     type: 'website',
     locale: 'en_US',
     url: '/',
-    title: 'RelayPost | The Premier Digital Curator',
+    title: 'RelayPost | The Premier Digital Publisher',
     description: 'Discover trending news and in-depth articles. Scale your insights with advanced content discovery, dynamic analysis, and real-time curation across business, technology, and science.',
     siteName: 'RelayPost',
     images: [
@@ -54,7 +54,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'RelayPost | The Premier Digital Curator',
+    title: 'RelayPost | The Premier Digital Publisher',
     description: 'Discover trending news and in-depth articles. Scale your insights with advanced content discovery, dynamic analysis, and real-time curation across business, technology, and science.',
     creator: '@RelayPost',
     images: ['/fallback_article.png'],
