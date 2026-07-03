@@ -52,10 +52,10 @@ function HomeContent() {
   }, [category]);
 
   return (
-    <div className="min-h-full flex flex-col font-sans bg-white md:bg-[#F8F9FB] dark:bg-slate-900 dark:md:bg-[#0f172a] transition-colors duration-300">
+    <div className="min-h-full flex flex-col font-sans overflow-x-hidden bg-white md:bg-[#F8F9FB] dark:bg-slate-900 dark:md:bg-[#0f172a] transition-colors duration-300">
       <Navbar />
       <main className="flex-grow">
-        <div className="max-w-7xl mx-auto px-4 md:px-8 py-4">
+        <div className="max-w-7xl mx-auto px-4 md:px-8 pt-2 pb-6 md:py-4">
           
           <AnimatePresence mode="wait">
             {category && (
@@ -82,10 +82,12 @@ function HomeContent() {
 
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
             {/* LEFT COLUMN - 8 columns wide */}
-            <div className="lg:col-span-8 flex flex-col gap-8">
+            <div className="lg:col-span-8 flex flex-col gap-6 md:gap-8">
               {isLoading ? (
-                <div className="py-20 text-center text-[10px] font-black uppercase tracking-widest text-slate-400 animate-pulse">
-                   Synchronizing Intelligence Stream...
+                <div className="space-y-8 animate-pulse w-full">
+                   <div className="h-[400px] bg-slate-200 dark:bg-slate-800 rounded-[2.5rem] w-full"></div>
+                   <div className="h-[300px] bg-slate-200 dark:bg-slate-800 rounded-[2.5rem] w-full"></div>
+                   <div className="h-[200px] bg-slate-200 dark:bg-slate-800 rounded-[2.5rem] w-full"></div>
                 </div>
               ) : (
                 <>
@@ -128,8 +130,17 @@ function HomeFallback() {
     <div className="min-h-full flex flex-col font-sans bg-white md:bg-[#F8F9FB] dark:bg-slate-900 dark:md:bg-[#0f172a] transition-colors duration-300">
       <Navbar />
       <main className="flex-grow">
-        <div className="max-w-7xl mx-auto px-4 md:px-8 py-20 text-center text-[10px] font-black uppercase tracking-widest text-slate-400 animate-pulse">
-          Synchronizing Intelligence Stream...
+        <div className="max-w-7xl mx-auto px-4 md:px-8 py-4 w-full">
+           <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
+              <div className="lg:col-span-8 space-y-8 animate-pulse w-full">
+                 <div className="h-[400px] bg-slate-200 dark:bg-slate-800 rounded-[2.5rem] w-full"></div>
+                 <div className="h-[300px] bg-slate-200 dark:bg-slate-800 rounded-[2.5rem] w-full"></div>
+              </div>
+              <div className="lg:col-span-4 space-y-8 animate-pulse w-full">
+                 <div className="h-[200px] bg-slate-200 dark:bg-slate-800 rounded-[2.5rem] w-full"></div>
+                 <div className="h-[300px] bg-slate-200 dark:bg-slate-800 rounded-[2.5rem] w-full"></div>
+              </div>
+           </div>
         </div>
       </main>
       <Footer />

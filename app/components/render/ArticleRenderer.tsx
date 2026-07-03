@@ -3,14 +3,15 @@
 import React, { useState, useEffect } from "react";
 import { Article, ContentBlock, Reflection } from "@/lib/types";
 import { motion, AnimatePresence } from "framer-motion";
-import { User, Calendar, Share, ThumbsUp, ChevronRight, Quote as QuoteIcon, Trophy, Sparkles, MessageSquare, Send, Zap, Shield, Target } from "lucide-react";
+import { User, Calendar, Share, ThumbsUp, ChevronRight, Quote as QuoteIcon, Trophy, Sparkles, MessageSquare, Send, Zap, Shield, Target, Bookmark } from "lucide-react";
 import Link from "next/link";
 import ParticleEffect from "../ParticleEffect";
 import InteractiveHero from "./InteractiveHero";
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, LineChart, Line, AreaChart, Area, Cell } from 'recharts';
 import { recordArticleView, toggleLike, submitReflection, getArticlesBySection } from "@/lib/articles";
 import Cookies from "js-cookie";
-
+import toast from "react-hot-toast";
+import Footer from "../Footer";
 interface ArticleRendererProps {
   article: Article;
 }
@@ -30,6 +31,9 @@ export default function ArticleRenderer({ article }: ArticleRendererProps) {
   const [reflectionContent, setReflectionContent] = React.useState("");
   const [showReflectionForm, setShowReflectionForm] = React.useState(false);
   const [isSubmitting, setIsSubmitting] = React.useState(false);
+  const [isLiking, setIsLiking] = React.useState(false);
+  const [isSaved, setIsSaved] = React.useState(false);
+  const [isSaving, setIsSaving] = React.useState(false);
 
   React.useEffect(() => {
     if (article.id) {
@@ -45,15 +49,74 @@ export default function ArticleRenderer({ article }: ArticleRendererProps) {
   }, [article.id, article.homepage_section, article.slug]);
 
   const handleLike = async () => {
+    if (isLiking) return;
     const token = Cookies.get("access_token");
     if (!token) {
-       alert("Please login to like this article");
+       toast.error("Please login to like this article");
        return;
     }
-    const res = await toggleLike(article.id!, token);
-    if (res) {
-       setLiked(res.liked);
-       setLikesCount(prev => res.liked ? prev + 1 : prev - 1);
+    
+    setIsLiking(true);
+    setLiked(true);
+    if (!liked) {
+       setLikesCount(prev => prev + 1);
+    }
+    
+    try {
+       const res = await toggleLike(article.id!, token);
+       if (res) {
+          setLiked(res.liked);
+          // If server says we unliked it (shouldn't happen on first click, but sync state)
+          if (!res.liked && !liked) {
+            setLikesCount(prev => prev - 1);
+          }
+       }
+    } catch (err) {
+       setLiked(liked);
+       if (!liked) {
+         setLikesCount(prev => prev - 1);
+       }
+       toast.error("Failed to record like");
+    } finally {
+       setTimeout(() => setIsLiking(false), 1000);
+    }
+  };
+
+  const handleBookmark = async () => {
+    if (isSaving) return;
+    const token = Cookies.get("access_token");
+    if (!token) {
+       toast.error("Please login to save this article");
+       return;
+    }
+    
+    setIsSaving(true);
+    setIsSaved(!isSaved);
+    
+    try {
+        const response = await fetch(`http://localhost:8001/profile/articles/${article.id}/save`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+        
+        if (response.ok) {
+            const data = await response.json();
+            setIsSaved(data.saved);
+            if (data.saved) {
+                toast.success("Article saved to your profile!");
+            } else {
+                toast.success("Removed from saved list.");
+            }
+        } else {
+            throw new Error('Failed to save');
+        }
+    } catch (err) {
+        setIsSaved(isSaved);
+        toast.error("Failed to update bookmark");
+    } finally {
+        setIsSaving(false);
     }
   };
 
@@ -115,7 +178,7 @@ export default function ArticleRenderer({ article }: ArticleRendererProps) {
   };
 
   return (
-    <div className={`${themeClasses.body} min-h-screen font-sans selection:bg-brand selection:text-white transition-colors duration-300 pb-24 ${theme === 'intelligence' ? 'dark' : ''}`}>
+    <div className={`${themeClasses.body} min-h-screen font-sans selection:bg-brand selection:text-white transition-colors duration-300 ${theme === 'intelligence' ? 'dark' : ''}`}>
       {/* Premium Hero Section (Maritime Style) */}
       <section className="relative h-[60vh] md:h-[85vh] min-h-[400px] md:min-h-[600px] overflow-hidden bg-[#0A0D1F]">
         <InteractiveHero imageSrc={article.hero_image || ""} />
@@ -135,17 +198,24 @@ export default function ArticleRenderer({ article }: ArticleRendererProps) {
             
             <div className="flex flex-wrap items-center justify-center gap-6 pt-8 border-t border-white/5">
               <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-brand/50 shadow-inner">
-                   <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${article.author_id}`} alt="Author" className="w-full h-full object-cover" />
-                </div>
-                <div className="text-left">
-                  <p className="text-white font-black text-[10px] tracking-widest uppercase mb-0.5 opacity-60">Published By</p>
-                  <p className="text-brand text-xs font-black tracking-widest uppercase">
-                    {article.author_id === '00000000-0000-0000-0000-000000000000' 
-                      ? 'RelayPost Intelligence' 
-                      : 'Kartik'}
-                  </p>
-                </div>
+                {(() => {
+                  const names = ["Kartik Kalra", "Astha Jadon", "Prince Verma"];
+                  const nameIndex = article.title ? article.title.length % 3 : 0;
+                  const authorName = names[nameIndex];
+                  return (
+                    <>
+                      <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-brand/50 shadow-inner bg-slate-800 flex items-center justify-center">
+                         <img src={`https://api.dicebear.com/7.x/initials/svg?seed=${authorName}&backgroundColor=0f172a&textColor=ffffff`} alt="Author" className="w-full h-full object-cover" />
+                      </div>
+                      <div className="text-left">
+                        <p className="text-white font-black text-[10px] tracking-widest uppercase mb-0.5 opacity-60">Published By</p>
+                        <p className="text-brand text-xs font-black tracking-widest uppercase">
+                          {authorName}
+                        </p>
+                      </div>
+                    </>
+                  );
+                })()}
               </div>
               
               <div className="flex items-center gap-8 text-white/60 text-[10px] font-black uppercase tracking-[0.15em]">
@@ -169,16 +239,16 @@ export default function ArticleRenderer({ article }: ArticleRendererProps) {
         <div className="hidden lg:block lg:col-span-1" />
 
         {/* Article Body */}
-        <div className={`lg:col-span-7 ${themeClasses.card} rounded-[2.5rem] shadow-[0_32px_128px_-32px_rgba(0,0,0,0.15)] p-10 md:p-20 border overflow-hidden`}>
+        <div className={`lg:col-span-7 ${themeClasses.card} rounded-[2.5rem] shadow-[0_32px_128px_-32px_rgba(0,0,0,0.15)] p-6 md:p-12 lg:p-20 border overflow-hidden`}>
           
-          <div className="space-y-12">
+          <div className="space-y-8 md:space-y-12">
             {article.ai_summary && (
-              <div className="p-8 bg-indigo-50/50 dark:bg-indigo-900/10 rounded-3xl border border-indigo-100 dark:border-indigo-500/10">
+              <div className="p-5 md:p-8 bg-indigo-50/50 dark:bg-indigo-900/10 rounded-3xl border border-indigo-100 dark:border-indigo-500/10">
                 <p className="text-[10px] font-black text-brand uppercase tracking-[0.2em] mb-4 flex items-center gap-2">
                    <span className="w-2 h-2 rounded-full bg-brand animate-pulse" />
                    AI Executive Summary
                 </p>
-                <p className="text-indigo-900 dark:text-indigo-200 text-lg font-medium leading-relaxed italic">
+                <p className="text-indigo-900 dark:text-indigo-200 text-base md:text-lg font-medium leading-relaxed italic">
                   "{article.ai_summary}"
                 </p>
               </div>
@@ -202,16 +272,16 @@ export default function ArticleRenderer({ article }: ArticleRendererProps) {
                    
                    {block.type === 'heading' && React.createElement(`h${block.metadata?.level || 2}`, {
                       className: `font-black tracking-tighter ${themeClasses.heading} ${
-                        block.metadata?.level === 1 ? 'text-4xl md:text-6xl mb-12' :
-                        block.metadata?.level === 3 ? 'text-2xl md:text-3xl mb-6' : 
-                        'text-xl md:text-2xl mb-4'
+                        block.metadata?.level === 1 ? 'text-3xl md:text-5xl lg:text-6xl mb-8 md:mb-12' :
+                        block.metadata?.level === 3 ? 'text-xl md:text-3xl mb-4 md:mb-6' : 
+                        'text-lg md:text-2xl mb-3 md:mb-4'
                       }`,
                       style: blockStyle
                    }, block.content)}
 
                    {block.type === 'paragraph' && (
                      <p 
-                       className={`text-lg md:text-xl ${themeClasses.text} leading-[1.8] mb-8 ${idx === 0 ? `first-letter:text-7xl first-letter:font-black first-letter:${themeClasses.accent.split(' ')[0]} first-letter:mr-3 first-letter:float-left` : ''}`} 
+                       className={`text-[17px] md:text-xl ${themeClasses.text} leading-[1.8] mb-6 md:mb-8 ${idx === 0 ? `first-letter:text-6xl md:first-letter:text-7xl first-letter:font-black first-letter:${themeClasses.accent.split(' ')[0]} first-letter:mr-3 first-letter:float-left` : ''}`} 
                        style={blockStyle}
                      >
                        {block.content}
@@ -240,9 +310,9 @@ export default function ArticleRenderer({ article }: ArticleRendererProps) {
                    )}
 
                    {block.type === 'quote' && (
-                      <div className="my-16 relative">
-                         <QuoteIcon className="absolute -top-6 -left-6 w-20 h-20 text-brand/10 -rotate-12" />
-                         <blockquote className="relative z-10 text-2xl md:text-3xl font-serif italic text-slate-800 dark:text-slate-100 leading-snug text-center max-w-3xl mx-auto">
+                       <div className="my-10 md:my-16 relative">
+                          <QuoteIcon className="absolute -top-4 -left-4 md:-top-6 md:-left-6 w-12 h-12 md:w-20 md:h-20 text-brand/10 -rotate-12" />
+                          <blockquote className="relative z-10 text-xl md:text-3xl font-serif italic text-slate-800 dark:text-slate-100 leading-snug text-center max-w-3xl mx-auto">
                             "{block.content}"
                          </blockquote>
                          {block.metadata?.caption && (
@@ -265,12 +335,12 @@ export default function ArticleRenderer({ article }: ArticleRendererProps) {
                    )}
 
                     {block.type === 'table' && block.metadata?.tableData && (
-                       <div className="my-14 overflow-x-auto rounded-[2.5rem] border border-slate-100 dark:border-white/5 shadow-2xl">
+                       <div className="my-8 md:my-14 overflow-x-auto rounded-[2.5rem] border border-slate-100 dark:border-white/5 shadow-2xl">
                           <table className="w-full text-left border-collapse">
                              <thead>
                                 <tr className="bg-slate-50 dark:bg-slate-800">
                                    {block.metadata.tableData.headers?.map((header: string, i: number) => (
-                                      <th key={i} className="p-6 text-[10px] font-black text-slate-500 uppercase tracking-widest border-b border-slate-100 dark:border-white/10">{header}</th>
+                                      <th key={i} className="p-4 md:p-6 text-[10px] font-black text-slate-500 uppercase tracking-widest border-b border-slate-100 dark:border-white/10">{header}</th>
                                    ))}
                                 </tr>
                              </thead>
@@ -278,7 +348,7 @@ export default function ArticleRenderer({ article }: ArticleRendererProps) {
                                 {block.metadata.tableData.rows?.map((row: string[], i: number) => (
                                    <tr key={i} className="hover:bg-slate-50/50 dark:hover:bg-white/5 transition-colors">
                                       {row.map((cell, j) => (
-                                         <td key={j} className="p-6 text-sm font-medium text-slate-700 dark:text-slate-300">{cell}</td>
+                                         <td key={j} className="p-4 md:p-6 text-sm font-medium text-slate-700 dark:text-slate-300">{cell}</td>
                                       ))}
                                    </tr>
                                 ))}
@@ -288,18 +358,18 @@ export default function ArticleRenderer({ article }: ArticleRendererProps) {
                     )}
 
                    {block.type === 'graph' && block.metadata?.chartData && (
-                      <div className="my-14 p-10 bg-[#f8fafc] dark:bg-slate-800 rounded-[2.5rem] border border-slate-100 dark:border-white/5 shadow-xl overflow-hidden">
-                        <div className="flex justify-between items-center mb-10">
-                           <div className="space-y-1">
-                              <h4 className="text-xl font-black text-slate-800 dark:text-white tracking-tight uppercase dark:text-slate-100 transition-colors duration-300">{block.metadata?.caption || 'Data Analysis'}</h4>
-                              <p className="text-[10px] text-slate-400 font-bold tracking-widest uppercase">{block.metadata?.altText || 'Executive Insight'}</p>
-                           </div>
-                           <div className="text-right">
-                              <p className="text-3xl font-black text-brand tracking-tighter">+18.4%</p>
-                              <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">YTD Growth</p>
-                           </div>
-                        </div>
-                        <div className="w-full h-[350px]">
+                       <div className="my-8 md:my-14 p-6 md:p-10 bg-[#f8fafc] dark:bg-slate-800 rounded-[2.5rem] border border-slate-100 dark:border-white/5 shadow-xl overflow-hidden">
+                         <div className="flex flex-col md:flex-row md:justify-between items-start md:items-center gap-4 mb-6 md:mb-10">
+                            <div className="space-y-1">
+                               <h4 className="text-xl font-black text-slate-800 dark:text-white tracking-tight uppercase dark:text-slate-100 transition-colors duration-300">{block.metadata?.caption || 'Data Analysis'}</h4>
+                               <p className="text-[10px] text-slate-400 font-bold tracking-widest uppercase">{block.metadata?.altText || 'Executive Insight'}</p>
+                            </div>
+                            <div className="text-left md:text-right">
+                               <p className="text-3xl font-black text-brand tracking-tighter">+18.4%</p>
+                               <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">YTD Growth</p>
+                            </div>
+                         </div>
+                         <div className="w-full h-[250px] md:h-[350px]">
                            <ResponsiveContainer width="100%" height="100%">
                               {block.metadata.chartType === 'line' ? (
                                 <LineChart data={block.metadata.chartData}>
@@ -328,7 +398,7 @@ export default function ArticleRenderer({ article }: ArticleRendererProps) {
                    )}
 
                    {block.type === 'code_block' && (
-                      <div className="my-8 rounded-2xl overflow-hidden bg-slate-950 shadow-2xl border border-white/5">
+                      <div className="my-6 md:my-8 rounded-2xl overflow-hidden bg-slate-950 shadow-2xl border border-white/5">
                         <div className="flex items-center justify-between px-6 py-3 bg-white/5 border-b border-white/5">
                            <span className="text-[10px] font-black text-white/40 uppercase tracking-widest">{block.metadata?.language || 'typescript'}</span>
                            <div className="flex gap-1.5">
@@ -344,7 +414,7 @@ export default function ArticleRenderer({ article }: ArticleRendererProps) {
                    )}
 
                    {block.type === 'callout' && (
-                      <div className={`my-8 p-8 rounded-3xl border flex gap-6 items-start ${
+                       <div className={`my-8 p-5 md:p-8 rounded-3xl border flex flex-col sm:flex-row gap-4 md:gap-6 items-start ${
                         block.metadata?.calloutType === 'warning' ? 'bg-amber-50/50 border-amber-100 dark:bg-amber-900/10 dark:border-amber-500/20' :
                         'bg-indigo-50/50 border-indigo-100 dark:bg-indigo-900/10 dark:border-indigo-500/20'
                       }`}>
@@ -371,10 +441,10 @@ export default function ArticleRenderer({ article }: ArticleRendererProps) {
                    )}
 
                    {block.type === 'cta_block' && (
-                      <div className="my-16 p-12 bg-gradient-to-br from-brand to-indigo-900 rounded-[2.5rem] text-center shadow-2xl relative overflow-hidden group">
+                      <div className="my-10 md:my-16 p-8 md:p-12 bg-gradient-to-br from-brand to-indigo-900 rounded-[2.5rem] text-center shadow-2xl relative overflow-hidden group">
                          <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-10" />
-                         <div className="relative z-10 space-y-6">
-                            <h3 className="text-3xl font-black text-white tracking-tight">{block.metadata?.title || 'Connect with Intelligence'}</h3>
+                         <div className="relative z-10 space-y-4 md:space-y-6">
+                            <h3 className="text-2xl md:text-3xl font-black text-white tracking-tight">{block.metadata?.title || 'Connect with Intelligence'}</h3>
                             <p className="text-white/80 max-w-lg mx-auto leading-relaxed">{block.content}</p>
                             <button className="px-10 py-4 bg-white text-brand font-black uppercase tracking-widest text-[10px] rounded-full hover:scale-105 transition-all shadow-xl dark:bg-slate-900">
                                {block.metadata?.buttonText || 'Contact Us'}
@@ -403,7 +473,7 @@ export default function ArticleRenderer({ article }: ArticleRendererProps) {
           </div>
 
           {/* Tags */}
-          <div className="mt-20 pt-12 border-t border-slate-100 dark:border-white/5 flex flex-wrap items-center justify-between gap-8">
+          <div className="mt-12 md:mt-20 pt-8 md:pt-12 border-t border-slate-100 dark:border-white/5 flex flex-wrap items-center justify-between gap-6">
              <div className="flex flex-wrap gap-2">
                 {article.secondary_keywords?.map(tag => (
                    <span key={tag} className="px-4 py-2 bg-[#f0f2f5] dark:bg-slate-800 text-slate-500 dark:text-slate-400 text-[10px] font-black rounded-full hover:bg-brand hover:text-white transition-all cursor-pointer uppercase tracking-widest shadow-sm dark:shadow-none">
@@ -411,10 +481,24 @@ export default function ArticleRenderer({ article }: ArticleRendererProps) {
                    </span>
                 ))}
              </div>
-             <div className="flex gap-6">
-                <button className="flex items-center gap-2 group">
+              <div className="flex gap-6">
+                <button 
+                  onClick={() => {
+                    navigator.clipboard.writeText(window.location.href);
+                    toast.success("Link copied to clipboard!");
+                  }}
+                  className="flex items-center gap-2 group"
+                >                   
                    <div className="w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center transition-all group-hover:bg-brand/10">
                       <Share size={16} className="text-slate-400 group-hover:text-brand" />
+                   </div>
+                </button>
+                <button 
+                  onClick={handleBookmark}
+                  className="flex items-center gap-2 group"
+                >
+                   <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-all ${isSaved ? 'bg-brand/10 text-brand' : 'bg-slate-100 dark:bg-slate-800 text-slate-400 group-hover:bg-brand/10 group-hover:text-brand'}`}>
+                      <Bookmark size={16} className={isSaved ? "fill-brand text-brand" : "text-slate-400 group-hover:text-brand"} />
                    </div>
                 </button>
                 <button 
@@ -489,9 +573,9 @@ export default function ArticleRenderer({ article }: ArticleRendererProps) {
       </main>
 
       {/* Reflections / Comments Section */}
-      <section className="max-w-4xl mx-auto px-4 mt-24 space-y-12">
+      <section className="max-w-4xl mx-auto px-4 mt-16 md:mt-24 pb-24 space-y-8 md:space-y-12">
          <div className="flex items-center justify-between">
-            <h2 className="text-4xl font-black text-slate-900 dark:text-white tracking-tight">Reflections</h2>
+            <h2 className="text-3xl md:text-4xl font-black text-slate-900 dark:text-white tracking-tight">Reflections</h2>
             <div className="h-0.5 grow mx-8 bg-slate-100 dark:bg-white/5" />
          </div>
          
@@ -582,46 +666,7 @@ export default function ArticleRenderer({ article }: ArticleRendererProps) {
       </section>
 
       {/* Corporate Footer */}
-      <footer className="mt-32 pt-24 pb-12 bg-[#0A0D1F] text-white">
-         <div className="max-w-7xl mx-auto px-8 grid grid-cols-1 md:grid-cols-4 gap-12 border-b border-white/5 pb-16">
-            <div className="space-y-6">
-               <h2 className="text-2xl font-black text-white italic tracking-tighter">RelayPost</h2>
-               <p className="text-slate-400 text-[10px] leading-relaxed max-w-xs font-bold uppercase tracking-wider">
-                  Premium editorial intelligence for global executives. High-fidelity analysis on the intersections of geopolitics, technology, and trade.
-               </p>
-            </div>
-            <div className="space-y-6">
-               <h3 className="text-[10px] font-black tracking-[0.2em] uppercase text-brand">Directory</h3>
-               <div className="flex flex-col gap-3 text-[10px] text-slate-400 font-bold uppercase tracking-widest">
-                  <a href="#" className="hover:text-white transition-colors">Archive</a>
-                  <a href="#" className="hover:text-white transition-colors">Newsletters</a>
-                  <a href="#" className="hover:text-white transition-colors">White Papers</a>
-               </div>
-            </div>
-            <div className="space-y-6">
-               <h3 className="text-[10px] font-black tracking-[0.2em] uppercase text-brand">Information</h3>
-               <div className="flex flex-col gap-3 text-[10px] text-slate-400 font-bold uppercase tracking-widest">
-                  <a href="#" className="hover:text-white transition-colors">About Us</a>
-                  <a href="#" className="hover:text-white transition-colors">Privacy Policy</a>
-                  <a href="#" className="hover:text-white transition-colors">Terms of Service</a>
-               </div>
-            </div>
-            <div className="space-y-6">
-               <h3 className="text-[10px] font-black tracking-[0.2em] uppercase text-brand">Global Operations</h3>
-               <div className="flex gap-4">
-                  <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center hover:bg-brand transition-colors cursor-pointer border border-white/5">
-                     <Share size={16} />
-                  </div>
-               </div>
-               <button className="w-full py-4 bg-white/5 border border-white/10 rounded-xl text-[9px] font-black uppercase tracking-widest hover:bg-white/10 transition-all shadow-inner">
-                  Contact Support
-               </button>
-            </div>
-         </div>
-         <div className="max-w-7xl mx-auto px-8 pt-12 flex justify-center text-[9px] font-black text-slate-500 uppercase tracking-[0.3em] text-center dark:text-slate-400 transition-colors duration-300">
-            © 2026 RelayPost Intelligence Network. All rights reserved. Registered trademark of Lux Intel Group.
-         </div>
-      </footer>
+      <Footer/>
     </div>
   );
 }

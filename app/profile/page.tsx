@@ -1,309 +1,143 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import Image from "next/image";
 import Link from "next/link";
-import { Edit2, Share2, Sparkles, Clock, Users, CreditCard, Plus } from "lucide-react";
-import { Article } from "@/lib/types";
-import { API_BASE } from "@/lib/config";
-
+import { Edit2, Share2, FileText } from "lucide-react";
+import { AUTH_BASE, API_BASE } from "@/lib/config";
+import Cookies from "js-cookie";
 
 export default function ProfileDashboard() {
-  const [stats, setStats] = useState<any>(null);
-  const [savedArticles, setSavedArticles] = useState<Article[]>([]);
-  const [favArticles, setFavArticles] = useState<Article[]>([]);
+  const [user, setUser] = useState<any>(null);
+  const [contributions, setContributions] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // In a real implementation we would fetch the user stats from our new backend routes
-    // But since this is a frontend layout built to match the image, we will mock the backend returns
-    // for immediate UI parity or fetch if backend is connected
-    const fetchDashboardContent = async () => {
+    const fetchUserData = async () => {
       try {
-        const token = (await import("js-cookie")).default.get("access_token");
-        
-        // Example backend call:
-        // const statsRes = await fetch(`${API_BASE}/profile/stats`, {
-        //   headers: { Authorization: `Bearer ${token}` }
-        // });
-        // const statsData = await statsRes.json();
-        
-        // MOCK data to match image
-        setStats({
-          articles_curated: 1284,
-          history_explored: 42.5,
-          followers: "8.9k"
+        const token = Cookies.get("access_token") || localStorage.getItem("auth_token");
+        if (!token) {
+          window.location.href = "/login";
+          return;
+        }
+
+        const res = await fetch(`${AUTH_BASE}/users/me`, {
+          headers: { Authorization: `Bearer ${token}` }
         });
-
-        // Mock saved articles based on image
-        setSavedArticles([
-          {
-            id: "1",
-            title: "The Quantum Leap: Why Space Tech is the New Frontier for Private Equity",
-            status: "published",
-            content_blocks: [],
-            media_gallery: [],
-            secondary_keywords: [],
-            key_takeaways: [],
-            faq_section: [],
-            created_at: new Date().toISOString(),
-            author_id: "alex",
-            slug: "quantum-leap",
-            hero_image: "https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=800",
-          } as unknown as Article,
-          {
-            id: "2",
-            title: "Digital Fortresses: Navigating the 2024 Cybersecurity Landscape",
-            status: "published",
-            content_blocks: [],
-            media_gallery: [],
-            secondary_keywords: [],
-            key_takeaways: [],
-            faq_section: [],
-            created_at: new Date().toISOString(),
-            author_id: "alex",
-            slug: "cyber-landscape",
-            hero_image: "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&w=800",
-          } as unknown as Article,
-          {
-            id: "3",
-            title: "The Pivot: Central Bank Strategies in a Decoupling Global Economy",
-            status: "published",
-            content_blocks: [],
-            media_gallery: [],
-            secondary_keywords: [],
-            key_takeaways: [],
-            faq_section: [],
-            created_at: new Date().toISOString(),
-            author_id: "alex",
-            slug: "central-bank",
-            hero_image: "https://images.unsplash.com/photo-1611974714451-f4043fbb10e3?auto=format&fit=crop&w=800",
-          } as unknown as Article
-        ]);
-
-        setFavArticles([
-          {
-            id: "4",
-            title: "The Automation Paradox: Human Labor in the Age of LLMs",
-            status: "published",
-            content_blocks: [],
-            media_gallery: [],
-            secondary_keywords: [],
-            key_takeaways: [],
-            faq_section: [],
-            created_at: new Date().toISOString(),
-            author_id: "alex",
-            slug: "automation",
-            hero_image: "https://images.unsplash.com/photo-1485827404703-89b55fcc595e?auto=format&fit=crop&w=800",
-          } as unknown as Article,
-          {
-            id: "5",
-            title: "Rethinking the Ivy League: The Rise of Specialized Intelligence Hubs",
-            status: "published",
-            content_blocks: [],
-            media_gallery: [],
-            secondary_keywords: [],
-            key_takeaways: [],
-            faq_section: [],
-            created_at: new Date().toISOString(),
-            author_id: "alex",
-            slug: "ivy-league",
-            hero_image: "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?auto=format&fit=crop&w=800",
-          } as unknown as Article
-        ]);
-
+        
+        if (res.ok) {
+          const data = await res.json();
+          setUser(data);
+          
+          try {
+            const contribRes = await fetch(`${API_BASE}/profile/contributions`, {
+              headers: { Authorization: `Bearer ${token}` }
+            });
+            if (contribRes.ok) {
+              const cData = await contribRes.json();
+              setContributions(cData);
+            }
+          } catch (e) {
+            console.error("Failed to fetch contributions", e);
+          }
+        } else {
+          // Token might be invalid
+          localStorage.removeItem("auth_token");
+          Cookies.remove("access_token");
+          window.location.href = "/login";
+        }
       } catch (err) {
-        console.error(err);
+        console.error("Failed to fetch user data", err);
+      } finally {
+        setIsLoading(false);
       }
     };
-    fetchDashboardContent();
+    fetchUserData();
   }, []);
 
-  return (
-    <div className="flex flex-col gap-6">
-      
-      {/* Top row cards */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        
-        {/* User Profile Card */}
-        <div className="bg-slate-50 dark:bg-slate-900 rounded-3xl p-8 flex flex-col items-center shadow-sm relative border border-slate-100 dark:border-slate-800">
-          <div className="absolute top-6 right-6 inline-flex items-center gap-1.5 px-3 py-1 bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 text-xs font-semibold rounded-full border border-emerald-200 dark:border-emerald-800/50">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Verified Member
-          </div>
+  const getInitials = (name: string) => {
+    if (!name) return "?";
+    return name.split(" ").map(n => n[0]).join("").toUpperCase().substring(0, 2);
+  };
 
-          <div className="w-24 h-24 rounded-full border-4 border-white dark:border-slate-800 shadow-xl overflow-hidden mb-4 ring-2 ring-indigo-500 ring-offset-2 dark:ring-offset-slate-900 relative">
-            <Image 
-              src="https://api.dicebear.com/7.x/avataaars/svg?seed=Alex" 
-              alt="Profile" 
-              fill
-              className="object-cover bg-slate-200 dark:bg-slate-800"
-              unoptimized
-            />
-          </div>
-          
-          <h2 className="text-2xl font-bold dark:text-white">Alex Johnson</h2>
-          <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">Member since: Jan 2022</p>
+  const formatDate = (dateString: string) => {
+    if (!dateString) return "";
+    const d = new Date(dateString);
+    return d.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+  };
 
-          <div className="flex gap-4 mt-6 w-full max-w-xs">
-            <button className="flex-1 bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-semibold py-2.5 rounded-full flex items-center justify-center gap-2 hover:bg-slate-800 dark:hover:bg-slate-100 transition-colors">
-              <Edit2 size={16} /> Edit Profile
-            </button>
-            <button className="flex-1 bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-semibold py-2.5 rounded-full flex items-center justify-center gap-2 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors">
-              <Share2 size={16} /> Share
-            </button>
-          </div>
-        </div>
-
-        {/* Intelligence Pulse Card */}
-        <div className="bg-[#1e2335] dark:bg-[#161a28] rounded-3xl p-8 text-white flex flex-col justify-between shadow-sm relative overflow-hidden">
-          <div className="absolute -top-16 -right-16 w-32 h-32 bg-indigo-500/20 blur-3xl rounded-full"></div>
-          
-          <h3 className="text-xs font-bold tracking-widest text-slate-400 uppercase mb-8">Intelligence Pulse</h3>
-
-          <div className="flex flex-col gap-6">
-            <div className="flex justify-between items-end border-b border-white/10 pb-4">
-              <div>
-                <p className="text-3xl font-bold">{stats?.articles_curated || "..."}</p>
-                <p className="text-xs text-slate-400 mt-1">Articles Curated</p>
-              </div>
-              <Sparkles size={24} className="text-indigo-400 mb-2" />
-            </div>
-
-            <div className="flex justify-between items-end border-b border-white/10 pb-4">
-              <div>
-                <p className="text-3xl font-bold">{stats?.history_explored || "..."}h</p>
-                <p className="text-xs text-slate-400 mt-1">History Explored</p>
-              </div>
-              <Clock size={24} className="text-emerald-400 mb-2" />
-            </div>
-
-            <div className="flex justify-between items-end">
-              <div>
-                <p className="text-3xl font-bold">{stats?.followers || "..."}</p>
-                <p className="text-xs text-slate-400 mt-1">Followers</p>
-              </div>
-              <Users size={24} className="text-rose-400 mb-2" />
-            </div>
-          </div>
-        </div>
-        
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
       </div>
+    );
+  }
 
-      {/* Middle row cards */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+  return (
+    <div className="flex flex-col gap-6 w-full max-w-3xl mx-auto">
+      
+      {/* User Profile Card */}
+      <div className="bg-slate-50 dark:bg-slate-900 rounded-3xl p-8 flex flex-col items-center shadow-sm relative border border-slate-100 dark:border-slate-800">
+        <div className="absolute top-6 right-6 inline-flex items-center gap-1.5 px-3 py-1 bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 text-xs font-semibold rounded-full border border-emerald-200 dark:border-emerald-800/50">
+          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Verified Member
+        </div>
+
+        <div className="w-24 h-24 rounded-full border-4 border-white dark:border-slate-800 shadow-xl overflow-hidden mb-4 ring-2 ring-indigo-500 ring-offset-2 dark:ring-offset-slate-900 flex items-center justify-center bg-indigo-100 dark:bg-indigo-900 text-indigo-700 dark:text-indigo-300 text-3xl font-black tracking-tighter">
+          {getInitials(user?.display_name || user?.email)}
+        </div>
         
-        {/* Subscription Status Card */}
-        <div className="bg-slate-50 dark:bg-slate-900 rounded-3xl p-8 shadow-sm border border-slate-100 dark:border-slate-800">
-          <div className="flex justify-between items-start mb-6">
-            <div>
-              <h3 className="font-bold text-lg dark:text-white">Subscription Status</h3>
-              <div className="flex items-center gap-2 mt-2">
-                <span className="text-sm text-slate-500 dark:text-slate-400">Your Plan:</span>
-                <span className="px-2 py-0.5 bg-indigo-600 text-white text-[10px] font-bold uppercase tracking-wider rounded">Pro Subscriber</span>
-              </div>
-            </div>
-            <div className="w-10 h-10 rounded-full bg-indigo-100 dark:bg-indigo-900/50 flex items-center justify-center text-indigo-600 dark:text-indigo-400">
-              <CreditCard size={20} />
-            </div>
-          </div>
+        <h2 className="text-2xl font-bold dark:text-white">{user?.display_name || user?.email?.split('@')[0]}</h2>
+        <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
+          Member since: {formatDate(user?.created_at) || "Recently"}
+        </p>
 
-          <div className="bg-white dark:bg-slate-800/50 rounded-2xl p-4 flex flex-col gap-3 mb-6">
-            <div className="flex justify-between text-sm">
-              <span className="text-slate-500 dark:text-slate-400">Next Payment</span>
-              <span className="font-bold dark:text-white">Feb 12, 2024</span>
-            </div>
-            <div className="flex justify-between text-sm">
-              <span className="text-slate-500 dark:text-slate-400">Amount</span>
-              <span className="font-bold dark:text-white">$19.00 / mo</span>
-            </div>
-          </div>
-
-          <button className="w-full bg-white dark:bg-slate-800 text-indigo-600 dark:text-indigo-400 font-bold py-3 rounded-full border border-indigo-200 dark:border-indigo-800 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 transition-colors">
-            Manage Billing
+        <div className="flex gap-4 mt-6 w-full max-w-xs">
+          <button className="flex-1 bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-semibold py-2.5 rounded-full flex items-center justify-center gap-2 hover:bg-slate-800 dark:hover:bg-slate-100 transition-colors">
+            <Edit2 size={16} /> Edit Profile
+          </button>
+          <button className="flex-1 bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-semibold py-2.5 rounded-full flex items-center justify-center gap-2 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors">
+            <Share2 size={16} /> Share
           </button>
         </div>
+      </div>
 
-        {/* Global Topics Card */}
-        <div className="bg-slate-50 dark:bg-slate-900 rounded-3xl p-8 shadow-sm border border-slate-100 dark:border-slate-800">
-          <h3 className="font-bold text-lg dark:text-white mb-2">My Global Topics</h3>
-          <p className="text-sm text-slate-500 dark:text-slate-400 mb-6 leading-relaxed">
-            Your intelligence feeds are currently optimized for these personalized clusters.
-          </p>
-
-          <div className="flex flex-wrap gap-2">
-            {["#techtrends", "#marketinsights", "#geopolitics", "#sustainability", "#aiethics", "#macroeconomics"].map(tag => (
-              <span 
-                key={tag}
-                className={`px-4 py-2 rounded-full text-xs font-bold border border-slate-200 dark:border-slate-700/50 dark:bg-slate-800
-                  ${tag === '#techtrends' ? 'bg-indigo-50 text-indigo-700 dark:text-indigo-400' : ''}
-                  ${tag === '#marketinsights' ? 'bg-purple-50 text-purple-700 dark:text-purple-400' : ''}
-                  ${tag === '#geopolitics' ? 'bg-orange-50 text-orange-700 dark:text-orange-400' : ''}
-                  ${tag === '#sustainability' ? 'bg-emerald-50 text-emerald-700 dark:text-emerald-400' : ''}
-                  ${tag === '#aiethics' ? 'bg-rose-50 text-rose-700 dark:text-rose-400' : ''}
-                  ${tag === '#macroeconomics' ? 'bg-cyan-50 text-cyan-700 dark:text-cyan-400' : ''}
-                `}
-              >
-                {tag}
-              </span>
-            ))}
-            <button className="w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-700 text-slate-500 dark:text-slate-300 flex items-center justify-center hover:bg-slate-300 dark:hover:bg-slate-600 transition-colors">
-              <Plus size={16} />
-            </button>
+      {/* Contributions Section */}
+      <div className="mt-8">
+        <h3 className="text-xl font-bold dark:text-white mb-4">My Contributions</h3>
+        {contributions.length === 0 ? (
+          <div className="bg-slate-50 dark:bg-slate-900 rounded-3xl p-8 border border-slate-100 dark:border-slate-800 text-center flex flex-col items-center">
+            <div className="w-16 h-16 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center mb-4 text-slate-400">
+              <FileText size={24} />
+            </div>
+            <p className="text-slate-500 dark:text-slate-400 mb-6 font-medium">You haven't submitted any contributions yet.</p>
+            <Link href="/contribute" className="inline-block bg-indigo-600 hover:bg-indigo-500 text-white px-8 py-3 rounded-full font-bold text-sm transition-colors shadow-lg">
+              Submit Analysis
+            </Link>
           </div>
-        </div>
-
-      </div>
-
-      {/* Saved For Later Section */}
-      <div className="mt-6">
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-xl font-bold dark:text-white">Saved for Later</h2>
-          <Link href="/profile/saved" className="text-sm font-bold text-indigo-600 dark:text-indigo-400 hover:text-indigo-500">
-            View All
-          </Link>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {savedArticles.map(article => (
-            <Link href={`/article/${article.slug}`} key={article.id} className="group flex flex-col">
-              <div className="relative aspect-[16/9] rounded-2xl overflow-hidden mb-4">
-                <Image src={article.hero_image || ""} alt={article.title} fill className="object-cover group-hover:scale-105 transition-transform duration-500" unoptimized />
-                <div className="absolute top-3 right-3 px-2 py-1 bg-black/60 backdrop-blur-md text-white text-[10px] font-bold rounded-md">
-                  12 min read
+        ) : (
+          <div className="flex flex-col gap-4">
+            {contributions.map((contrib: any) => (
+              <div key={contrib.id} className="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-2xl p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-sm hover:shadow-md transition-shadow">
+                <div>
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="text-[10px] font-black uppercase tracking-widest text-indigo-500 bg-indigo-50 dark:bg-indigo-900/30 px-2 py-1 rounded">
+                      {contrib.content_type}
+                    </span>
+                    <span className="text-xs font-medium text-slate-500 dark:text-slate-400">
+                      {formatDate(contrib.created_at)}
+                    </span>
+                  </div>
+                  <h4 className="font-bold dark:text-white text-lg">{contrib.header}</h4>
+                </div>
+                <div className="shrink-0">
+                  <span className={`text-[10px] font-black uppercase tracking-widest px-3 py-1.5 rounded-full ${contrib.status === 'approved' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400' : contrib.status === 'rejected' ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400' : 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400'}`}>
+                    {contrib.status}
+                  </span>
                 </div>
               </div>
-              <h3 className="font-bold text-sm leading-tight group-hover:text-indigo-600 dark:text-white dark:group-hover:text-indigo-400 transition-colors mb-2">
-                {article.title}
-              </h3>
-              <p className="text-xs text-slate-500 dark:text-slate-400">Added 2 days ago</p>
-            </Link>
-          ))}
-        </div>
-      </div>
-
-      {/* Favorite Articles Section */}
-      <div className="mt-6">
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-xl font-bold dark:text-white">Favorite Articles</h2>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {favArticles.map(article => (
-            <Link href={`/article/${article.slug}`} key={article.id} className="group bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-2xl p-4 flex gap-4 hover:shadow-md transition-shadow">
-              <div className="w-24 h-24 shrink-0 rounded-xl overflow-hidden relative border border-slate-100 dark:border-slate-800">
-                <Image src={article.hero_image || ""} alt={article.title} fill className="object-cover group-hover:scale-105 transition-transform duration-500" unoptimized />
-              </div>
-              <div className="flex flex-col justify-center">
-                <h3 className="font-bold text-sm leading-tight group-hover:text-indigo-600 dark:text-white dark:group-hover:text-indigo-400 transition-colors mb-3">
-                  {article.title}
-                </h3>
-                <div className="flex gap-3 text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
-                  <span className="text-rose-500 flex items-center gap-1">❤ Top Rated</span>
-                  <span>Published Dec 2023</span>
-                </div>
-              </div>
-            </Link>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
       </div>
 
     </div>

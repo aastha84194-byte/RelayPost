@@ -23,7 +23,7 @@ export default function HeroSection({ articles = [] }: { articles?: Article[] })
   const currentArticle = articles[currentIndex];
 
   return (
-    <div className="relative w-full rounded-none md:rounded-2xl overflow-hidden min-h-[400px] md:min-h-[460px] group shadow-xl -mx-4 md:mx-0">
+    <div className="relative w-full rounded-3xl md:rounded-[2.5rem] overflow-hidden min-h-[360px] md:min-h-[460px] group shadow-xl">
       <AnimatePresence initial={false}>
         <motion.div
           key={currentArticle.id}
@@ -51,7 +51,7 @@ export default function HeroSection({ articles = [] }: { articles?: Article[] })
 
           <ParticleEffect />
 
-          <div className="absolute bottom-0 left-0 right-0 p-8 md:p-12 lg:p-16 z-20 pointer-events-none">
+          <div className="absolute bottom-0 left-0 right-0 p-6 md:p-12 lg:p-16 z-20 pointer-events-none">
             <motion.h1
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}

@@ -14,15 +14,13 @@ export default function ProfileLayout({ children }: { children: React.ReactNode 
   const navItems = [
     { name: "Dashboard", href: "/profile", icon: LayoutDashboard },
     { name: "Saved", href: "/profile/saved", icon: Bookmark },
-    { name: "Stats", href: "/profile/stats", icon: Activity },
-    { name: "Settings", href: "/profile/settings", icon: Settings },
   ];
 
   return (
     <div className="min-h-screen flex flex-col font-sans bg-white dark:bg-[#0f172a] text-slate-900 dark:text-slate-100 transition-colors">
       <Navbar />
       
-      <main className="flex-grow flex justify-center w-full mt-24 md:mt-32 px-4 md:px-8 max-w-7xl mx-auto mb-20 gap-8">
+      <main className="flex-grow flex justify-center w-full mt-12 md:mt-16 px-4 md:px-8 max-w-7xl mx-auto mb-20 gap-8">
         
         {/* Mobile Sidebar Toggle */}
         <button 
@@ -35,8 +33,7 @@ export default function ProfileLayout({ children }: { children: React.ReactNode 
         {/* Sidebar - Desktop */}
         <aside className="hidden md:flex flex-col w-64 shrink-0 gap-8 pt-4">
           <div>
-            <h1 className="text-xl font-bold">Intelligence Profile</h1>
-            <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">Elite Curator Tier</p>
+            <h1 className="text-xl font-bold">Profile</h1>
           </div>
           
           <nav className="flex flex-col gap-2">

@@ -7,6 +7,7 @@ import Image from 'next/image';
 import { Clock, Globe, ArrowLeft, Share2, Bookmark, Layers } from 'lucide-react';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import NewsActionButtons from '../../components/NewsActionButtons';
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -24,11 +25,15 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   return {
     title: `${article.meta_title || article.title} | RelayPost News`,
-    description: article.meta_description || article.description,
+    description: article.meta_description || article.ai_summary || article.description,
+    keywords: (article.keywords || []).filter(Boolean),
+    alternates: {
+      canonical: `https://relaypost.com/news/${article.slug}`
+    },
     openGraph: {
-      title: article.title,
-      description: article.description,
-      images: article.image_url ? [article.image_url] : [],
+      title: article.meta_title || article.title,
+      description: article.meta_description || article.ai_summary || article.description,
+      images: article.image_url ? [{ url: article.image_url }] : [],
     },
   };
 }
@@ -56,14 +61,7 @@ export default async function NewsDetailPage({ params }: Props) {
             Back to Intel
           </Link>
 
-          <div className="flex gap-4">
-            <button className="p-2 rounded-full border border-slate-100 dark:border-slate-800 text-slate-400 hover:text-indigo-600 transition-colors">
-              <Share2 size={18} />
-            </button>
-            <button className="p-2 rounded-full border border-slate-100 dark:border-slate-800 text-slate-400 hover:text-indigo-600 transition-colors">
-              <Bookmark size={18} />
-            </button>
-          </div>
+          <NewsActionButtons />
         </div>
 
         {/* Article Header */}
