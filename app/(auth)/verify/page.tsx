@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Cookies from 'js-cookie';
 import toast from 'react-hot-toast';
@@ -8,7 +8,7 @@ import { AUTH_BASE } from "@/lib/config";
 import NetworkBackground from '../../components/NetworkBackground';
 import Footer from '../../components/Footer';
 
-export default function Verify() {
+function VerifyContent() {
   const searchParams = useSearchParams();
   const token = searchParams.get("token");
   const [status, setStatus] = useState<"loading" | "success" | "error">("loading");
@@ -103,5 +103,13 @@ export default function Verify() {
       </main>
       <Footer />
     </div>
+  );
+}
+
+export default function Verify() {
+  return (
+    <Suspense fallback={<div className="bg-deep-sea min-h-screen"></div>}>
+      <VerifyContent />
+    </Suspense>
   );
 }
