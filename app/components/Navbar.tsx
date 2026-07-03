@@ -47,7 +47,7 @@ function NavbarCategoryFilters() {
   }
 
   return (
-    <div className="w-full md:max-w-7xl md:mx-auto px-4 md:px-8 mb-6 mt-4 md:mt-6">
+    <div className="w-full md:max-w-7xl md:mx-auto px-4 md:px-8 mb-3 md:mb-6 mt-3 md:mt-6">
       <div className="flex items-center gap-3 overflow-x-auto hide-scrollbar py-1">
         {categories.map((cat) => {
           const Icon = cat.icon;
@@ -81,6 +81,7 @@ export default function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const pathname = usePathname();
 
   useEffect(() => {
     import("js-cookie").then((Cookies) => {
@@ -121,12 +122,12 @@ export default function Navbar() {
     <>
       <SearchOverlay isOpen={searchOpen} onClose={() => setSearchOpen(false)} />
 
-      <div className="fixed top-0 w-full z-50 pointer-events-none flex justify-center md:px-4">
+      <div className="fixed top-0 left-0 right-0 z-50 pointer-events-none flex justify-center md:px-4">
         <motion.header
           className="md:pt-4 w-full flex justify-center pointer-events-auto"
           animate={{
-            width: isScrolled ? "800px" : "1280px",
-            maxWidth: "100%"
+            width: "100%",
+            maxWidth: isScrolled ? "800px" : "1280px"
           }}
           transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
         >
@@ -260,9 +261,7 @@ export default function Navbar() {
                             <Link href="/profile/saved" className="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-300 hover:text-white hover:bg-slate-700/50 transition-colors">
                               <Bookmark size={16} className="text-slate-400" /> Saved Articles
                             </Link>
-                            <Link href="/profile/favorites" className="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-300 hover:text-white hover:bg-slate-700/50 transition-colors">
-                              <Star size={16} className="text-slate-400" /> Favourites
-                            </Link>
+
                             <Link href="/profile/contributions" className="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-300 hover:text-white hover:bg-slate-700/50 transition-colors">
                               <Edit3 size={16} className="text-slate-400" /> Contributions
                             </Link>
@@ -272,6 +271,7 @@ export default function Navbar() {
                                 onClick={() => {
                                   import("js-cookie").then((Cookies) => {
                                     Cookies.default.remove("access_token");
+                                    localStorage.removeItem("auth_token");
                                     window.location.reload();
                                   });
                                 }}
@@ -295,7 +295,7 @@ export default function Navbar() {
                 {/* Mobile Menu Toggle */}
                 <button
                   onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                  className="flex md:hidden w-10 h-10 items-center justify-center text-white bg-white/5 rounded-full"
+                  className="flex md:hidden w-9 h-9 md:w-10 md:h-10 items-center justify-center text-white bg-white/5 rounded-full"
                 >
                   {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
                 </button>
@@ -348,7 +348,7 @@ export default function Navbar() {
         )}
       </AnimatePresence>
 
-      <div className="h-20 md:h-28"></div>
+      <div className={`${pathname === '/' ? 'h-20 md:h-28' : 'h-[60px] md:h-28'}`}></div>
 
       <Suspense
         fallback={

@@ -6,6 +6,7 @@ import { NewsArticle } from '@/lib/types';
 import { getNewsLive, getNewsCategories, getNewsByCategory } from '@/lib/articles';
 import { NewsSpotlight, NewsCard } from '../components/NewsCard';
 import NewsQuickReadModal from '../components/NewsQuickReadModal';
+import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { Sparkles, ArrowRight, Layers } from 'lucide-react';
 
@@ -82,10 +83,10 @@ function NewsContent() {
                   </div>
                   <h2 className="text-2xl font-black text-slate-900 dark:text-white uppercase tracking-tight">{cat}</h2>
                 </div>
-                <button className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-indigo-600 transition-colors">
+                <Link href={`/?category=${encodeURIComponent(cat)}`} className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-indigo-600 transition-colors">
                   View Full Feed
                   <ArrowRight size={14} />
-                </button>
+                </Link>
               </div>
               
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">

@@ -154,6 +154,7 @@ export default function TrendingNow({ articles }: { articles: Article[] }) {
                   fill
                   sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                   className="object-cover group-hover:scale-110 transition-transform duration-500"
+                  unoptimized={true}
                 />
               </div>
               <div className="p-3 bg-white group-hover:bg-gray-50 transition-colors flex-grow dark:bg-slate-900 dark:group-hover:bg-slate-800/50">

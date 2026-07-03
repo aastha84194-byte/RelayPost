@@ -5,31 +5,30 @@ import Image from "next/image";
 import Link from "next/link";
 import { Article } from "@/lib/types";
 import { BookmarkMinus } from "lucide-react";
+import Cookies from "js-cookie";
 
 export default function SavedArticlesPage() {
   const [savedArticles, setSavedArticles] = useState<Article[]>([]);
 
   useEffect(() => {
-    // MOCK data matching the subset seen on the dashboard
-    setSavedArticles([
-      {
-        id: "1",
-        title: "The Quantum Leap: Why Space Tech is the New Frontier for Private Equity",
-        status: "published",
-        slug: "quantum-leap",
-        hero_image: "https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=800",
-        created_at: new Date().toISOString(),
-      } as unknown as Article,
-      {
-        id: "2",
-        title: "Digital Fortresses: Navigating the 2024 Cybersecurity Landscape",
-        status: "published",
-        slug: "cyber-landscape",
-        hero_image: "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&w=800",
-        created_at: new Date().toISOString(),
-      } as unknown as Article,
-      // Add more items here...
-    ]);
+    const fetchSavedArticles = async () => {
+      const token = Cookies.get("access_token");
+      if (!token) return;
+      try {
+        const res = await fetch("http://localhost:8001/profile/saved?limit=50", {
+          headers: {
+            "Authorization": `Bearer ${token}`
+          }
+        });
+        if (res.ok) {
+          const data = await res.json();
+          setSavedArticles(data);
+        }
+      } catch (err) {
+        console.error("Failed to fetch saved articles", err);
+      }
+    };
+    fetchSavedArticles();
   }, []);
 
   return (
@@ -60,7 +59,7 @@ export default function SavedArticlesPage() {
                 </Link>
               </div>
               <div className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-widest mt-4">
-                Saved 2 days ago
+                Saved Article
               </div>
             </div>
           </div>

@@ -73,9 +73,7 @@ export default function ContributePage() {
              animate={{ opacity: 1, x: 0 }}
              className="space-y-6"
            >
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-brand/10 border border-brand/20 text-brand text-[10px] font-black uppercase tracking-widest">
-                 <Zap size={12} /> Community Intelligence Network
-              </div>
+
               <h1 className="text-5xl md:text-6xl font-black tracking-tight leading-[0.95] uppercase">
                 Submit Your <span className="text-brand">Analysis</span>.
               </h1>
@@ -202,7 +200,7 @@ export default function ContributePage() {
          <div className="grid grid-cols-1 md:grid-cols-3 gap-12 text-center md:text-left">
             <div>
                <p className="text-[10px] font-black text-indigo-400 uppercase tracking-widest mb-4">Integrity Auditing</p>
-               <p className="text-sm text-slate-500 font-medium">All submissions undergo a dual-human blind review process to ensure zero corporate bias in our intelligence dispatches.</p>
+               <p className="text-sm text-slate-500 font-medium">All submissions undergo a human review process to ensure zero bias in our intelligence dispatches.</p>
             </div>
             <div>
                <p className="text-[10px] font-black text-emerald-400 uppercase tracking-widest mb-4">Submission Rewards</p>
