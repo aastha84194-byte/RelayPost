@@ -421,9 +421,13 @@ export async function getPopularKeywords(limit: number = 10): Promise<string[]> 
   }
 }
 
-export async function getAllNewsAdmin(limit: number = 50, skip: number = 0): Promise<{ items: NewsArticle[], total: number }> {
+export async function getAllNewsAdmin(limit: number = 50, skip: number = 0, search: string = ""): Promise<{ items: NewsArticle[], total: number }> {
   try {
-    const res = await fetch(`${NEWS_API_BASE}/live?limit=${limit}&skip=${skip}&is_admin=true`, { 
+    let url = `${NEWS_API_BASE}/live?limit=${limit}&skip=${skip}&is_admin=true`;
+    if (search) {
+      url += `&search=${encodeURIComponent(search)}`;
+    }
+    const res = await fetch(url, { 
       cache: 'no-store' 
     });
     if (!res.ok) return { items: [], total: 0 };
