@@ -9,6 +9,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import NewsActionButtons from '../../components/NewsActionButtons';
 import ReactMarkdown from 'react-markdown';
+import rehypeRaw from 'rehype-raw';
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -158,6 +159,7 @@ export default async function NewsDetailPage({ params }: Props) {
             {article.full_analysis ? (
                <div className="mb-12 [&>p:first-of-type]:first-letter:text-6xl md:[&>p:first-of-type]:first-letter:text-7xl [&>p:first-of-type]:first-letter:font-black [&>p:first-of-type]:first-letter:text-indigo-600 dark:[&>p:first-of-type]:first-letter:text-indigo-400 [&>p:first-of-type]:first-letter:mr-3 [&>p:first-of-type]:first-letter:float-left">
                   <ReactMarkdown
+                    rehypePlugins={[rehypeRaw]}
                     components={{
                       h1: ({node, ...props}) => <h1 className="text-3xl md:text-5xl font-black text-slate-900 dark:text-white mb-6 tracking-tight" {...props} />,
                       h2: ({node, ...props}) => <h2 className="text-2xl md:text-4xl font-black text-slate-900 dark:text-white mt-12 mb-6 tracking-tight" {...props} />,
@@ -165,20 +167,17 @@ export default async function NewsDetailPage({ params }: Props) {
                       p: ({node, ...props}) => <p className="text-[17px] md:text-xl text-slate-700 dark:text-slate-300 leading-[1.8] mb-6 md:mb-8" {...props} />,
                       ul: ({node, ...props}) => <ul className="space-y-4 mb-8 pl-6 list-disc text-[17px] md:text-xl text-slate-700 dark:text-slate-300" {...props} />,
                       li: ({node, ...props}) => <li className="pl-2" {...props} />,
-                      blockquote: ({node, ...props}) => <blockquote className="border-l-4 border-indigo-500 pl-6 my-8 italic text-xl text-slate-800 dark:text-slate-200" {...props} />
+                      blockquote: ({node, ...props}) => <blockquote className="border-l-4 border-indigo-500 pl-6 my-8 italic text-xl text-slate-800 dark:text-slate-200" {...props} />,
+                      strong: ({node, ...props}) => <strong className="font-bold text-slate-900 dark:text-white" {...props} />
                     }}
                   >
-                    {article.full_analysis.split('\n').map(line => {
-                      const t = line.trim();
-                      if (!t) return '';
-                      if (t.length > 0 && t.length < 100 && !/[.!?]$/.test(t) && !t.startsWith('#')) return `### ${t}`;
-                      return t;
-                    }).join('\n\n')}
+                    {article.full_analysis}
                   </ReactMarkdown>
                </div>
             ) : article.content ? (
                <div className="mb-12 [&>p:first-of-type]:first-letter:text-6xl md:[&>p:first-of-type]:first-letter:text-7xl [&>p:first-of-type]:first-letter:font-black [&>p:first-of-type]:first-letter:text-indigo-600 dark:[&>p:first-of-type]:first-letter:text-indigo-400 [&>p:first-of-type]:first-letter:mr-3 [&>p:first-of-type]:first-letter:float-left">
                   <ReactMarkdown
+                    rehypePlugins={[rehypeRaw]}
                     components={{
                       h1: ({node, ...props}) => <h1 className="text-3xl md:text-5xl font-black text-slate-900 dark:text-white mb-6 tracking-tight" {...props} />,
                       h2: ({node, ...props}) => <h2 className="text-2xl md:text-4xl font-black text-slate-900 dark:text-white mt-12 mb-6 tracking-tight" {...props} />,
@@ -186,15 +185,11 @@ export default async function NewsDetailPage({ params }: Props) {
                       p: ({node, ...props}) => <p className="text-[17px] md:text-xl text-slate-700 dark:text-slate-300 leading-[1.8] mb-6 md:mb-8" {...props} />,
                       ul: ({node, ...props}) => <ul className="space-y-4 mb-8 pl-6 list-disc text-[17px] md:text-xl text-slate-700 dark:text-slate-300" {...props} />,
                       li: ({node, ...props}) => <li className="pl-2" {...props} />,
-                      blockquote: ({node, ...props}) => <blockquote className="border-l-4 border-indigo-500 pl-6 my-8 italic text-xl text-slate-800 dark:text-slate-200" {...props} />
+                      blockquote: ({node, ...props}) => <blockquote className="border-l-4 border-indigo-500 pl-6 my-8 italic text-xl text-slate-800 dark:text-slate-200" {...props} />,
+                      strong: ({node, ...props}) => <strong className="font-bold text-slate-900 dark:text-white" {...props} />
                     }}
                   >
-                    {article.content.split('\n').map(line => {
-                      const t = line.trim();
-                      if (!t) return '';
-                      if (t.length > 0 && t.length < 100 && !/[.!?]$/.test(t) && !t.startsWith('#')) return `### ${t}`;
-                      return t;
-                    }).join('\n\n')}
+                    {article.content}
                   </ReactMarkdown>
                </div>
             ) : null}
