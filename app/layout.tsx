@@ -5,6 +5,12 @@ import { ThemeProvider } from './components/ThemeProvider';
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://relay-post.vercel.app'),
+  applicationName: 'RelayPost',
+  appleWebApp: {
+    title: 'RelayPost',
+    statusBarStyle: 'default',
+    capable: true,
+  },
   verification: {
     google: '39eC-3uLPsyxpmG-CvFLWTAO9DheJfC_kXXIPYFO2ck',
   },
