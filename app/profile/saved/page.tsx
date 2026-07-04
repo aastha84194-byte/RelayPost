@@ -6,6 +6,7 @@ import Link from "next/link";
 import { Article } from "@/lib/types";
 import { BookmarkMinus } from "lucide-react";
 import Cookies from "js-cookie";
+import { API_BASE } from "@/lib/config";
 
 export default function SavedArticlesPage() {
   const [savedArticles, setSavedArticles] = useState<Article[]>([]);
@@ -15,7 +16,7 @@ export default function SavedArticlesPage() {
       const token = Cookies.get("access_token");
       if (!token) return;
       try {
-        const res = await fetch("http://localhost:8001/profile/saved?limit=50", {
+        const res = await fetch(`${API_BASE}/profile/saved?limit=50`, {
           headers: {
             "Authorization": `Bearer ${token}`
           }

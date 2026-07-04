@@ -397,13 +397,26 @@ export async function getNewsByCategory(category: string, limit: number = 20, sk
 
 export async function getNewsCategories(): Promise<string[]> {
   try {
-    const res = await fetch(`${NEWS_API_BASE}/meta/categories`, { 
-      next: { revalidate: 300 } 
+    const response = await fetch(`${NEWS_API_BASE}/meta/categories`, {
+      next: { revalidate: 3600 }
     });
-    if (!res.ok) return [];
-    return await res.json();
-  } catch (err) {
-    console.error("Failed to fetch news categories", err);
+    if (!response.ok) return [];
+    return await response.json();
+  } catch (error) {
+    console.error('Error fetching categories:', error);
+    return [];
+  }
+}
+
+export async function getPopularKeywords(limit: number = 10): Promise<string[]> {
+  try {
+    const response = await fetch(`${API_BASE}/public/meta/popular-keywords?limit=${limit}`, {
+      next: { revalidate: 3600 }
+    });
+    if (!response.ok) return [];
+    return await response.json();
+  } catch (error) {
+    console.error('Error fetching popular keywords:', error);
     return [];
   }
 }
