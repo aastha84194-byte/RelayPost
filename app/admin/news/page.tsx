@@ -2,7 +2,7 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { NewsArticle } from "@/lib/types";
 import { getAllNewsAdmin, deleteNewsAdmin } from "@/lib/articles";
-import { Edit, Trash2, Globe, CheckCircle, XCircle, ChevronLeft, ChevronRight, RefreshCw } from "lucide-react";
+import { Edit, Trash2, Globe, CheckCircle, XCircle, ChevronLeft, ChevronRight, RefreshCw, Search } from "lucide-react";
 import Link from "next/link";
 
 const PAGE_SIZE = 25;
@@ -12,26 +12,36 @@ export default function AdminNewsPage() {
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
+  const [searchInput, setSearchInput] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
 
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
 
-  const fetchNews = useCallback(async (p: number = 1) => {
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setSearchQuery(searchInput);
+      setPage(1);
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [searchInput]);
+
+  const fetchNews = useCallback(async (p: number = 1, sq: string = "") => {
     setLoading(true);
     const skip = (p - 1) * PAGE_SIZE;
-    const data = await getAllNewsAdmin(PAGE_SIZE, skip);
+    const data = await getAllNewsAdmin(PAGE_SIZE, skip, sq);
     setNews(data.items);
     setTotal(data.total || data.items.length);
     setLoading(false);
   }, []);
 
   useEffect(() => {
-    fetchNews(page);
-  }, [page, fetchNews]);
+    fetchNews(page, searchQuery);
+  }, [page, searchQuery, fetchNews]);
 
   const handleDelete = async (id: number) => {
     if (confirm("Are you sure you want to delete this news article?")) {
       await deleteNewsAdmin(id);
-      fetchNews(page);
+      fetchNews(page, searchQuery);
     }
   };
 
@@ -62,13 +72,25 @@ export default function AdminNewsPage() {
             {total > 0 ? `${total} articles total — Page ${page} of ${totalPages}` : "Loading..."}
           </p>
         </div>
-        <button
-          onClick={() => fetchNews(page)}
-          className="flex items-center gap-2 bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors"
-        >
-          <RefreshCw size={16} className={loading ? "animate-spin" : ""} />
-          Refresh Feed
-        </button>
+        <div className="flex items-center gap-4">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+            <input
+              type="text"
+              placeholder="Search news..."
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
+              className="pl-10 pr-4 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 w-64 bg-white"
+            />
+          </div>
+          <button
+            onClick={() => fetchNews(page, searchQuery)}
+            className="flex items-center gap-2 bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors"
+          >
+            <RefreshCw size={16} className={loading ? "animate-spin" : ""} />
+            Refresh Feed
+          </button>
+        </div>
       </div>
 
       {loading ? (
