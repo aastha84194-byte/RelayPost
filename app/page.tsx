@@ -5,7 +5,7 @@ import TrendingNow from './components/TrendingNow';
 import LatestInsights from './components/LatestInsights';
 import TechSpotlight from './components/TechSpotlight';
 import ExpertAnalysis from './components/ExpertAnalysis';
-import InteractiveData from './components/InteractiveData';
+
 import PopularConversations from './components/PopularConversations';
 import GoUnlimited from './components/GoUnlimited';
 import Navbar from './components/Navbar';
@@ -14,7 +14,7 @@ import CommunityPulse from './components/CommunityPulse';
 import Footer from './components/Footer';
 import CategoryArticleSection from './components/CategoryArticleSection';
 import LiveInsightsSidebar from './components/LiveInsightsSidebar';
-import { getArticlesBySection, getHomepageCategorySections } from '@/lib/articles';
+import { getArticlesBySection, getHomepageCategorySections, getPopularKeywords } from '@/lib/articles';
 import { Article } from '@/lib/types';
 import { useSearchParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -29,23 +29,27 @@ function HomeContent() {
   const [insights, setInsights] = React.useState<Article[]>([]);
   const [heroes, setHeroes] = React.useState<Article[]>([]);
   const [categorySections, setCategorySections] = React.useState<Record<string, { slug: string, articles: Article[] }>>({});
+  const [derivedKeywords, setDerivedKeywords] = React.useState<string[]>([]);
   const [isLoading, setIsLoading] = React.useState(true);
 
   React.useEffect(() => {
     setIsLoading(true);
     const fetchData = async () => {
-       const [t, e, i, h, cats] = await Promise.all([
+       const [t, e, i, h, cats, popKw] = await Promise.all([
           getArticlesBySection("TrendingNow", category || undefined),
           getArticlesBySection("ExpertAnalysis", category || undefined),
           getArticlesBySection("LatestInsights", category || undefined),
           getArticlesBySection("Hero", category || undefined),
-          getHomepageCategorySections(5)
+          getHomepageCategorySections(5),
+          getPopularKeywords(10)
        ]);
        setTrending(t);
        setExpert(e);
        setInsights(i);
        setHeroes(h);
        setCategorySections(cats);
+       setDerivedKeywords(popKw);
+       
        setIsLoading(false);
     };
     fetchData();
@@ -104,7 +108,6 @@ function HomeContent() {
                       articles={data.articles}
                     />
                   ))}
-                  {!category && <InteractiveData />}
                 </>
               )}
             </div>
@@ -112,10 +115,10 @@ function HomeContent() {
             {/* RIGHT COLUMN - Sidebar - 4 columns wide */}
             <div className="lg:col-span-4 flex flex-col pl-0 lg:pl-4">
               <LiveInsightsSidebar />
-              <PopularConversations />
+              <PopularConversations articles={trending.slice(0, 5)} />
               <GoUnlimited />
               <TheBriefing />
-              <CommunityPulse />
+              {derivedKeywords.length > 0 && <CommunityPulse keywords={derivedKeywords} />}
             </div>
           </div>
         </div>

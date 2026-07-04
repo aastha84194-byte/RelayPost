@@ -12,6 +12,7 @@ import { recordArticleView, toggleLike, submitReflection, getArticlesBySection }
 import Cookies from "js-cookie";
 import toast from "react-hot-toast";
 import Footer from "../Footer";
+import { API_BASE } from "@/lib/config";
 interface ArticleRendererProps {
   article: Article;
 }
@@ -94,7 +95,7 @@ export default function ArticleRenderer({ article }: ArticleRendererProps) {
     setIsSaved(!isSaved);
     
     try {
-        const response = await fetch(`http://localhost:8001/profile/articles/${article.id}/save`, {
+        const response = await fetch(`${API_BASE}/profile/articles/${article.id}/save`, {
             method: 'POST',
             headers: {
                 'Authorization': `Bearer ${token}`
@@ -475,11 +476,17 @@ export default function ArticleRenderer({ article }: ArticleRendererProps) {
           {/* Tags */}
           <div className="mt-12 md:mt-20 pt-8 md:pt-12 border-t border-slate-100 dark:border-white/5 flex flex-wrap items-center justify-between gap-6">
              <div className="flex flex-wrap gap-2">
-                {article.secondary_keywords?.map(tag => (
-                   <span key={tag} className="px-4 py-2 bg-[#f0f2f5] dark:bg-slate-800 text-slate-500 dark:text-slate-400 text-[10px] font-black rounded-full hover:bg-brand hover:text-white transition-all cursor-pointer uppercase tracking-widest shadow-sm dark:shadow-none">
-                      #{tag}
-                   </span>
-                ))}
+                {article.secondary_keywords?.map(tag => {
+                   const cleanTag = tag.replace('#', '');
+                   const urlTag = cleanTag.replace(/ /g, '-').toLowerCase();
+                   return (
+                     <Link href={`/tag/${urlTag}`} key={tag}>
+                       <span className="px-4 py-2 bg-[#f0f2f5] dark:bg-slate-800 text-slate-500 dark:text-slate-400 text-[10px] font-black rounded-full hover:bg-brand hover:text-white transition-all cursor-pointer uppercase tracking-widest shadow-sm dark:shadow-none inline-block">
+                          #{cleanTag}
+                       </span>
+                     </Link>
+                   );
+                })}
              </div>
               <div className="flex gap-6">
                 <button 
