@@ -1,8 +1,8 @@
 import type { Metadata } from 'next';
 import './globals.css';
 import { Toaster } from 'react-hot-toast';
+import { Analytics } from '@vercel/analytics/react';
 import { ThemeProvider } from './components/ThemeProvider';
-
 export const metadata: Metadata = {
   metadataBase: new URL('https://relay-post.vercel.app'),
   applicationName: 'RelayPost',
@@ -107,6 +107,7 @@ export default function RootLayout({
               }
           }} />
           {children}
+          <Analytics />
         </ThemeProvider>
       </body>
     </html>
