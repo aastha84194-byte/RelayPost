@@ -1,7 +1,7 @@
 import React from "react";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
-
+import SupportMission from "./SupportMission";
 export default function Footer() {
   return (
     <footer className="bg-dark-bg text-gray-300 py-16 mt-24 border-t border-gray-800">
@@ -47,23 +47,7 @@ export default function Footer() {
           </div>
 
           {/* Mission & Newsletter Box */}
-          <div className="col-span-2 md:col-span-1">
-            <h4 className="text-white font-semibold mb-4 text-base">Support the Mission</h4>
-            <p className="text-sm text-gray-400 mb-4">
-              Sign up for exclusive content and monthly contributions to the site.
-            </p>
-            <div className="flex items-center bg-dark-surface rounded-full p-1 border border-gray-700/50 focus-within:border-brand/50 transition-colors max-w-sm">
-              <span className="pl-4 text-gray-500 dark:text-slate-400 transition-colors duration-300">$</span>
-              <input 
-                type="number" 
-                placeholder="/ monthly" 
-                className="bg-transparent border-none outline-none text-white text-sm w-full p-2 placeholder-gray-500"
-              />
-              <button className="w-8 h-8 rounded-full bg-brand hover:bg-brand-dark flex flex-shrink-0 items-center justify-center text-white transition-colors">
-                <ArrowRight size={14} />
-              </button>
-            </div>
-          </div>
+          <SupportMission />
         </div>
 
         {/* Bottom Bar */}
