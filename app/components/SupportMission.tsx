@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { ArrowRight, Loader2, Plus, Minus } from "lucide-react";
+import { ArrowRight, Loader2, Plus, Minus, Lock } from "lucide-react";
 import toast from "react-hot-toast";
 
 declare global {
@@ -12,6 +12,7 @@ declare global {
 
 export default function SupportMission() {
   const [amount, setAmount] = useState<string>("99");
+  const [isCustomAmount, setIsCustomAmount] = useState(false);
   const [loading, setLoading] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [token, setToken] = useState<string | null>(null);
@@ -38,15 +39,7 @@ export default function SupportMission() {
     };
   }, []);
 
-  const handleIncrease = () => {
-    const current = parseInt(amount) || 0;
-    setAmount(Math.min(50000, current + 50).toString());
-  };
 
-  const handleDecrease = () => {
-    const current = parseInt(amount) || 0;
-    setAmount(Math.max(1, current - 50).toString());
-  };
 
   const handleContribute = async () => {
     if (!isLoggedIn || !token) {
@@ -140,50 +133,86 @@ export default function SupportMission() {
 
   return (
     <div className="col-span-2 md:col-span-1">
-      <h4 className="text-white font-semibold mb-4 text-base">Support the Mission</h4>
-      <p className="text-sm text-gray-400 mb-4">
-        Contribute to get exclusive content and Weekly Digest directly in your MailBox.
+      <div className="flex items-center justify-start gap-2 mb-3">
+        <h4 className="text-white font-semibold text-base leading-none whitespace-nowrap">Support the Mission</h4>
+        <span className="text-[10px] font-medium text-brand bg-brand/10 px-2 py-0.5 rounded-full border border-brand/20 whitespace-nowrap">One-time Contribution</span>
+      </div>
+      <p className="text-sm text-gray-400 mb-5">
+        Get our Weekly Digest — top stories, curated by us, straight to your inbox.
       </p>
-      <div className="flex items-center bg-dark-surface rounded-full p-1 border border-gray-700/50 focus-within:border-brand/50 transition-colors max-w-sm">
-        <button 
-          onClick={handleDecrease}
+
+      {/* Preset Chips */}
+      <div className="grid grid-cols-2 gap-2 mb-4">
+        {[49, 99, 199].map((preset) => (
+          <button
+            key={preset}
+            onClick={() => {
+              setAmount(preset.toString());
+              setIsCustomAmount(false);
+            }}
+            disabled={loading}
+            className={`px-3 py-2 rounded-full text-sm font-medium transition-colors border ${
+              !isCustomAmount && amount === preset.toString()
+                ? "bg-brand text-white border-brand shadow-[0_0_10px_rgba(79,70,229,0.3)]"
+                : "bg-dark-surface text-gray-400 border-gray-700/50 hover:border-gray-500 hover:text-white"
+            } disabled:opacity-50`}
+          >
+            ₹{preset}
+          </button>
+        ))}
+        <button
+          onClick={() => setIsCustomAmount(true)}
           disabled={loading}
-          className="w-8 h-8 rounded-full flex flex-shrink-0 items-center justify-center text-gray-400 hover:text-white hover:bg-gray-800 transition-colors disabled:opacity-50"
+          className={`px-3 py-2 rounded-full text-sm font-medium transition-colors border ${
+            isCustomAmount
+              ? "bg-brand text-white border-brand shadow-[0_0_10px_rgba(79,70,229,0.3)]"
+              : "bg-dark-surface text-gray-400 border-gray-700/50 hover:border-gray-500 hover:text-white"
+          } disabled:opacity-50`}
         >
-          <Minus size={14} />
+          Custom
         </button>
-        <span className="pl-2 text-gray-500 dark:text-slate-400 transition-colors duration-300">₹</span>
-        <input 
-          type="number" 
-          value={amount}
-          onChange={(e) => {
-            const val = e.target.value;
-            // Prevent entering "e", "+", "-", or "." (force positive integers only)
-            if (val === "" || /^[0-9\b]+$/.test(val)) {
-              setAmount(val);
-            }
-          }}
-          placeholder="99" 
-          min="1"
-          max="50000"
-          step="50"
-          disabled={loading}
-          className="bg-transparent border-none outline-none text-white text-sm w-full p-2 placeholder-gray-500 disabled:opacity-50 text-center [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-        />
-        <button 
-          onClick={handleIncrease}
-          disabled={loading}
-          className="w-8 h-8 rounded-full flex flex-shrink-0 items-center justify-center text-gray-400 hover:text-white hover:bg-gray-800 transition-colors disabled:opacity-50 mr-1"
-        >
-          <Plus size={14} />
-        </button>
-        <button 
-          onClick={handleContribute}
-          disabled={loading}
-          className="w-8 h-8 rounded-full bg-brand hover:bg-brand-dark flex flex-shrink-0 items-center justify-center text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          {loading ? <Loader2 size={14} className="animate-spin" /> : <ArrowRight size={14} />}
-        </button>
+      </div>
+
+      {/* Custom Amount Input Box */}
+      {isCustomAmount && (
+        <div className="flex items-center bg-dark-surface rounded-full px-4 py-0.5 border border-brand shadow-[0_0_10px_rgba(79,70,229,0.2)] transition-colors mb-4">
+          <span className="text-gray-400 text-sm font-medium">₹</span>
+          <input 
+            type="number" 
+            value={amount}
+            onChange={(e) => {
+              const val = e.target.value;
+              if (val === "" || /^[0-9\b]+$/.test(val)) setAmount(val);
+            }}
+            placeholder="Other amount" 
+            min="1"
+            max="50000"
+            disabled={loading}
+            className="bg-transparent border-none outline-none text-white font-medium text-sm w-full py-1.5 px-1.5 placeholder-gray-500 disabled:opacity-50 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+          />
+        </div>
+      )}
+
+      {/* Submit Button */}
+      <button 
+        onClick={handleContribute}
+        disabled={loading || !amount || parseInt(amount) < 1}
+        className="w-full sm:w-auto px-6 py-3 rounded-lg bg-brand hover:bg-brand-dark flex items-center justify-center gap-2 text-white font-medium transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed shadow-[0_0_15px_rgba(79,70,229,0.4)] hover:shadow-[0_0_25px_rgba(79,70,229,0.6)]"
+      >
+        {loading ? (
+          <Loader2 size={16} className="animate-spin" />
+        ) : (
+          <>
+            Contribute <span className="font-bold text-white">₹{amount || "0"}</span>
+            <ArrowRight size={16} />
+          </>
+        )}
+      </button>
+
+      {/* Trust Signal */}
+      <div className="flex items-center gap-1.5 mt-3 text-gray-500 text-xs">
+        <Lock size={10} />
+        <span>Secured by Razorpay</span>
       </div>
     </div>
   );
