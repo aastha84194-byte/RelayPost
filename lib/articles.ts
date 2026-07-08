@@ -64,10 +64,12 @@ const MOCK_EXPERT_ARTICLES: Article[] = [
   }
 ];
 
-export async function getAllArticles(category?: string): Promise<Article[]> {
+export async function getAllArticles(category?: string, skip: number = 0, limit: number = 20): Promise<Article[]> {
   try {
     const url = new URL(`${API_BASE}/public/articles`);
     if (category) url.searchParams.append("category", category);
+    url.searchParams.append("skip", skip.toString());
+    url.searchParams.append("limit", limit.toString());
     
     const res = await fetch(url.toString(), { next: { revalidate: 60 } });
     if (!res.ok) return [];

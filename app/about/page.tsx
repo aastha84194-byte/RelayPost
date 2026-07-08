@@ -1,12 +1,24 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { Database, Globe, ShieldCheck, Clock, Users } from "lucide-react";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 
 export default function AboutPage() {
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  useEffect(() => {
+    import("js-cookie").then((Cookies) => {
+      const token = Cookies.default.get("access_token");
+      if (token) {
+        setIsLoggedIn(true);
+      }
+    });
+  }, []);
+
   return (
     <div className="bg-white dark:bg-slate-950 text-slate-900 dark:text-white min-h-screen flex flex-col">
       <Navbar />
@@ -108,9 +120,12 @@ export default function AboutPage() {
             Join thousands of professionals who rely on RelayPost for signal over noise.
           </p>
           <div className="flex justify-center">
-            <button className="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-3.5 rounded-full font-bold shadow-lg shadow-indigo-600/30 transition-all text-xs tracking-wide">
+            <Link 
+              href={isLoggedIn ? "/" : "/register"}
+              className="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-3.5 rounded-full font-bold shadow-lg shadow-indigo-600/30 transition-all text-xs tracking-wide block"
+            >
               START EXPLORING
-            </button>
+            </Link>
           </div>
         </section>
 

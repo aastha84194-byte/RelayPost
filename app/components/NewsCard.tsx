@@ -92,17 +92,21 @@ export function NewsSpotlight({ articles, onQuickRead }: { articles: NewsArticle
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
         {/* Main Feature */}
         <div className="lg:col-span-8">
-          <div className="relative group cursor-pointer overflow-hidden rounded-[2.5rem] bg-slate-900 h-[500px]" onClick={() => onQuickRead(main)}>
-            {main.image_url && (
+          <div className="relative group cursor-pointer overflow-hidden rounded-[2.5rem] bg-indigo-100 dark:bg-indigo-900/20 h-[500px]" onClick={() => onQuickRead(main)}>
+            {main.image_url ? (
               <Image 
                 src={main.image_url} 
                 alt={main.title} 
                 fill 
-                className="object-cover opacity-60 group-hover:scale-105 transition-transform duration-700" 
+                className="object-cover group-hover:scale-105 transition-transform duration-700" 
                 unoptimized
               />
+            ) : (
+              <div className="absolute inset-0 flex items-center justify-center">
+                 <Globe size={80} className="text-indigo-300 dark:text-indigo-700" />
+              </div>
             )}
-            <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/20 to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-gray-900/40 to-transparent" />
             
             <div className="absolute bottom-0 left-0 right-0 p-10">
               <span className="inline-block px-3 py-1 mb-6 rounded-full bg-indigo-600 text-[10px] font-black text-white uppercase tracking-[0.2em]">

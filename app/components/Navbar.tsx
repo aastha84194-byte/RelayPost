@@ -8,6 +8,7 @@ import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { ThemeToggle } from "./ThemeToggle";
 
 import SearchOverlay from "../../components/SearchOverlay";
+import { HARDCODED_CATEGORIES } from "@/lib/categoryMapping";
 
 const navItems = [
   { name: "Home", href: "/", icon: Home },
@@ -16,15 +17,7 @@ const navItems = [
   { name: "About", href: "/about", icon: Info },
 ];
 
-const categories = [
-  { name: "Business", icon: Briefcase },
-  { name: "Sports", icon: Trophy },
-  { name: "Health", icon: Heart },
-  { name: "Entertainment", icon: Film },
-  { name: "Politics", icon: Landmark },
-  { name: "Science", icon: Microscope },
-  { name: "World News", icon: Globe },
-];
+// Remove the old hardcoded categories array as we now use HARDCODED_CATEGORIES
 
 function NavbarCategoryFilters() {
   const router = useRouter();
@@ -49,7 +42,7 @@ function NavbarCategoryFilters() {
   return (
     <div className="w-full md:max-w-7xl md:mx-auto px-4 md:px-8 mb-3 md:mb-6 mt-3 md:mt-6">
       <div className="flex items-center gap-3 overflow-x-auto hide-scrollbar py-1">
-        {categories.map((cat) => {
+        {HARDCODED_CATEGORIES.filter(cat => cat.isPrimary).map((cat) => {
           const Icon = cat.icon;
           const isActive = activeCategory === cat.name;
           return (
@@ -58,12 +51,12 @@ function NavbarCategoryFilters() {
               type="button"
               onClick={() => handleCategoryClick(cat.name)}
               className={`flex items-center gap-2 px-4 py-2 rounded-full whitespace-nowrap text-sm font-medium transition-all shadow-sm border ${isActive
-                ? "bg-indigo-600 text-white border-indigo-600 ring-4 ring-indigo-500/10 scale-105"
+                ? "bg-indigo-600 text-white border-indigo-600 shadow-md"
                 : "bg-white text-gray-500 border-gray-200 hover:text-indigo-600 hover:border-indigo-600"
                 } dark:border-slate-800 dark:text-slate-400 dark:shadow-none`}
             >
               <Icon size={14} className={isActive ? "text-white" : "text-gray-400"} />
-              {cat.name}
+              {cat.shortName || cat.name}
             </button>
           );
         })}
@@ -76,6 +69,7 @@ export default function Navbar() {
   const { scrollY } = useScroll();
   const [isScrolled, setIsScrolled] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isAuthLoading, setIsAuthLoading] = useState(true);
   const [userRole, setUserRole] = useState<string | null>(null);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -101,6 +95,7 @@ export default function Navbar() {
         setIsLoggedIn(false);
         setUserRole(null);
       }
+      setIsAuthLoading(false);
     });
 
     const handleClickOutside = (event: MouseEvent) => {
@@ -125,6 +120,7 @@ export default function Navbar() {
       <div className="fixed top-0 left-0 right-0 z-50 pointer-events-none flex justify-center md:px-4">
         <motion.header
           className="md:pt-4 w-full flex justify-center pointer-events-auto"
+          initial={{ width: "100%", maxWidth: "1280px" }}
           animate={{
             width: "100%",
             maxWidth: isScrolled ? "800px" : "1280px"
@@ -138,20 +134,19 @@ export default function Navbar() {
                 <div className="w-8 h-8 md:w-9 md:h-9 bg-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-500/20 group-hover:scale-105 transition-transform duration-300 overflow-hidden">
                   <img src="/favicon.ico" alt="Logo" className="w-full h-full object-cover" />
                 </div>
-                <div className="flex md:hidden flex-col leading-tight">
-                  <span className="text-white font-bold text-base tracking-tight">RelayPost</span>
+                <div className="flex md:hidden items-center">
+                  <span className="text-white font-bold text-lg tracking-tight">RelayPost</span>
                 </div>
-                <AnimatePresence mode="wait">
+                <AnimatePresence mode="wait" initial={false}>
                   {!isScrolled && (
                     <motion.div
                       initial={{ opacity: 0, x: -10 }}
                       animate={{ opacity: 1, x: 0 }}
                       exit={{ opacity: 0, x: -10 }}
                       transition={{ duration: 0.3 }}
-                      className="hidden md:flex flex-col leading-tight"
+                      className="hidden md:flex items-center"
                     >
-                      <span className="text-white font-bold text-lg tracking-tight">Relay</span>
-                      <span className="text-indigo-300 text-[10px] font-semibold uppercase tracking-widest">Post</span>
+                      <span className="text-white font-bold text-lg tracking-tight">RelayPost</span>
                     </motion.div>
                   )}
                 </AnimatePresence>
@@ -167,7 +162,7 @@ export default function Navbar() {
                       href={item.href}
                       className="relative px-3 py-2 text-slate-300 hover:text-white transition-all group rounded-lg overflow-hidden flex items-center justify-center min-w-[40px]"
                     >
-                      <AnimatePresence mode="wait">
+                      <AnimatePresence mode="wait" initial={false}>
                         {isScrolled ? (
                           <motion.div
                             key="icon"
@@ -227,7 +222,9 @@ export default function Navbar() {
 
                 <ThemeToggle />
 
-                {isLoggedIn ? (
+                {isAuthLoading ? (
+                  <div className="w-10 h-10 md:w-24 md:h-10 ml-2 rounded-full animate-pulse bg-slate-800/50"></div>
+                ) : isLoggedIn ? (
                   isAdminOrPublisher ? (
                     <Link href="/admin/dashboard" className="w-9 h-9 md:w-10 md:h-10 rounded-full bg-indigo-600/30 border border-indigo-500 flex items-center justify-center text-indigo-400 hover:text-indigo-300 hover:bg-indigo-600/50 transition-colors shadow-lg" title="Go to Dashboard">
                       <Monitor size={18} />
@@ -322,14 +319,7 @@ export default function Navbar() {
               <X size={24} />
             </button>
             <div className="flex flex-col gap-6 mb-12">
-              <div className="relative mb-4">
-                <input
-                  className="bg-slate-800 border border-slate-700 rounded-2xl py-4 pl-6 pr-12 text-lg text-white focus:ring-2 focus:ring-indigo-500 w-full focus:outline-none transition-all placeholder-slate-500 shadow-xl"
-                  placeholder="Universal Search..."
-                  type="text"
-                />
-                <Search size={22} className="absolute right-5 top-1/2 -translate-y-1/2 text-slate-500" />
-              </div>
+
               <Link onClick={() => setMobileMenuOpen(false)} className="text-2xl font-bold text-white flex items-center justify-between" href="/">Home</Link>
               <Link onClick={() => setMobileMenuOpen(false)} className="text-2xl font-bold text-slate-300" href="/categories">Categories</Link>
               <Link onClick={() => setMobileMenuOpen(false)} className="text-2xl font-bold text-slate-300" href="/about">About Us</Link>

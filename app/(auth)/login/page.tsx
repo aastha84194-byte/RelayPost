@@ -9,6 +9,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import NetworkBackground from '../../components/NetworkBackground';
 import Navbar from '../../components/Navbar';
 import Footer from '../../components/Footer';
+import { Mail, Lock, Eye, EyeOff } from 'lucide-react';
 import { AUTH_BASE } from "@/lib/config";
 
 export default function Login() {
@@ -131,7 +132,7 @@ export default function Login() {
                       <div className="space-y-1">
                         <label className="text-xs font-semibold text-slate-300 uppercase tracking-widest px-1">Email Address</label>
                         <div className="relative">
-                          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 material-symbols-outlined text-lg">mail</span>
+                          <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5" />
                           <input
                             type="email"
                             value={formData.email}
@@ -144,7 +145,7 @@ export default function Login() {
                       <div className="space-y-1">
                         <label className="text-xs font-semibold text-slate-300 uppercase tracking-widest px-1">Password</label>
                         <div className="relative">
-                          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 material-symbols-outlined text-lg">lock</span>
+                          <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5" />
                           <input
                             type={showPassword ? "text" : "password"}
                             value={formData.password}
@@ -152,7 +153,7 @@ export default function Login() {
                             className="w-full bg-white/5 border border-white/10 rounded-lg pl-10 pr-10 py-2 text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all text-sm"
                             placeholder="••••••••" minLength={8} required />
                           <button onClick={() => setShowPassword(!showPassword)} type="button" className="absolute right-3 top-[50%] -translate-y-[50%] flex items-center justify-center text-slate-400 hover:text-primary transition-colors">
-                            <span className="material-symbols-outlined text-lg leading-none">{showPassword ? "visibility_off" : "visibility"}</span>
+                            {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                           </button>
                         </div>
                       </div>

@@ -6,8 +6,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   
   // Fetch dynamic articles
   const articles = await getAllArticles();
+  const safeArticles = Array.isArray(articles) ? articles : [];
   
-  const articleUrls: MetadataRoute.Sitemap = articles.map((article) => ({
+  const articleUrls: MetadataRoute.Sitemap = safeArticles.map((article) => ({
     url: `${baseUrl}/article/${article.slug}`,
     lastModified: article.published_at ? new Date(article.published_at) : new Date(),
     changeFrequency: 'weekly',
@@ -16,8 +17,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   // Fetch dynamic news
   const newsItems = await getNewsLive(1000);
+  const safeNews = Array.isArray(newsItems) ? newsItems : [];
 
-  const newsUrls: MetadataRoute.Sitemap = newsItems.map((news) => ({
+  const newsUrls: MetadataRoute.Sitemap = safeNews.map((news) => ({
     url: `${baseUrl}/news/${news.slug}`,
     lastModified: news.published_at ? new Date(news.published_at) : new Date(),
     changeFrequency: 'daily',
