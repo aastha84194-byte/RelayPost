@@ -6,6 +6,7 @@ import { GoogleOAuthProvider, GoogleLogin } from '@react-oauth/google';
 import Cookies from 'js-cookie';
 import toast from 'react-hot-toast';
 import { motion, useMotionValue, useSpring, useTransform, AnimatePresence } from 'framer-motion';
+import { User, AtSign, Eye, EyeOff } from 'lucide-react';
 import NetworkBackground from '../../components/NetworkBackground';
 import Footer from '../../components/Footer';
 import { AUTH_BASE } from "@/lib/config";
@@ -133,7 +134,7 @@ export default function Register() {
         if (res.ok) {
             Cookies.set('access_token', data.access_token, { expires: 7, secure: true, sameSite: 'strict' });
             localStorage.setItem('auth_token', data.access_token);
-            toast.success("Biometric Sync successful via Google");
+            toast.success("Authenticatin Sync successful via Google");
             setTimeout(() => window.location.href = "/", 1000);
         } else {
             toast.error(data.detail || "Google Link failed");
@@ -183,8 +184,8 @@ export default function Register() {
                     <form onSubmit={handleRegister} className="space-y-4" style={{ transform: "translateZ(40px)" }}>
                       {/* Form Input Groups */}
                       {[
-                        { label: 'Full Identity', type: 'text', icon: 'person', value: formData.name, field: 'name', placeholder: 'Alex Rivera' },
-                        { label: 'Email', type: 'email', icon: 'alternate_email', value: formData.email, field: 'email', placeholder: 'name@domain.com' },
+                        { label: 'Full Identity', type: 'text', icon: <User className="w-5 h-5" />, value: formData.name, field: 'name', placeholder: 'Alex Rivera' },
+                        { label: 'Email', type: 'email', icon: <AtSign className="w-5 h-5" />, value: formData.email, field: 'email', placeholder: 'name@domain.com' },
                       ].map((input, idx) => (
                         <motion.div 
                           key={input.field}
@@ -195,7 +196,7 @@ export default function Register() {
                         >
                           <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest ml-1">{input.label}</label>
                           <div className="relative group/input">
-                            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 material-symbols-outlined text-lg group-focus-within/input:text-primary transition-colors z-10 pointer-events-none">
+                            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within/input:text-primary transition-colors z-10 pointer-events-none">
                               {input.icon}
                             </span>
                             <input 
@@ -236,7 +237,7 @@ export default function Register() {
                               />
                               {input.field === 'password' && (
                                 <button onClick={() => setShowPassword(!showPassword)} type="button" className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-white transition-colors">
-                                  <span className="material-symbols-outlined text-lg">{showPassword ? "visibility_off" : "visibility"}</span>
+                                  {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                                 </button>
                               )}
                             </div>

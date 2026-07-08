@@ -43,7 +43,7 @@ export default async function TagPage({ params }: { params: Promise<{ keyword: s
             {articles.map((item: Article, i: number) => (
               <Link 
                 key={`${item.id}-${i}`} 
-                href={`/${item.category_name?.toLowerCase().replace(/ /g, '-') || 'general'}/${item.slug}`}
+                href={`/${item.category_name ? item.category_name.toLowerCase().replace(/[^a-z0-9]+/g, '-') : 'general'}/${item.slug}`}
                 className="bg-white dark:bg-slate-800 rounded-[2.5rem] border border-slate-100 dark:border-slate-800/50 overflow-hidden shadow-sm hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 group flex flex-col h-full"
               >
                 <div className="h-64 relative overflow-hidden shrink-0">

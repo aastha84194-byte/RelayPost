@@ -532,7 +532,7 @@ export default function ArticleRenderer({ article }: ArticleRendererProps) {
                 {relatedArticles.length > 0 ? relatedArticles.map((item, i) => (
                   <Link 
                     key={i} 
-                    href={`/${item.category_name?.toLowerCase().replace(/ /g, '-') || 'general'}/${item.slug}`} 
+                    href={`/${item.category_name ? item.category_name.toLowerCase().replace(/[^a-z0-9]+/g, '-') : 'general'}/${item.slug}`} 
                     className="flex gap-4 group cursor-pointer"
                   >
                      <div className="w-20 h-20 rounded-2xl overflow-hidden shrink-0 shadow-md dark:shadow-none transition-colors duration-300">

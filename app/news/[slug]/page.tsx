@@ -250,8 +250,12 @@ export default async function NewsDetailPage({ params }: Props) {
                       href={`/news/${item.slug || item.id}`} 
                       className="flex gap-4 group cursor-pointer"
                     >
-                       <div className="w-20 h-20 rounded-2xl overflow-hidden shrink-0 shadow-md dark:shadow-none transition-colors duration-300 relative">
-                          <Image src={item.image_url || "https://images.unsplash.com/photo-1544411047-c491574abb46?w=400&q=80"} alt="Thumb" fill unoptimized className="object-cover group-hover:scale-110 transition-all duration-500" />
+                       <div className="w-20 h-20 rounded-2xl overflow-hidden shrink-0 shadow-md dark:shadow-none transition-colors duration-300 relative bg-slate-200 dark:bg-slate-800 flex items-center justify-center">
+                          {item.image_url ? (
+                            <Image src={item.image_url} alt={item.title || "Thumb"} fill unoptimized className="object-cover group-hover:scale-110 transition-all duration-500" />
+                          ) : (
+                            <Globe size={24} className="text-slate-400 dark:text-slate-500" />
+                          )}
                        </div>
                        <div className="space-y-1 flex-1">
                           <p className="text-[9px] font-black text-indigo-600 tracking-widest uppercase">{item.category || 'INTELLIGENCE'}</p>
