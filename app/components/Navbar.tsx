@@ -52,11 +52,13 @@ function NavbarCategoryFilters() {
               onClick={() => handleCategoryClick(cat.name)}
               className={`flex items-center gap-2 px-4 py-2 rounded-full whitespace-nowrap text-sm font-medium transition-all shadow-sm border ${isActive
                 ? "bg-indigo-600 text-white border-indigo-600 shadow-md"
-                : "bg-white text-gray-500 border-gray-200 hover:text-indigo-600 hover:border-indigo-600"
-                } dark:border-slate-800 dark:text-slate-400 dark:shadow-none`}
+                : "bg-white text-gray-500 border-gray-200 hover:text-indigo-600 hover:border-indigo-600 dark:bg-slate-800/50 dark:border-slate-700 dark:text-slate-400 dark:hover:text-indigo-400"
+                } dark:shadow-none`}
             >
-              <Icon size={14} className={isActive ? "text-white" : "text-gray-400"} />
-              {cat.shortName || cat.name}
+              <Icon size={14} className={isActive ? "text-white" : "text-gray-400 dark:text-slate-400"} />
+              <span className="hidden sm:block">
+                {cat.shortName || cat.name}
+              </span>
             </button>
           );
         })}
