@@ -26,8 +26,8 @@ export default function Footer() {
           <div className="col-span-1 md:col-span-1">
             <h4 className="text-white font-semibold mb-4 text-base">About</h4>
             <ul className="space-y-3 text-sm">
-              <li><Link href="#" className="hover:text-white transition-colors">Home</Link></li>
-              <li><Link href="/" className="hover:text-white transition-colors">Categories</Link></li>
+              <li><Link href="/" className="hover:text-white transition-colors">Home</Link></li>
+              <li><Link href="/categories" className="hover:text-white transition-colors">Categories</Link></li>
               <li><Link href="/about" className="hover:text-white transition-colors">About</Link></li>
               <li><Link href="/contact" className="hover:text-white transition-colors">Contact</Link></li>
             </ul>
@@ -37,10 +37,10 @@ export default function Footer() {
           <div className="col-span-1 md:col-span-1">
             <h4 className="text-white font-semibold mb-4 text-base">Categories</h4>
             <ul className="space-y-3 text-sm">
-              <li><Link href="#" className="hover:text-white transition-colors">Sports</Link></li>
-              <li><Link href="#" className="hover:text-white transition-colors">Health</Link></li>
-              <li><Link href="#" className="hover:text-white transition-colors">Entertainment</Link></li>
-              <li><Link href="#" className="hover:text-white transition-colors">Politics</Link></li>
+              <li><Link href="/categories/sports" className="hover:text-white transition-colors">Sports</Link></li>
+              <li><Link href="/categories/health" className="hover:text-white transition-colors">Health</Link></li>
+              <li><Link href="/categories/entertainment" className="hover:text-white transition-colors">Entertainment</Link></li>
+              <li><Link href="/categories/politics" className="hover:text-white transition-colors">Politics</Link></li>
             </ul>
           </div>
 

@@ -17,6 +17,9 @@ export default function CategoryDetailPage() {
   const [isFollowed, setIsFollowed] = useState(false);
   const [userId, setUserId] = useState("");
   const [isLoading, setIsLoading] = useState(true);
+  const [skip, setSkip] = useState(0);
+  const [hasMore, setHasMore] = useState(true);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
 
   const containerRef = useRef<HTMLDivElement>(null);
   const mouseX = useMotionValue(0.5);
@@ -53,8 +56,40 @@ export default function CategoryDetailPage() {
       setArticles(uniqueArticles);
       setIsFollowed(follows.some((f: any) => f.target_id === categoryMapping?.id));
       setIsLoading(false);
+      setSkip(20);
+      if (uniqueArticles.length < 20) {
+         setHasMore(false);
+      }
     });
   }, [slug]);
+
+  const loadMore = async () => {
+    if (!slug || isLoadingMore || !hasMore) return;
+    setIsLoadingMore(true);
+    
+    const backendSlugs = getAllBackendSlugsForFrontendSlug(slug as string);
+    const newArticlesArrays = await Promise.all(backendSlugs.map(bs => getAllArticles(bs, skip, 20)));
+    
+    const newArticles = newArticlesArrays.flat();
+    if (newArticles.length === 0) {
+      setHasMore(false);
+      setIsLoadingMore(false);
+      return;
+    }
+    
+    setArticles(prev => {
+      const merged = [...prev, ...newArticles];
+      const unique = Array.from(new Map(merged.map(item => [item.id, item])).values());
+      unique.sort((a: any, b: any) => new Date(b.published_at || b.created_at).getTime() - new Date(a.published_at || a.created_at).getTime());
+      return unique;
+    });
+    
+    setSkip(prev => prev + 20);
+    if (newArticles.length < 20) {
+      setHasMore(false);
+    }
+    setIsLoadingMore(false);
+  };
 
   const handleMouseMove = (e: React.MouseEvent) => {
     if (!containerRef.current) return;
@@ -148,6 +183,7 @@ export default function CategoryDetailPage() {
                {[1,2,3,4,5,6].map(i => <div key={i} className="aspect-[16/10] bg-slate-50 dark:bg-slate-900 animate-pulse rounded-[2.5rem]" />)}
             </div>
           ) : articles.length > 0 ? (
+          <>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-12" style={{ transformStyle: "preserve-3d" }}>
               {articles.map((article, idx) => (
                 <motion.div
@@ -180,6 +216,26 @@ export default function CategoryDetailPage() {
                 </motion.div>
               ))}
             </div>
+            
+            {articles.length > 0 && hasMore && (
+              <div className="mt-16 flex justify-center">
+                <button
+                  onClick={loadMore}
+                  disabled={isLoadingMore}
+                  className="px-8 py-4 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white rounded-full font-black text-xs uppercase tracking-[0.2em] shadow-sm hover:shadow-md hover:border-indigo-600 hover:text-indigo-600 dark:hover:text-indigo-400 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                >
+                  {isLoadingMore ? (
+                    <>
+                      <div className="w-4 h-4 rounded-full border-2 border-indigo-600 border-t-transparent animate-spin" />
+                      Loading...
+                    </>
+                  ) : (
+                    'Load More Intelligence'
+                  )}
+                </button>
+              </div>
+            )}
+          </>
           ) : (
             <div className="text-center py-40 rounded-[4rem] bg-slate-50 dark:bg-slate-900 border-2 border-dashed border-slate-200 dark:border-white/10">
               <span className="material-symbols-outlined text-slate-300 dark:text-slate-700 text-8xl mb-8">dashboard_customize</span>
