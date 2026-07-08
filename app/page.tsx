@@ -289,6 +289,7 @@ function HomeContent() {
                     title={`All ${category} Articles`}
                     slug={category}
                     articles={allCategoryArticles}
+                    layout="grid"
                   />
                   {hasMore && (
                     <div ref={observerTarget} className="w-full flex justify-center py-8">
