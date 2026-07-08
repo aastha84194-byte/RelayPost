@@ -37,9 +37,9 @@ export function NewsCard({ article, onClick }: { article: NewsArticle, onClick?:
       
       <div className="p-6 flex flex-col flex-grow">
         <div className="flex items-center gap-3 mb-3 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
-           <span className="flex items-center gap-1"><Clock size={12} /> {getTimeAgo(article.published_at)}</span>
-           <span className="w-1 h-1 bg-slate-200 dark:bg-slate-700 rounded-full" />
-           <span className="truncate max-w-[100px]">{article.source_name || 'Global News'}</span>
+           <span className="flex items-center gap-1 shrink-0"><Clock size={12} /> {getTimeAgo(article.published_at)}</span>
+           <span className="w-1 h-1 bg-slate-200 dark:bg-slate-700 rounded-full shrink-0" />
+           <span className="truncate">{article.source_name || 'Global News'}</span>
         </div>
         
         <h3 className="text-lg font-bold text-slate-900 dark:text-white leading-tight group-hover:text-indigo-600 transition-colors line-clamp-2 mb-3">
@@ -116,9 +116,9 @@ export function NewsSpotlight({ articles, onQuickRead }: { articles: NewsArticle
                 {main.title}
               </h3>
               <div className="flex items-center gap-6">
-                <span className="flex items-center gap-2 text-xs font-bold text-slate-300">
-                  <Globe size={14} className="text-indigo-400" />
-                  {main.source_name || 'Global News'}
+                <span className="flex items-center gap-2 text-xs font-bold text-slate-300 max-w-[150px] md:max-w-[250px]">
+                  <Globe size={14} className="text-indigo-400 shrink-0" />
+                  <span className="truncate">{main.source_name || 'Global News'}</span>
                 </span>
                 <span className="flex items-center gap-2 text-xs font-bold text-slate-300">
                    <Clock size={14} className="text-indigo-400" />

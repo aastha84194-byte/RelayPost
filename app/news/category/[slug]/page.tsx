@@ -14,10 +14,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const decodedCategory = decodeURIComponent(slug).replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
 
   return {
-    title: `${decodedCategory} News | RelayPost`,
+    title: `${decodedCategory} News`,
     description: `Stay updated with the latest news and intelligence on ${decodedCategory} from RelayPost.`,
     openGraph: {
-      title: `${decodedCategory} News | RelayPost`,
+      title: `${decodedCategory} News`,
       description: `Stay updated with the latest news and intelligence on ${decodedCategory} from RelayPost.`,
     },
     alternates: {

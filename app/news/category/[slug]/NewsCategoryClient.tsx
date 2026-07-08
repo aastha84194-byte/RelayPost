@@ -64,7 +64,7 @@ export default function NewsCategoryClient({ initialArticles, decodedCategory, s
               <Layers size={20} className="text-indigo-600" />
             </div>
             <h1 className="text-xl md:text-2xl font-black text-slate-900 dark:text-white uppercase tracking-tight">
-              {decodedCategory} News
+              {decodedCategory.toLowerCase().endsWith('news') ? decodedCategory : `${decodedCategory} News`}
             </h1>
           </div>
         </div>

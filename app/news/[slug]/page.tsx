@@ -73,15 +73,15 @@ export default async function NewsDetailPage({ params }: Props) {
       />
       <Navbar />
 
-      <main className="max-w-7xl mx-auto px-4 md:px-8 py-12">
+      <main className="max-w-7xl mx-auto px-4 md:px-8 py-6 md:py-12">
         {/* Navigation / Actions */}
-        <div className="flex items-center justify-between mb-12">
+        <div className="flex items-center justify-between mb-6 md:][omb-12">
           <Link 
             href="/news"
             className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 hover:text-indigo-600 transition-colors"
           >
             <ArrowLeft size={16} />
-            Back to Intel
+            Back to News
           </Link>
 
           <NewsActionButtons />
@@ -98,8 +98,8 @@ export default async function NewsDetailPage({ params }: Props) {
                   {article.category || 'Intelligence'}
                 </span>
                 <div className="h-1 w-1 bg-slate-300 dark:bg-slate-700 rounded-full" />
-                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-1">
-                  <Globe size={12} /> {article.source_name || 'Global Stream'}
+                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-1 max-w-[200px]">
+                  <Globe size={12} className="shrink-0" /> <span className="truncate">{article.source_name || 'Global Stream'}</span>
                 </span>
               </div>
 
@@ -107,14 +107,14 @@ export default async function NewsDetailPage({ params }: Props) {
                 {article.title}
               </h1>
 
-              <div className="flex items-center gap-6 pb-8 border-b border-slate-100 dark:border-slate-800">
+              <div className="flex flex-wrap items-center gap-6 pb-8 border-b border-slate-100 dark:border-slate-800">
                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center text-indigo-600">
+                    <div className="w-10 h-10 rounded-full bg-indigo-100 dark:bg-indigo-900/30 flex shrink-0 items-center justify-center text-indigo-600">
                        <Globe size={20} />
                     </div>
                     <div>
                        <p className="text-[10px] font-black text-slate-900 dark:text-white uppercase tracking-widest">Source Entity</p>
-                       <p className="text-xs font-bold text-slate-500">{article.author || article.source_name || 'RelayPost Intelligence'}</p>
+                       <p className="text-xs font-bold text-slate-500 max-w-[200px] truncate">{article.author || article.source_name || 'RelayPost Intelligence'}</p>
                     </div>
                  </div>
                  <div className="h-8 w-px bg-slate-100 dark:bg-slate-800" />
