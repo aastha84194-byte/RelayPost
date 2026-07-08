@@ -75,7 +75,7 @@ export default async function NewsDetailPage({ params }: Props) {
 
       <main className="max-w-7xl mx-auto px-4 md:px-8 py-6 md:py-12">
         {/* Navigation / Actions */}
-        <div className="flex items-center justify-between mb-6 md:mb-12">
+        <div className="flex items-center justify-between mb-6 md:][omb-12">
           <Link 
             href="/news"
             className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 hover:text-indigo-600 transition-colors"
