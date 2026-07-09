@@ -24,7 +24,7 @@ export default function NewsCategoryClient({ initialArticles, decodedCategory, s
     setIsLoadingMore(true);
 
     try {
-      const res = await getNewsByCategory(decodedCategory, skip, 20);
+      const res = await getNewsByCategory(decodedCategory, 20, skip);
       const newArticles = res.items || [];
       
       if (newArticles.length === 0) {
