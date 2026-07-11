@@ -7,6 +7,7 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import Navbar from "../components/Navbar";
 import { API_BASE } from "@/lib/config";
+import { getCategorySlugForArticle } from "@/lib/categoryMapping";
 
 function SearchResults() {
   const searchParams = useSearchParams();
@@ -71,7 +72,7 @@ function SearchResults() {
                 transition={{ delay: idx * 0.1 }}
                 className="group relative"
               >
-                <Link href={`/article/${article.slug}`} className="block bg-slate-900 border border-white/5 rounded-[2.5rem] overflow-hidden hover:border-indigo-500/50 transition-all duration-500 shadow-xl hover:shadow-indigo-500/10">
+                <Link href={`/${getCategorySlugForArticle(article.category_name)}/${article.slug}`} className="block bg-slate-900 border border-white/5 rounded-[2.5rem] overflow-hidden hover:border-indigo-500/50 transition-all duration-500 shadow-xl hover:shadow-indigo-500/10">
                   <div className="relative aspect-[16/10] overflow-hidden">
                     {article.hero_image ? (
                       <img 

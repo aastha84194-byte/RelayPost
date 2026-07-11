@@ -7,6 +7,7 @@ import { Article } from "@/lib/types";
 import { BookmarkMinus } from "lucide-react";
 import Cookies from "js-cookie";
 import { API_BASE } from "@/lib/config";
+import { getCategorySlugForArticle } from "@/lib/categoryMapping";
 
 export default function SavedArticlesPage() {
   const [savedArticles, setSavedArticles] = useState<Article[]>([]);
@@ -44,7 +45,7 @@ export default function SavedArticlesPage() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {savedArticles.map(article => (
           <div key={article.id} className="group relative flex flex-col bg-slate-50 dark:bg-slate-900 rounded-2xl overflow-hidden border border-slate-100 dark:border-slate-800 hover:shadow-lg transition-all duration-300">
-            <Link href={`/article/${article.slug}`} className="relative aspect-[16/9] w-full block overflow-hidden">
+            <Link href={`/${getCategorySlugForArticle(article.category_name)}/${article.slug}`} className="relative aspect-[16/9] w-full block overflow-hidden">
               <Image src={article.hero_image || ""} alt={article.title} fill className="object-cover group-hover:scale-105 transition-transform duration-500" unoptimized />
               <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
             </Link>
@@ -55,7 +56,7 @@ export default function SavedArticlesPage() {
 
             <div className="p-5 flex flex-col flex-1 justify-between">
               <div>
-                <Link href={`/article/${article.slug}`} className="font-bold text-lg leading-tight lg:leading-snug dark:text-white hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors line-clamp-3 mb-2">
+                <Link href={`/${getCategorySlugForArticle(article.category_name)}/${article.slug}`} className="font-bold text-lg leading-tight lg:leading-snug dark:text-white hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors line-clamp-3 mb-2">
                   {article.title}
                 </Link>
               </div>
