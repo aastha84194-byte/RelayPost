@@ -19,6 +19,7 @@ import { Article, NewsArticle } from '@/lib/types';
 import { useSearchParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Sparkles } from 'lucide-react';
+import { getCategorySlugForArticle, HARDCODED_CATEGORIES } from '@/lib/categoryMapping';
 
 function HomeContent() {
   const searchParams = useSearchParams();
@@ -111,7 +112,26 @@ function HomeContent() {
 
     getHomepageCategorySections(5)
       .then((data) => {
-        setCategorySections(data);
+        const merged: Record<string, { slug: string, articles: Article[] }> = {};
+        Object.entries(data).forEach(([rawName, secData]) => {
+          const canonicalSlug = getCategorySlugForArticle(rawName);
+          const canonicalCat = HARDCODED_CATEGORIES.find(c => c.slug === canonicalSlug);
+          const title = canonicalCat ? canonicalCat.name : rawName;
+          const slug = canonicalCat ? canonicalCat.slug : secData.slug;
+          
+          if (!merged[title]) {
+            merged[title] = { slug, articles: [] };
+          }
+          
+          const existingIds = new Set(merged[title].articles.map(a => a.id));
+          secData.articles.forEach(a => {
+            if (!existingIds.has(a.id)) {
+              merged[title].articles.push(a);
+            }
+          });
+        });
+
+        setCategorySections(merged);
         setIsCategoriesLoading(false);
       })
       .catch((err) => {
@@ -273,7 +293,13 @@ function HomeContent() {
                   <div className="h-[280px] bg-slate-200 dark:bg-slate-800 rounded-[2.5rem] w-full" />
                 </div>
               ) : (
-                !category && Object.entries(categorySections).map(([name, data]) => (
+                !category && Object.entries(categorySections)
+                  .sort(([nameA], [nameB]) => {
+                    const idxA = HARDCODED_CATEGORIES.findIndex(c => c.name === nameA);
+                    const idxB = HARDCODED_CATEGORIES.findIndex(c => c.name === nameB);
+                    return (idxA === -1 ? 999 : idxA) - (idxB === -1 ? 999 : idxB);
+                  })
+                  .map(([name, data]) => (
                   <CategoryArticleSection 
                     key={name}
                     title={name}

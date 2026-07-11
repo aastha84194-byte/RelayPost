@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import ParticleEffect from './ParticleEffect';
 import { Article } from '@/lib/types';
 import Link from 'next/link';
+import { getCategorySlugForArticle } from '@/lib/categoryMapping';
 
 export default function HeroSection({ articles = [] }: { articles?: Article[] }) {
   const [[page, direction], setPage] = useState([0, 0]);
@@ -111,7 +112,7 @@ export default function HeroSection({ articles = [] }: { articles?: Article[] })
               className="pointer-events-auto inline-block"
             >
               <Link
-                href={`/${currentArticle.category_name ? currentArticle.category_name.toLowerCase().replace(/[^a-z0-9]+/g, '-') : 'general'}/${currentArticle.slug}`}
+                href={`/${getCategorySlugForArticle(currentArticle.category_name)}/${currentArticle.slug}`}
                 className="bg-brand hover:bg-brand-dark text-white px-8 py-3 rounded-full font-bold text-xs md:text-sm inline-flex items-center gap-2 transition-all shadow-xl shadow-brand/20 active:scale-95 uppercase tracking-widest"
               >
                 Read Report

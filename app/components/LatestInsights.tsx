@@ -4,6 +4,7 @@ import Image from 'next/image';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Article } from '@/lib/types';
 import Link from 'next/link';
+import { getCategorySlugForArticle } from '@/lib/categoryMapping';
 import { motion } from 'framer-motion';
 
 export default function LatestInsights({ articles }: { articles: Article[] }) {
@@ -118,7 +119,7 @@ export default function LatestInsights({ articles }: { articles: Article[] }) {
           {displayArticles.map((item, i) => (
             <Link 
               key={`${item.id}-${i}`} 
-              href={`/${item.category_name ? item.category_name.toLowerCase().replace(/[^a-z0-9]+/g, '-') : 'general'}/${item.slug}`}
+              href={`/${getCategorySlugForArticle(item.category_name)}/${item.slug}`}
               className="w-[300px] shrink-0 bg-white p-4 border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition-all duration-300 group dark:bg-slate-900 dark:border-slate-800 dark:shadow-none"
             >
               <div className="h-36 relative overflow-hidden mb-3 rounded-md">

@@ -4,10 +4,11 @@ import { motion } from 'framer-motion';
 import { User } from 'lucide-react';
 import { Article } from '@/lib/types';
 import Link from 'next/link';
+import { getCategorySlugForArticle } from '@/lib/categoryMapping';
 
 export default function PopularConversations({ articles = [] }: { articles?: Article[] }) {
   const displayItems = articles.length > 0 
-    ? articles.map(a => ({ title: a.title, slug: a.slug, listeners: `${a.views_count || Math.floor(Math.random() * 50) + 10} Active readers`, cat: a.category_name?.toLowerCase().replace(/[^a-z0-9]+/g, '-') || 'general' }))
+    ? articles.map(a => ({ title: a.title, slug: a.slug, listeners: `${a.views_count || Math.floor(Math.random() * 50) + 10} Active readers`, cat: getCategorySlugForArticle(a.category_name) }))
     : [];
 
   return (
