@@ -9,7 +9,7 @@ import { GoogleOAuthProvider } from '@react-oauth/google';
 import GlobalOneTap from './components/GlobalOneTap';
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://relay-post.vercel.app'),
+  metadataBase: new URL('https://relaypost.me'),
   applicationName: 'RelayPost',
   appleWebApp: {
     title: 'RelayPost',
