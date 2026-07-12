@@ -8,7 +8,7 @@ import Cookies from "js-cookie";
 import toast from "react-hot-toast";
 import { getAllArticles, toggleFollow, getUserFollows, getUserIdentifier } from "@/lib/articles";
 import { Article } from "@/lib/types";
-import { getCategoryMapping, getAllBackendSlugsForFrontendSlug } from "@/lib/categoryMapping";
+import { getCategoryMapping, getAllBackendSlugsForFrontendSlug, getCategorySlugForArticle } from "@/lib/categoryMapping";
 import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
 import { Sparkles, Bookmark, BookmarkCheck } from "lucide-react";
 
@@ -199,7 +199,7 @@ export default function CategoryDetailPage() {
                   whileHover={{ y: -6 }}
                   className="group relative"
                 >
-                  <Link href={`/${article.category_name ? article.category_name.toLowerCase().replace(/[^a-z0-9]+/g, '-') : 'general'}/${article.slug}`} className="block h-full">
+                  <Link href={`/${getCategorySlugForArticle(article.category_name)}/${article.slug}`} className="block h-full">
                     <div className="flex flex-col h-full bg-white dark:bg-slate-900/50 rounded-[2rem] overflow-hidden border border-slate-100 dark:border-white/5 shadow-sm group-hover:shadow-2xl transition-all duration-500 group-hover:-translate-y-2">
                       <div className="relative aspect-[16/10] overflow-hidden">
                         <img

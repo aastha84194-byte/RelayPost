@@ -40,7 +40,7 @@ export default function NewsCategoryClient({ initialArticles, decodedCategory, s
     if (isLoadingMore || !hasMore) return;
     setIsLoadingMore(true);
     try {
-      const res = await getNewsByCategory(decodedCategory, skip, 20);
+      const res = await getNewsByCategory(decodedCategory, 20, skip);
       const newArticles = res.items || [];
       if (newArticles.length === 0) {
         setHasMore(false);

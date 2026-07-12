@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Article } from "@/lib/types";
 import { Heart } from "lucide-react";
+import { getCategorySlugForArticle } from "@/lib/categoryMapping";
 
 export default function FavoritesPage() {
   const [favArticles, setFavArticles] = useState<Article[]>([]);
@@ -42,7 +43,7 @@ export default function FavoritesPage() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {favArticles.map(article => (
-          <Link href={`/article/${article.slug}`} key={article.id} className="group bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-2xl p-4 flex gap-4 hover:shadow-md transition-shadow relative">
+          <Link href={`/${getCategorySlugForArticle(article.category_name)}/${article.slug}`} key={article.id} className="group bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-2xl p-4 flex gap-4 hover:shadow-md transition-shadow relative">
             
             <div className="absolute -top-3 -right-3 w-10 h-10 bg-white dark:bg-slate-800 rounded-full flex items-center justify-center shadow-lg border border-slate-100 dark:border-slate-700 z-10 transition-transform group-hover:scale-110">
               <Heart size={18} className="text-rose-500 fill-rose-500" />

@@ -1,5 +1,6 @@
 import React from "react";
 import { getArticleBySlug } from "@/lib/articles";
+import { getCategorySlugForArticle } from "@/lib/categoryMapping";
 import ArticleRenderer from "@/app/components/render/ArticleRenderer";
 import Navbar from "@/app/components/Navbar";
 import { notFound } from "next/navigation";
@@ -15,8 +16,10 @@ export async function generateMetadata(
     return { title: 'Article Not Found' };
   }
 
-  // Canonical should now reflect the new URL structure
-  const catSlug = article.category_name?.toLowerCase().replace(/ /g, '-') || category;
+  // Canonical should now reflect the new URL structure with a clean slug
+  const catSlug = article.category_name
+    ? getCategorySlugForArticle(article.category_name)
+    : category;
 
   return {
     title: article.meta_title || article.title,

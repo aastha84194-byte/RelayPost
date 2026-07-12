@@ -4,6 +4,7 @@ import Image from 'next/image';
 import { ArrowRight } from 'lucide-react';
 import { Article } from '@/lib/types';
 import Link from 'next/link';
+import { getCategorySlugForArticle } from '@/lib/categoryMapping';
 
 export default function TechSpotlight({ articles }: { articles?: Article[] }) {
   if (!articles || articles.length === 0) return null;
@@ -18,7 +19,7 @@ export default function TechSpotlight({ articles }: { articles?: Article[] }) {
 
         {/* Large Featured Spotlight */}
         <div className="md:col-span-3 relative rounded-none md:rounded-xl overflow-hidden min-h-[300px] group shadow-md -mx-4 md:mx-0 dark:shadow-none transition-colors duration-300">
-          <Link href={`/${mainArticle.category_name?.toLowerCase() || 'tech'}/${mainArticle.slug}`} className="absolute inset-0 block z-10" />
+          <Link href={`/${getCategorySlugForArticle(mainArticle.category_name)}/${mainArticle.slug}`} className="absolute inset-0 block z-10" />
           <div className="absolute inset-0">
             {mainArticle.hero_image ? (
               <Image src={mainArticle.hero_image} alt={mainArticle.title || "Spotlight"} fill sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw" priority className="object-cover group-hover:scale-105 transition-transform duration-700" />
@@ -33,7 +34,7 @@ export default function TechSpotlight({ articles }: { articles?: Article[] }) {
             {mainArticle.ai_summary && (
               <p className="text-gray-300 text-xs md:text-sm mb-4 line-clamp-2 max-w-[90%]">{mainArticle.ai_summary}</p>
             )}
-            <Link href={`/${mainArticle.category_name?.toLowerCase() || 'tech'}/${mainArticle.slug}`} className="pointer-events-auto bg-[#4f46e5] hover:bg-[#3730a3] text-white px-5 py-2 rounded-full text-xs md:text-sm font-medium inline-flex items-center gap-1.5 transition-colors shadow-lg">
+            <Link href={`/${getCategorySlugForArticle(mainArticle.category_name)}/${mainArticle.slug}`} className="pointer-events-auto bg-[#4f46e5] hover:bg-[#3730a3] text-white px-5 py-2 rounded-full text-xs md:text-sm font-medium inline-flex items-center gap-1.5 transition-colors shadow-lg">
               Read More
               <ArrowRight size={16} />
             </Link>
@@ -44,7 +45,7 @@ export default function TechSpotlight({ articles }: { articles?: Article[] }) {
         {sideArticles.length > 0 && (
           <div className="md:col-span-2 flex flex-col gap-4">
             {sideArticles.map(article => (
-              <Link href={`/${article.category_name?.toLowerCase() || 'tech'}/${article.slug}`} key={article.id} className="flex gap-4 p-4 rounded-xl bg-white dark:bg-slate-800 hover:shadow-lg transition-shadow border border-slate-100 dark:border-slate-700 h-full">
+              <Link href={`/${getCategorySlugForArticle(article.category_name)}/${article.slug}`} key={article.id} className="flex gap-4 p-4 rounded-xl bg-white dark:bg-slate-800 hover:shadow-lg transition-shadow border border-slate-100 dark:border-slate-700 h-full">
                 {article.hero_image ? (
                   <div className="w-24 h-24 relative rounded-lg overflow-hidden shrink-0">
                     <Image src={article.hero_image} alt={article.title} fill className="object-cover" />

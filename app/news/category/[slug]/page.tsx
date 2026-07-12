@@ -31,7 +31,7 @@ export default async function NewsCategoryPage({ params }: Props) {
   const decodedCategory = decodeURIComponent(slug).replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
 
   // Fetch initial 20 articles
-  const res = await getNewsByCategory(decodedCategory, 0, 20);
+  const res = await getNewsByCategory(decodedCategory, 20, 0);
   const articles = res.items || [];
 
   return (

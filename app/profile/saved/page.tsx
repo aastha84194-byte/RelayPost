@@ -12,6 +12,7 @@ import { API_BASE } from "@/lib/config";
 import { UsageMeter } from "@/components/UsageMeter";
 import { useTier } from "@/components/TierProvider";
 import toast from "react-hot-toast";
+import { getCategorySlugForArticle } from "@/lib/categoryMapping";
 
 type Tab = "articles" | "news";
 

@@ -18,6 +18,7 @@ import { getPopularKeywords } from '@/lib/articles';
 import InlineSubscriptionCTA from '../../components/InlineSubscriptionCTA';
 import CommunityPulse from '../CommunityPulse';
 
+import { getCategorySlugForArticle } from "@/lib/categoryMapping";
 interface ArticleRendererProps {
   article: Article;
   sidebarComponent?: React.ReactNode;
@@ -936,7 +937,7 @@ export default function ArticleRenderer({ article, sidebarComponent }: ArticleRe
                 {relatedArticles.length > 0 ? relatedArticles.map((item, i) => (
                   <Link 
                     key={i} 
-                    href={`/${item.category_name ? item.category_name.toLowerCase().replace(/[^a-z0-9]+/g, '-') : 'general'}/${item.slug}`} 
+                    href={`/${getCategorySlugForArticle(item.category_name)}/${item.slug}`} 
                     className="flex gap-4 group cursor-pointer"
                   >
                      <div className="w-20 h-20 rounded-2xl overflow-hidden shrink-0 shadow-md dark:shadow-none transition-colors duration-300">

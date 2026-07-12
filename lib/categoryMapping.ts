@@ -177,3 +177,20 @@ export function getAllBackendSlugsForFrontendSlug(frontendSlug: string): string[
   const cat = HARDCODED_CATEGORIES.find(c => c.slug === frontendSlug);
   return cat ? cat.backendSlugs : [frontendSlug];
 }
+
+export function getCategorySlugForArticle(categoryName?: string): string {
+  if (!categoryName) return 'article';
+  
+  const rawWithAnd = categoryName.toLowerCase().replace(/&/g, 'and').replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+  const rawWithoutAnd = categoryName.toLowerCase().replace(/&/g, '').replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+  
+  const mapping = HARDCODED_CATEGORIES.find(cat => 
+    cat.slug === rawWithAnd || 
+    cat.slug === rawWithoutAnd || 
+    cat.backendSlugs.includes(rawWithAnd) || 
+    cat.backendSlugs.includes(rawWithoutAnd) ||
+    cat.name.toLowerCase() === categoryName.toLowerCase()
+  );
+  
+  return mapping ? mapping.slug : rawWithAnd;
+}

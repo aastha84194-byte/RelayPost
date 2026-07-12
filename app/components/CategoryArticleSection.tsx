@@ -4,6 +4,7 @@ import Image from 'next/image';
 import { ChevronLeft, ChevronRight, ArrowUpRight } from 'lucide-react';
 import { Article } from '@/lib/types';
 import Link from 'next/link';
+import { getCategorySlugForArticle } from '@/lib/categoryMapping';
 import { motion } from 'framer-motion';
 
 interface CategoryArticleSectionProps {
@@ -172,7 +173,7 @@ export default function CategoryArticleSection({ title, slug, articles, layout =
             {displayArticles.map((item, i) => (
               <Link 
                 key={`${item.id}-${i}`} 
-                href={`/${item.category_name ? item.category_name.toLowerCase().replace(/[^a-z0-9]+/g, '-') : 'general'}/${item.slug}`}
+                href={`/${getCategorySlugForArticle(item.category_name || title)}/${item.slug}`}
                 className="w-[230px] md:w-[280px] shrink-0 bg-white dark:bg-slate-800/40 rounded-[2rem] border border-slate-100 dark:border-slate-800 overflow-hidden shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-200 group"
               >
                 <div className="h-40 md:h-44 relative overflow-hidden">
@@ -216,7 +217,7 @@ export default function CategoryArticleSection({ title, slug, articles, layout =
           {articles.map((item, i) => (
             <Link 
               key={item.id} 
-              href={`/${item.category_name ? item.category_name.toLowerCase().replace(/[^a-z0-9]+/g, '-') : 'general'}/${item.slug}`}
+              href={`/${getCategorySlugForArticle(item.category_name || title)}/${item.slug}`}
               className="w-full shrink-0 bg-white dark:bg-slate-800/40 rounded-[2rem] border border-slate-100 dark:border-slate-800 overflow-hidden shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-200 group flex flex-col"
             >
               <div className="h-48 md:h-56 relative overflow-hidden">
