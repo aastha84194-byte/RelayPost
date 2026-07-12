@@ -69,7 +69,6 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 html, body {
-  overflow-x: hidden;
   max-width: 100%;
   font-family: var(--font-body);
 }

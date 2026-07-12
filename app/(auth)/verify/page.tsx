@@ -36,7 +36,7 @@ function VerifyContent() {
           localStorage.setItem('auth_token', data.access_token);
           toast.success("Email successfully verified!");
           setTimeout(() => {
-            window.location.href = "/";
+            window.location.href = "/?onboarding=true";
           }, 1500);
         } else {
           setStatus("error");

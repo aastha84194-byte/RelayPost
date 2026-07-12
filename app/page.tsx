@@ -14,6 +14,7 @@ import CommunityPulse from './components/CommunityPulse';
 import Footer from './components/Footer';
 import CategoryArticleSection from './components/CategoryArticleSection';
 import LiveInsightsSidebar from './components/LiveInsightsSidebar';
+import OnboardingOverlay from './components/OnboardingOverlay';
 import { getArticlesBySection, getHomepageCategorySections, getPopularKeywords, getNewsLive, getAllArticles } from '@/lib/articles';
 import { Article, NewsArticle } from '@/lib/types';
 import { useSearchParams } from 'next/navigation';
@@ -23,6 +24,16 @@ import { Sparkles } from 'lucide-react';
 function HomeContent() {
   const searchParams = useSearchParams();
   const category = searchParams.get("category");
+  
+  const [showOnboarding, setShowOnboarding] = React.useState(false);
+
+  React.useEffect(() => {
+    if (searchParams.get("onboarding") === "true") {
+      setShowOnboarding(true);
+      // Remove query param from URL without refreshing
+      window.history.replaceState({}, '', window.location.pathname);
+    }
+  }, [searchParams]);
 
   const [trending, setTrending] = React.useState<Article[]>([]);
   const [expert, setExpert] = React.useState<Article[]>([]);
@@ -201,19 +212,21 @@ function HomeContent() {
   }, [hasMore, isFetchingMore, isAllCategoryArticlesLoading, category, skip]);
 
   return (
-    <div className="min-h-full flex flex-col font-sans overflow-x-hidden bg-white md:bg-[#F8F9FB] dark:bg-slate-900 dark:md:bg-[#0f172a] transition-colors duration-300">
-      <Navbar />
-      <main className="flex-grow">
-        <div className="max-w-7xl mx-auto px-4 md:px-8 pt-2 pb-6 md:py-4">
-          
-          <AnimatePresence mode="wait">
-            {category && (
-              <motion.div 
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-                className="mb-8 pb-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between"
-              >
+    <>
+      {showOnboarding && <OnboardingOverlay onClose={() => setShowOnboarding(false)} />}
+      <div className="min-h-full flex flex-col font-sans overflow-x-hidden bg-white md:bg-[#F8F9FB] dark:bg-slate-900 dark:md:bg-[#0f172a] transition-colors duration-300">
+        <Navbar />
+        <main className="flex-grow">
+          <div className="max-w-7xl mx-auto px-4 md:px-8 pt-2 pb-6 md:py-4">
+            
+            <AnimatePresence mode="wait">
+              {category && (
+                <motion.div 
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  className="mb-8 pb-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between"
+                >
                 <div>
                   <h2 className="text-2xl font-bold text-slate-900 dark:text-white capitalize">{category}</h2>
                   <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">Showing all articles related to {category}</p>
@@ -307,7 +320,7 @@ function HomeContent() {
               </div>
               <PopularConversations articles={trending.slice(0, 5)} />
               <GoUnlimited />
-              <TheBriefing />
+              {/* <TheBriefing /> */}
               {isKeywordsLoading ? (
                 <div className="h-[150px] bg-slate-200 dark:bg-slate-800 rounded-[2.5rem] animate-pulse w-full mt-6" />
               ) : (
@@ -319,6 +332,7 @@ function HomeContent() {
       </main>
       <Footer />
     </div>
+    </>
   );
 }
 

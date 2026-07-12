@@ -20,15 +20,6 @@ export default async function TagPage({ params }: { params: Promise<{ keyword: s
         <div className="mb-8 p-6 md:p-8 bg-gradient-to-br from-indigo-600 to-brand rounded-[2rem] text-white flex flex-col items-center justify-center text-center shadow-xl relative overflow-hidden">
            <div className="absolute top-0 left-0 w-full h-full bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-10" />
            <div className="relative z-10 flex flex-col items-center">
-              <div className="flex items-center gap-3 mb-6">
-                <div className="w-12 h-12 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center shadow-inner">
-                   <Sparkles size={24} className="text-white" />
-                </div>
-                <div className="text-left">
-                   <span className="text-[10px] font-black uppercase tracking-[0.3em] text-indigo-200">Intelligence Filter</span>
-                   <p className="text-sm font-bold text-white">Keyword Tag</p>
-                </div>
-              </div>
               <h1 className="text-3xl md:text-4xl font-black tracking-tight uppercase leading-none mt-2">
                  #{decodedKeyword}
               </h1>

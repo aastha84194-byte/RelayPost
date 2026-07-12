@@ -20,7 +20,10 @@ interface User {
   is_active: boolean;
   avatar?: string;
   created_at?: string;
+  tier: string;
+  subscription_status: string;
 }
+
 
 export default function UsersManagement() {
   const [users, setUsers] = useState<User[]>([]);
@@ -66,8 +69,9 @@ export default function UsersManagement() {
         setInviteEmail("");
         toast.success("Invitation sent successfully!");
       } else {
-        const error = await res.json();
-        toast.error(error.detail || "Invitation failed");
+        const err = await res.json();
+        const errMsg = typeof err.detail === 'string' ? err.detail : (Array.isArray(err.detail) ? err.detail[0]?.msg : null);
+        toast.error(errMsg || "Invitation failed");
       }
     } catch (e) { toast.error("Invitation failed"); }
   };
@@ -94,10 +98,56 @@ export default function UsersManagement() {
         toast.success("User protocol updated");
       } else {
         const err = await res.json();
-        toast.error(err.detail || "Update failed");
+        const errMsg = typeof err.detail === 'string' ? err.detail : (Array.isArray(err.detail) ? err.detail[0]?.msg : null);
+        toast.error(errMsg || "Update failed");
       }
     } catch (e) { toast.error("Update failed"); }
   };
+
+  const handleDeleteUser = async (userId: string) => {
+    if (!window.confirm("Are you sure you want to delete this user? This will deactivate their account.")) return;
+
+    const token = Cookies.get("access_token");
+    try {
+      const res = await fetch(`${AUTH_BASE}/admin/users/${userId}`, {
+        method: "DELETE",
+        headers: { "Authorization": `Bearer ${token}` }
+      });
+      if (res.ok) {
+        toast.success("User deleted successfully");
+        setUsers(users.filter(u => u.id !== userId));
+      } else {
+        const err = await res.json();
+        const errMsg = typeof err.detail === 'string' ? err.detail : (Array.isArray(err.detail) ? err.detail[0]?.msg : null);
+        toast.error(errMsg || "Deletion failed");
+      }
+    } catch (e) { toast.error("Deletion failed"); }
+  };
+
+  const handleOverrideSubscription = async () => {
+    if (!selectedUser) return;
+    const token = Cookies.get("access_token");
+    try {
+      const res = await fetch(`${AUTH_BASE}/admin/users/${selectedUser.id}/subscription`, {
+        method: "PUT",
+        headers: { 
+          "Authorization": `Bearer ${token}`,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ tier: selectedUser.tier || "free" })
+      });
+      if (res.ok) {
+        setIsEditModalOpen(false);
+        fetchUsers();
+        toast.success("Subscription tier updated");
+      } else {
+        const err = await res.json();
+        const errMsg = typeof err.detail === 'string' ? err.detail : (Array.isArray(err.detail) ? err.detail[0]?.msg : null);
+        toast.error(errMsg || "Subscription update failed");
+      }
+    } catch (e) { toast.error("Subscription update failed"); }
+  };
+
 
   const toggleUserStatus = async (user: User) => {
     const token = Cookies.get("access_token");
@@ -146,6 +196,7 @@ export default function UsersManagement() {
                  <tr className="bg-slate-50 border-b border-slate-100">
                     <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">User Identity</th>
                     <th className="px-6 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Access Role</th>
+                    <th className="px-6 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Tier</th>
                     <th className="px-6 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Status</th>
                     <th className="px-6 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Joined</th>
                     <th className="px-8 py-5 text-right text-[10px] font-black text-slate-400 uppercase tracking-widest">Action</th>
@@ -174,6 +225,15 @@ export default function UsersManagement() {
                              {user.role}
                           </span>
                        </td>
+                       <td className="px-6 py-6">
+                          <span className={`text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full border ${
+                            user.tier === 'pro' ? 'bg-violet-50 text-violet-600 border-violet-100' :
+                            user.tier === 'plus' ? 'bg-indigo-50 text-indigo-600 border-indigo-100' :
+                            'bg-slate-50 text-slate-500 border-slate-100'
+                          }`}>
+                             {user.tier}
+                          </span>
+                       </td>
                        <td className="px-6 py-6 font-bold text-xs uppercase text-slate-500">
                           <button 
                             onClick={() => toggleUserStatus(user)}
@@ -194,8 +254,11 @@ export default function UsersManagement() {
                              >
                                 <Edit2 size={16} />
                              </button>
-                             <button className="p-2 hover:bg-slate-50 text-slate-400 hover:text-red-500 rounded-lg transition-all">
-                                <MoreVertical size={16} />
+                             <button 
+                               onClick={() => handleDeleteUser(user.id)}
+                               className="p-2 hover:bg-red-50 text-slate-400 hover:text-red-500 rounded-lg transition-all"
+                             >
+                                <Trash2 size={16} />
                              </button>
                           </div>
                        </td>
@@ -203,7 +266,7 @@ export default function UsersManagement() {
                  ))}
                  {users.length === 0 && !isLoading && (
                    <tr>
-                     <td colSpan={5} className="py-20 text-center">
+                     <td colSpan={6} className="py-20 text-center">
                         <UsersIcon size={48} className="mx-auto text-slate-100 mb-4" />
                         <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Zero nodes detected</p>
                      </td>
@@ -319,20 +382,41 @@ export default function UsersManagement() {
                       </select>
                    </div>
 
-                   <div className="pt-4 flex gap-3">
-                      <button 
-                        onClick={() => setIsEditModalOpen(false)}
-                        className="flex-1 py-4 text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-slate-600 transition-colors"
-                      >
-                         Cancel
-                      </button>
-                      <button 
-                        onClick={handleUpdateUser}
-                        className="flex-1 py-4 bg-indigo-600 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-xl shadow-indigo-100 hover:bg-indigo-700 transition-all"
-                      >
-                         Update Access
-                      </button>
-                   </div>
+                    <div>
+                       <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 block">Subscription Tier (Override)</label>
+                       <select 
+                         value={selectedUser.tier || "free"}
+                         onChange={(e) => setSelectedUser({...selectedUser, tier: e.target.value})}
+                         className="w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-black uppercase tracking-widest outline-none transition-all"
+                       >
+                          <option value="free">Free</option>
+                          <option value="plus">Plus</option>
+                          <option value="pro">Pro</option>
+                       </select>
+                    </div>
+
+                    <div className="pt-4 flex flex-col gap-3">
+                       <div className="flex gap-3">
+                         <button 
+                           onClick={() => setIsEditModalOpen(false)}
+                           className="flex-1 py-4 text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-slate-600 transition-colors"
+                         >
+                            Cancel
+                         </button>
+                         <button 
+                           onClick={handleUpdateUser}
+                           className="flex-1 py-4 bg-indigo-600 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-xl shadow-indigo-100 hover:bg-indigo-700 transition-all"
+                         >
+                            Update Access
+                         </button>
+                       </div>
+                       <button 
+                         onClick={handleOverrideSubscription}
+                         className="w-full py-4 bg-violet-600 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-xl shadow-violet-100 hover:bg-violet-700 transition-all"
+                       >
+                          Override Subscription Tier
+                       </button>
+                    </div>
                 </div>
              </motion.div>
           </div>

@@ -166,9 +166,75 @@ export async function getArticlesBySection(section: string, category?: string): 
 
 export async function recordArticleView(id: string): Promise<void> {
   try {
-    await fetch(`${API_BASE}/public/articles/${id}/view`, { method: "POST" });
+    const headers: Record<string, string> = {};
+    const Cookies = require("js-cookie");
+    const token = typeof window !== "undefined" 
+      ? ((Cookies.default ? Cookies.default.get("access_token") : Cookies.get("access_token")) || localStorage.getItem("auth_token"))
+      : undefined;
+    if (token) {
+      headers["Authorization"] = `Bearer ${token}`;
+    }
+    await fetch(`${API_BASE}/public/articles/${id}/view`, { 
+      method: "POST",
+      headers
+    });
   } catch (err) {
     console.error("Failed to record view", err);
+  }
+}
+
+export async function updateArticleDuration(id: string, durationSeconds: number): Promise<void> {
+  try {
+    const headers: Record<string, string> = { "Content-Type": "application/json" };
+    const Cookies = require("js-cookie");
+    const token = typeof window !== "undefined" 
+      ? ((Cookies.default ? Cookies.default.get("access_token") : Cookies.get("access_token")) || localStorage.getItem("auth_token"))
+      : undefined;
+    if (token) {
+      headers["Authorization"] = `Bearer ${token}`;
+    }
+    // Using fetch with keepalive ensures it completes even if the tab is closing
+    await fetch(`${API_BASE}/public/articles/${id}/view/duration`, { 
+      method: "PATCH",
+      headers,
+      body: JSON.stringify({ duration_seconds: durationSeconds }),
+      keepalive: true
+    });
+  } catch (err) {
+    console.error("Failed to update article duration", err);
+  }
+}
+
+export async function recordNewsView(newsId: number, title: string, slug: string): Promise<void> {
+  try {
+    const headers: Record<string, string> = { "Content-Type": "application/json" };
+    const Cookies = require("js-cookie");
+    const token = typeof window !== "undefined" 
+      ? ((Cookies.default ? Cookies.default.get("access_token") : Cookies.get("access_token")) || localStorage.getItem("auth_token"))
+      : undefined;
+    if (token) {
+      headers["Authorization"] = `Bearer ${token}`;
+    }
+    await fetch(`${API_BASE}/public/news/${newsId}/view`, { 
+      method: "POST",
+      headers,
+      body: JSON.stringify({ title, slug })
+    });
+  } catch (err) {
+    console.error("Failed to record news view", err);
+  }
+}
+
+export async function getUserHistory(token: string, limit: number = 20, offset: number = 0): Promise<any[]> {
+  try {
+    const res = await fetch(`${API_BASE}/profile/history?limit=${limit}&offset=${offset}`, {
+      headers: { "Authorization": `Bearer ${token}` }
+    });
+    if (!res.ok) return [];
+    return await res.json();
+  } catch (err) {
+    console.error("Failed to fetch user history", err);
+    return [];
   }
 }
 
@@ -349,6 +415,17 @@ export async function getUserFollows(user_id: string): Promise<any[]> {
 
 export function getUserIdentifier(): string {
     if (typeof window === 'undefined') return '';
+    const token = localStorage.getItem('auth_token');
+    if (token) {
+        try {
+            const payload = JSON.parse(atob(token.split('.')[1]));
+            if (payload && payload.sub) {
+                return payload.sub;
+            }
+        } catch (e) {
+            // ignore
+        }
+    }
     let id = localStorage.getItem('rp_user_id');
     if (!id) {
         id = crypto.randomUUID();

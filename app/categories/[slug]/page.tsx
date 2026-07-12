@@ -4,6 +4,8 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
+import Cookies from "js-cookie";
+import toast from "react-hot-toast";
 import { getAllArticles, toggleFollow, getUserFollows, getUserIdentifier } from "@/lib/articles";
 import { Article } from "@/lib/types";
 import { getCategoryMapping, getAllBackendSlugsForFrontendSlug } from "@/lib/categoryMapping";
@@ -101,6 +103,11 @@ export default function CategoryDetailPage() {
   };
 
   const handleToggleFollow = async () => {
+    const token = Cookies.get("access_token") || localStorage.getItem("auth_token");
+    if (!token) {
+      toast.error("Please log in to follow categories");
+      return;
+    }
     if (!category) return;
     const res = await toggleFollow(userId, category.id, 'category');
     setIsFollowed(!!res);

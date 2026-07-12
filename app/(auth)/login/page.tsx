@@ -11,6 +11,8 @@ import Navbar from '../../components/Navbar';
 import Footer from '../../components/Footer';
 import { Mail, Lock, Eye, EyeOff } from 'lucide-react';
 import { AUTH_BASE } from "@/lib/config";
+import { RedirectHelper } from "@/lib/redirectHelper";
+
 
 export default function Login() {
   const [formData, setFormData] = useState({ email: '', password: '' });
@@ -36,7 +38,7 @@ export default function Login() {
             localStorage.setItem('auth_token', tokenData.access_token);
             toast.success("Verification successful! Logging in...");
             clearInterval(interval);
-            setTimeout(() => window.location.href = "/", 600);
+            setTimeout(() => window.location.href = '/?onboarding=true', 600);
           }
         } catch (e) {
           // Ignore network errors during polling
@@ -74,7 +76,8 @@ export default function Login() {
       Cookies.set('access_token', data.access_token, { expires: 7, secure: true, sameSite: 'strict' });
       localStorage.setItem('auth_token', data.access_token);
       toast.success("Welcome back!");
-      setTimeout(() => window.location.href = "/", 600);
+      const target = RedirectHelper.getAndClearTarget();
+      setTimeout(() => window.location.href = target, 600);
     } catch (err: any) {
       toast.error(err.message || "Invalid credentials");
     } finally {
@@ -94,7 +97,12 @@ export default function Login() {
         Cookies.set('access_token', data.access_token, { expires: 7, secure: true, sameSite: 'strict' });
         localStorage.setItem('auth_token', data.access_token);
         toast.success("Successfully authenticated with Google");
-        setTimeout(() => window.location.href = "/", 600);
+        if (data.is_new_user) {
+          setTimeout(() => window.location.href = '/?onboarding=true', 600);
+        } else {
+          const target = RedirectHelper.getAndClearTarget();
+          setTimeout(() => window.location.href = target, 600);
+        }
       } else {
         toast.error(data.detail || "Google Login failed");
       }
@@ -163,7 +171,7 @@ export default function Login() {
                           <input type="checkbox" className="mr-2 w-3 h-3 rounded border-white/20 bg-white/5 text-primary focus:ring-primary focus:ring-offset-0" />
                           Remember me
                         </label>
-                        <a href="#" className="text-xs text-indigo-400 hover:text-indigo-300 transition-colors">Forgot Password?</a>
+                        <Link href="/forgot-password" className="text-xs text-indigo-400 hover:text-indigo-300 transition-colors">Forgot Password?</Link>
                       </div>
 
                       <button type="submit" disabled={isLoading} className="w-full py-2.5 bg-gradient-to-br from-primary to-primary-container text-white font-bold rounded-lg shadow-lg shadow-primary/20 hover:shadow-primary/40 hover:scale-[1.02] active:scale-95 transition-all duration-300 text-xs uppercase tracking-widest mt-2">
@@ -180,7 +188,7 @@ export default function Login() {
                           </div>
                         </div>
 
-                        <div className="mt-4 flex justify-center opacity-90 transition-opacity hover:opacity-100 transform scale-90">
+                        <div className="mt-4 flex justify-center opacity-90 transition-opacity hover:opacity-100 transform scale-90 [color-scheme:dark]">
                           <GoogleLogin
                             onSuccess={handleGoogleSuccess}
                             onError={() => console.log('Login Failed')}

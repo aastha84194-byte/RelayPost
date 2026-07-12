@@ -3,7 +3,10 @@ import './globals.css';
 import { Toaster } from 'react-hot-toast';
 import { Analytics } from '@vercel/analytics/react';
 import { ThemeProvider } from './components/ThemeProvider';
+import { TierProvider } from '@/components/TierProvider';
 import { GoogleAnalytics } from '@next/third-parties/google';
+import { GoogleOAuthProvider } from '@react-oauth/google';
+import GlobalOneTap from './components/GlobalOneTap';
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://relay-post.vercel.app'),
@@ -108,7 +111,12 @@ export default function RootLayout({
                   border: '1px solid rgba(255, 255, 255, 0.1)',
               }
           }} />
-          {children}
+          <TierProvider>
+            <GoogleOAuthProvider clientId={process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "45916998595-bd3pc3o44oo0qst9mob0ibsq05te4cjq.apps.googleusercontent.com"}>
+              <GlobalOneTap />
+              {children}
+            </GoogleOAuthProvider>
+          </TierProvider>
           <Analytics />
           <GoogleAnalytics gaId={process.env.NEXT_PUBLIC_GA_ID!} />
         </ThemeProvider>
