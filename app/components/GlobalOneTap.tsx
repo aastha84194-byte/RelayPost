@@ -5,10 +5,10 @@ import { useGoogleOneTapLogin } from '@react-oauth/google';
 import Cookies from 'js-cookie';
 import toast from 'react-hot-toast';
 import { useRouter } from 'next/navigation';
-import { API_BASE } from '@/lib/config';
+import { AUTH_BASE } from "@/lib/config";
 
 // Reusing the AUTH_BASE logic from login page
-const AUTH_BASE = "https://relaypost-backend.onrender.com"; // Adjust if necessary to match actual API_BASE
+ // Adjust if necessary to match actual API_BASE
 
 export default function GlobalOneTap() {
   const router = useRouter();
