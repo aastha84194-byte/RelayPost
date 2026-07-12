@@ -188,13 +188,15 @@ export default function Login() {
                           </div>
                         </div>
 
-                        <div className="mt-4 flex justify-center opacity-90 transition-opacity hover:opacity-100 transform scale-90 [color-scheme:dark]">
-                          <GoogleLogin
-                            onSuccess={handleGoogleSuccess}
-                            onError={() => console.log('Login Failed')}
-                            theme="filled_blue"
-                            shape="pill"
-                          />
+                        <div className="mt-4 flex justify-center opacity-90 transition-opacity hover:opacity-100 transform scale-90">
+                          <div className="rounded-full overflow-hidden flex items-center justify-center">
+                            <GoogleLogin
+                              onSuccess={handleGoogleSuccess}
+                              onError={() => console.log('Login Failed')}
+                              theme="filled_blue"
+                              shape="pill"
+                            />
+                          </div>
                         </div>
                       </div>
 

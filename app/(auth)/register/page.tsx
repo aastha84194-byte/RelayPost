@@ -285,8 +285,8 @@ export default function Register() {
                           <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-white/[0.08]"></div></div>
                         </div>
                         
-                        <div className="mt-5 flex justify-center [color-scheme:dark]">
-                          <div className="p-0.5 rounded-full bg-gradient-to-r from-blue-500/10 to-purple-500/10 hover:from-blue-500/30 hover:to-purple-500/30 transition-all duration-500 group/google">
+                        <div className="mt-5 flex justify-center">
+                          <div className="p-0.5 rounded-full overflow-hidden flex items-center justify-center bg-gradient-to-r from-blue-500/10 to-purple-500/10 hover:from-blue-500/30 hover:to-purple-500/30 transition-all duration-500 group/google">
                             <GoogleLogin 
                                 onSuccess={handleGoogleSuccess} 
                                 onError={() => console.log('Link Failed')}
