@@ -5,6 +5,8 @@ import { useParams } from "next/navigation";
 import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
 import { getPublicKeywords, getArticlesByKeyword, toggleFollow, getUserFollows, getUserIdentifier } from "@/lib/articles";
+import Cookies from "js-cookie";
+import toast from "react-hot-toast";
 import { Article } from "@/lib/types";
 import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
 import { Hash, Sparkles, TrendingUp, Bookmark, BookmarkCheck, Zap } from "lucide-react";
@@ -61,6 +63,11 @@ export default function KeywordDetailPage() {
   };
 
   const handleToggleFollow = async () => {
+    const token = Cookies.get("access_token") || localStorage.getItem("auth_token");
+    if (!token) {
+      toast.error("Please log in to follow keywords");
+      return;
+    }
     if (!keyword) return;
     const res = await toggleFollow(userId, keyword.id, 'keyword');
     setIsFollowed(!!res);

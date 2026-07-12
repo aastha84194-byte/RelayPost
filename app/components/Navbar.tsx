@@ -6,6 +6,8 @@ import { Search, User, Monitor, Briefcase, Trophy, Heart, Film, Landmark, Micros
 import { motion, useScroll, useMotionValueEvent, AnimatePresence } from "framer-motion";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { ThemeToggle } from "./ThemeToggle";
+import { useTier } from "@/components/TierProvider";
+
 
 import SearchOverlay from "../../components/SearchOverlay";
 import { HARDCODED_CATEGORIES } from "@/lib/categoryMapping";
@@ -78,8 +80,11 @@ export default function Navbar() {
   const [searchOpen, setSearchOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const pathname = usePathname();
+  const { tier } = useTier();
+  const [userName, setUserName] = useState<string>("User");
 
-  useEffect(() => {
+
+  const checkAuth = () => {
     import("js-cookie").then((Cookies) => {
       const token = Cookies.default.get("access_token");
       if (token) {
@@ -89,6 +94,7 @@ export default function Navbar() {
           const sanitizedPayload = payloadBase64.replace(/-/g, '+').replace(/_/g, '/');
           const decodedPayload = JSON.parse(decodeURIComponent(escape(atob(sanitizedPayload))));
           setUserRole(decodedPayload.role?.toUpperCase() || "VIEWER");
+          setUserName(decodedPayload.display_name || decodedPayload.email || "User");
         } catch (e) {
           console.error("Failed to decode token", e);
           setUserRole("VIEWER");
@@ -96,9 +102,20 @@ export default function Navbar() {
       } else {
         setIsLoggedIn(false);
         setUserRole(null);
+        setUserName("User");
       }
       setIsAuthLoading(false);
     });
+  };
+
+  useEffect(() => {
+    checkAuth();
+
+    const handleAuthChange = () => {
+      checkAuth();
+    };
+    
+    window.addEventListener('auth-change', handleAuthChange);
 
     const handleClickOutside = (event: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
@@ -106,7 +123,10 @@ export default function Navbar() {
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      window.removeEventListener('auth-change', handleAuthChange);
+    };
   }, []);
 
   useMotionValueEvent(scrollY, "change", (latest) => {
@@ -249,9 +269,18 @@ export default function Navbar() {
                             transition={{ duration: 0.15 }}
                             className="absolute right-0 mt-3 w-56 bg-slate-800 border border-slate-700 rounded-xl overflow-hidden shadow-2xl py-2"
                           >
-                            <div className="px-4 py-3 border-b border-slate-700/50 mb-1">
+                            <div className="px-4 py-3 border-b border-slate-700/50 mb-1 flex flex-col gap-0.5">
                               <p className="text-xs text-slate-400">Signed in as</p>
-                              <p className="text-sm font-semibold text-white truncate">User</p>
+                              <p className="text-sm font-semibold text-white truncate">{userName}</p>
+                              <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 mt-1 rounded w-fit ${
+                                tier === "pro"
+                                  ? "bg-violet-900/50 text-violet-300 border border-violet-800"
+                                  : tier === "plus"
+                                  ? "bg-indigo-900/50 text-indigo-300 border border-indigo-800"
+                                  : "bg-slate-700 text-slate-300"
+                              }`}>
+                                {tier.toUpperCase()} Plan
+                              </span>
                             </div>
 
                             <Link href="/profile" className="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-300 hover:text-white hover:bg-slate-700/50 transition-colors">
@@ -286,8 +315,24 @@ export default function Navbar() {
                   )
                 ) : (
                   <div className="hidden md:flex items-center gap-3 ml-2">
-                    <Link href="/login" className="text-slate-300 hover:text-white font-medium text-sm transition-colors px-2">Login</Link>
-                    <Link href="/register" className="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-full font-medium text-sm transition-colors cursor-pointer shadow-lg">Sign Up</Link>
+                    <Link 
+                      href="/login" 
+                      onClick={() => {
+                        import("@/lib/redirectHelper").then(({ RedirectHelper }) => RedirectHelper.saveTarget());
+                      }} 
+                      className="text-slate-300 hover:text-white font-medium text-sm transition-colors px-2"
+                    >
+                      Login
+                    </Link>
+                    <Link 
+                      href="/register" 
+                      onClick={() => {
+                        import("@/lib/redirectHelper").then(({ RedirectHelper }) => RedirectHelper.saveTarget());
+                      }} 
+                      className="bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded-full font-medium text-sm transition-colors cursor-pointer shadow-lg"
+                    >
+                      Sign Up
+                    </Link>
                   </div>
                 )}
 
@@ -331,8 +376,26 @@ export default function Navbar() {
             <div className="mt-auto space-y-4">
               {!isLoggedIn && (
                 <>
-                  <Link onClick={() => setMobileMenuOpen(false)} href="/login" className="block w-full py-4 text-center text-white font-bold border border-white/10 rounded-2xl">Login</Link>
-                  <Link onClick={() => setMobileMenuOpen(false)} href="/register" className="block w-full py-4 text-center bg-indigo-600 text-white font-bold rounded-2xl">Create Account</Link>
+                  <Link 
+                    onClick={() => {
+                      setMobileMenuOpen(false);
+                      import("@/lib/redirectHelper").then(({ RedirectHelper }) => RedirectHelper.saveTarget());
+                    }} 
+                    href="/login" 
+                    className="block w-full py-4 text-center text-white font-bold border border-white/10 rounded-2xl"
+                  >
+                    Login
+                  </Link>
+                  <Link 
+                    onClick={() => {
+                      setMobileMenuOpen(false);
+                      import("@/lib/redirectHelper").then(({ RedirectHelper }) => RedirectHelper.saveTarget());
+                    }} 
+                    href="/register" 
+                    className="block w-full py-4 text-center bg-indigo-600 text-white font-bold rounded-2xl"
+                  >
+                    Create Account
+                  </Link>
                 </>
               )}
             </div>

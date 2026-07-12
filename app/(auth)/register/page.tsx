@@ -10,6 +10,8 @@ import { User, AtSign, Eye, EyeOff } from 'lucide-react';
 import NetworkBackground from '../../components/NetworkBackground';
 import Footer from '../../components/Footer';
 import { AUTH_BASE } from "@/lib/config";
+import { RedirectHelper } from "@/lib/redirectHelper";
+
 
 export default function Register() {
   const [formData, setFormData] = useState({ name: '', email: '', password: '', confirm: '' });
@@ -36,7 +38,7 @@ export default function Register() {
             localStorage.setItem('auth_token', tokenData.access_token);
             toast.success("Verification successful! Initializing access...");
             clearInterval(interval);
-            setTimeout(() => window.location.href = "/", 1000);
+            setTimeout(() => window.location.href = '/?onboarding=true', 1000);
           }
         } catch (e) {
           // Ignore network errors during polling
@@ -134,8 +136,13 @@ export default function Register() {
         if (res.ok) {
             Cookies.set('access_token', data.access_token, { expires: 7, secure: true, sameSite: 'strict' });
             localStorage.setItem('auth_token', data.access_token);
-            toast.success("Authenticatin Sync successful via Google");
-            setTimeout(() => window.location.href = "/", 1000);
+            toast.success("Authentication Sync successful via Google");
+            if (data.is_new_user) {
+              setTimeout(() => window.location.href = '/?onboarding=true', 1000);
+            } else {
+              const target = RedirectHelper.getAndClearTarget();
+              setTimeout(() => window.location.href = target, 1000);
+            }
         } else {
             toast.error(data.detail || "Google Link failed");
         }
@@ -278,12 +285,12 @@ export default function Register() {
                           <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-white/[0.08]"></div></div>
                         </div>
                         
-                        <div className="mt-5 flex justify-center">
+                        <div className="mt-5 flex justify-center [color-scheme:dark]">
                           <div className="p-0.5 rounded-full bg-gradient-to-r from-blue-500/10 to-purple-500/10 hover:from-blue-500/30 hover:to-purple-500/30 transition-all duration-500 group/google">
                             <GoogleLogin 
                                 onSuccess={handleGoogleSuccess} 
                                 onError={() => console.log('Link Failed')}
-                                theme="filled_black"
+                                theme="filled_blue"
                                 shape="pill"
                                 text="signup_with"
                               />

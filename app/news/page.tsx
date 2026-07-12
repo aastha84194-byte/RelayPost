@@ -22,7 +22,7 @@ function NewsContent() {
     const fetchData = async () => {
       setIsLoading(true);
       try {
-        const MAIN_CATEGORIES = ['World News', 'Politics', 'Business', 'Technology', 'Science', 'Health', 'Sports', 'Entertainment'];
+        const MAIN_CATEGORIES = ['World News', 'India News', 'Politics', 'Business', 'Technology', 'Science', 'Health', 'Sports', 'Entertainment'];
         const liveNews = await getNewsLive(10);
         
         setSpotlight(liveNews.slice(0, 4));

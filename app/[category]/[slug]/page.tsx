@@ -36,6 +36,8 @@ export async function generateMetadata(
   };
 }
 
+import RecommendedNews from "@/app/components/RecommendedNews";
+
 export default async function ArticlePage(
   { params }: { params: Promise<{ category: string, slug: string }> }
 ) {
@@ -52,7 +54,7 @@ export default async function ArticlePage(
   return (
     <>
       <Navbar />
-      <ArticleRenderer article={article} />
+      <ArticleRenderer article={article} sidebarComponent={<RecommendedNews />} />
     </>
   );
 }

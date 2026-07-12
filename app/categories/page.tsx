@@ -4,6 +4,7 @@ import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import Link from "next/link";
+import { ChevronLeft, ChevronRight, Plus, Check, ArrowRight, CheckCircle2 } from "lucide-react";
 import { 
   subscribeToNewsletter, 
   toggleFollow, 
@@ -11,6 +12,8 @@ import {
   getUserIdentifier 
 } from "@/lib/articles";
 import { HARDCODED_CATEGORIES } from "@/lib/categoryMapping";
+import toast from "react-hot-toast";
+import Cookies from "js-cookie";
 
 export default function CategoriesPage() {
   const [userFollows, setUserFollows] = useState<string[]>([]);
@@ -86,6 +89,12 @@ export default function CategoriesPage() {
   };
 
   const handleToggleFollow = async (targetId: string, targetType: 'category' | 'keyword') => {
+    const token = Cookies.get("access_token") || localStorage.getItem("auth_token");
+    if (!token) {
+      toast.error("Please log in to follow categories");
+      return;
+    }
+
     const res = await toggleFollow(userId, targetId, targetType);
     if (!res) {
       // Unfollowed (API returns null/None for delete)
@@ -133,7 +142,7 @@ In-depth stories and analysis across the topics shaping our world.            </
                  className="absolute left-2 md:left-8 z-50 flex items-center justify-center w-12 h-12 bg-slate-900/50 hover:bg-indigo-600 backdrop-blur-md rounded-full text-white transition-all shadow-0 lg:shadow-xl"
                  aria-label="Previous Collection"
               >
-                 <span className="material-symbols-outlined">chevron_left</span>
+                 <ChevronLeft size={24} />
               </button>
 
               {orbitOrder.map((cardIndex, i) => {
@@ -184,10 +193,21 @@ In-depth stories and analysis across the topics shaping our world.            </
                           <p className="text-slate-500 dark:text-slate-400 text-sm line-clamp-2 italic leading-relaxed">
                             {card.description || "Discover high-fidelity reports and news synthesis across this specialized intelligence stream."}
                           </p>
-                          <div className="mt-8 flex items-center justify-between">
-                             <span className="text-[10px] font-black text-indigo-300 dark:text-indigo-600 tracking-[0.2em] uppercase drop-shadow-md">Enter Stream</span>
-                             <div className="w-10 h-10 rounded-full bg-slate-50 dark:bg-slate-800 flex items-center justify-center group-hover:bg-indigo-600 group-hover:text-white transition-all">
-                                <span className="material-symbols-outlined text-sm group-hover:translate-x-1 transition-transform">arrow_forward</span>
+                          <div className="mt-4 flex items-center justify-between relative z-10">
+                             <button 
+                               onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleToggleFollow(card.id, 'category'); }}
+                               className={`flex items-center gap-1 font-black text-[10px] uppercase tracking-widest transition-all px-4 py-2 rounded-full border ${userFollows.includes(card.id) ? 'bg-indigo-600 text-white border-indigo-600' : 'text-slate-400 border-slate-200 dark:border-slate-800 hover:border-indigo-600 hover:text-indigo-600'}`}
+                             >
+                               {userFollows.includes(card.id) ? 'Following' : 'Follow'}
+                               <span className="flex items-center justify-center">
+                                 {userFollows.includes(card.id) ? <CheckCircle2 size={14} className="text-white" /> : <Plus size={14} />}
+                               </span>
+                             </button>
+                             <div className="flex items-center gap-2 group/btn">
+                               <span className="text-[10px] font-black text-indigo-300 dark:text-indigo-600 tracking-[0.2em] uppercase drop-shadow-md">Enter Stream</span>
+                               <div className="w-10 h-10 rounded-full bg-slate-50 dark:bg-slate-800 flex items-center justify-center group-hover/btn:bg-indigo-600 group-hover/btn:text-white transition-all">
+                                  <ArrowRight size={16} className="group-hover/btn:translate-x-1 transition-transform" />
+                               </div>
                              </div>
                           </div>
                         </div>
@@ -203,7 +223,7 @@ In-depth stories and analysis across the topics shaping our world.            </
                  className="absolute right-2 md:right-8 z-50 flex items-center justify-center w-12 h-12 bg-slate-900/50 hover:bg-indigo-600 backdrop-blur-md rounded-full text-white transition-all shadow-xl"
                  aria-label="Next Collection"
               >
-                 <span className="material-symbols-outlined">chevron_right</span>
+                 <ChevronRight size={24} />
               </button>
             </div>
           ) : (
@@ -238,15 +258,15 @@ In-depth stories and analysis across the topics shaping our world.            </
                   className="bg-white dark:bg-slate-900/50 backdrop-blur-sm rounded-[2.5rem] p-10 shadow-sm border border-slate-100 dark:border-white/5 text-left cursor-pointer z-10 relative transition-colors hover:border-indigo-500/30 flex flex-col w-full h-full"
                 >
                   <Link href={contextUrl} className="flex-1">
-                    <div className="flex justify-between items-start mb-8">
-                      <span className="bg-slate-50 dark:bg-slate-800 text-slate-400 dark:text-slate-500 px-4 py-1.5 rounded-full text-[10px] font-black tracking-widest uppercase">
-                        Channel
-                      </span>
+                    <div className="flex justify-between items-start mb-6">
+                      <div className="w-12 h-12 rounded-2xl bg-indigo-50 dark:bg-indigo-500/10 flex items-center justify-center text-indigo-600 dark:text-indigo-400">
+                        <topic.icon size={24} />
+                      </div>
                     </div>
                     <h4 className="text-2xl font-black mb-4 dark:text-white uppercase tracking-tight">
                       {topic.name}
                     </h4>
-                    <p className="text-slate-500 dark:text-slate-400 text-sm leading-relaxed mb-8 line-clamp-3 font-medium italic">
+                    <p className="text-slate-500 dark:text-slate-400 text-sm leading-relaxed mb-4 md:mb-8 line-clamp-3 font-medium italic">
                       {topic.description || `Ongoing shifts and digital synthesis within the ${topic.name} research corridor.`}
                     </p>
                   </Link>
@@ -267,8 +287,8 @@ In-depth stories and analysis across the topics shaping our world.            </
                       className={`flex items-center gap-1 font-black text-[10px] uppercase tracking-widest transition-all px-4 py-2 rounded-full border ${isFollowed ? 'bg-indigo-600 text-white border-indigo-600' : 'text-slate-400 border-slate-200 dark:border-slate-800 hover:border-indigo-600 hover:text-indigo-600'}`}
                     >
                       {isFollowed ? 'Following' : 'Follow'}
-                      <span className={`material-symbols-outlined text-[14px] ${isFollowed ? 'fill-current' : ''}`}>
-                        {isFollowed ? 'task_alt' : 'add'}
+                      <span className="flex items-center justify-center">
+                        {isFollowed ? <CheckCircle2 size={14} className="text-white" /> : <Plus size={14} />}
                       </span>
                     </button>
                   </div>

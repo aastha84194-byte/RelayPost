@@ -4,12 +4,15 @@ import Footer from '../../components/Footer';
 import { getNewsBySlug, getNewsByCategory } from '@/lib/articles';
 import { Metadata } from 'next';
 import Image from 'next/image';
-import { Clock, Globe, ArrowLeft, Share2, Bookmark, Layers } from 'lucide-react';
+import { Clock, ArrowLeft,Globe, Share2, Bookmark, Layers } from 'lucide-react';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import NewsActionButtons from '../../components/NewsActionButtons';
 import ReactMarkdown from 'react-markdown';
 import rehypeRaw from 'rehype-raw';
+import RecommendedArticles from '../../components/RecommendedArticles';
+import NewsTracker from '../../components/NewsTracker';
+import InlineSubscriptionCTA from '../../components/InlineSubscriptionCTA';
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -84,7 +87,7 @@ export default async function NewsDetailPage({ params }: Props) {
             Back to News
           </Link>
 
-          <NewsActionButtons />
+          <NewsActionButtons newsArticle={article as any} />
         </div>
 
         {/* Content Section */}
@@ -142,60 +145,86 @@ export default async function NewsDetailPage({ params }: Props) {
               </div>
             )}
 
-            {/* AI Summary Callout */}
-            <div className="p-8 md:p-12 bg-indigo-600 rounded-[3rem] text-white mb-12 shadow-xl shadow-indigo-100 dark:shadow-none">
-              <div className="flex items-center gap-3 mb-6">
-                 <div className="p-2 bg-white/20 backdrop-blur-md rounded-xl">
-                    <Globe size={20} className="text-white" />
-                 </div>
-                 <div>
-                    <p className="text-[10px] font-black uppercase tracking-[0.2em] text-white/70">Intelligence Synthesis</p>
-                    <p className="text-sm font-bold text-white">AI-Generated Core Insights</p>
-                 </div>
-              </div>
-              <p className="text-xl md:text-2xl font-bold leading-relaxed">
-                {article.ai_summary || article.description}
+            {/* Excerpt / Description */}
+            {(article.description) && (
+              <p className="text-lg md:text-xl text-slate-600 dark:text-slate-300 leading-relaxed font-medium border-l-4 border-indigo-500/40 pl-5 mb-12 italic">
+                {article.description}
               </p>
-            </div>
+            )}
 
             {/* Full Analysis Snippet if exists */}
-            {article.full_analysis ? (
-               <div className="mb-12 [&>p:first-of-type]:first-letter:text-6xl md:[&>p:first-of-type]:first-letter:text-7xl [&>p:first-of-type]:first-letter:font-black [&>p:first-of-type]:first-letter:text-indigo-600 dark:[&>p:first-of-type]:first-letter:text-indigo-400 [&>p:first-of-type]:first-letter:mr-3 [&>p:first-of-type]:first-letter:float-left">
-                  <ReactMarkdown
-                    rehypePlugins={[rehypeRaw]}
-                    components={{
-                      h1: ({node, ...props}) => <h1 className="text-3xl md:text-5xl font-black text-slate-900 dark:text-white mb-6 tracking-tight" {...props} />,
-                      h2: ({node, ...props}) => <h2 className="text-2xl md:text-4xl font-black text-slate-900 dark:text-white mt-12 mb-6 tracking-tight" {...props} />,
-                      h3: ({node, ...props}) => <h3 className="text-xl md:text-2xl font-black text-slate-900 dark:text-white mt-10 mb-4 tracking-tight" {...props} />,
-                      p: ({node, ...props}) => <p className="text-[17px] md:text-xl text-slate-700 dark:text-slate-300 leading-[1.8] mb-6 md:mb-8" {...props} />,
-                      ul: ({node, ...props}) => <ul className="space-y-4 mb-8 pl-6 list-disc text-[17px] md:text-xl text-slate-700 dark:text-slate-300" {...props} />,
-                      li: ({node, ...props}) => <li className="pl-2" {...props} />,
-                      blockquote: ({node, ...props}) => <blockquote className="border-l-4 border-indigo-500 pl-6 my-8 italic text-xl text-slate-800 dark:text-slate-200" {...props} />,
-                      strong: ({node, ...props}) => <strong className="font-bold text-slate-900 dark:text-white" {...props} />
-                    }}
-                  >
-                    {article.full_analysis}
-                  </ReactMarkdown>
-               </div>
-            ) : article.content ? (
-               <div className="mb-12 [&>p:first-of-type]:first-letter:text-6xl md:[&>p:first-of-type]:first-letter:text-7xl [&>p:first-of-type]:first-letter:font-black [&>p:first-of-type]:first-letter:text-indigo-600 dark:[&>p:first-of-type]:first-letter:text-indigo-400 [&>p:first-of-type]:first-letter:mr-3 [&>p:first-of-type]:first-letter:float-left">
-                  <ReactMarkdown
-                    rehypePlugins={[rehypeRaw]}
-                    components={{
-                      h1: ({node, ...props}) => <h1 className="text-3xl md:text-5xl font-black text-slate-900 dark:text-white mb-6 tracking-tight" {...props} />,
-                      h2: ({node, ...props}) => <h2 className="text-2xl md:text-4xl font-black text-slate-900 dark:text-white mt-12 mb-6 tracking-tight" {...props} />,
-                      h3: ({node, ...props}) => <h3 className="text-xl md:text-2xl font-black text-slate-900 dark:text-white mt-10 mb-4 tracking-tight" {...props} />,
-                      p: ({node, ...props}) => <p className="text-[17px] md:text-xl text-slate-700 dark:text-slate-300 leading-[1.8] mb-6 md:mb-8" {...props} />,
-                      ul: ({node, ...props}) => <ul className="space-y-4 mb-8 pl-6 list-disc text-[17px] md:text-xl text-slate-700 dark:text-slate-300" {...props} />,
-                      li: ({node, ...props}) => <li className="pl-2" {...props} />,
-                      blockquote: ({node, ...props}) => <blockquote className="border-l-4 border-indigo-500 pl-6 my-8 italic text-xl text-slate-800 dark:text-slate-200" {...props} />,
-                      strong: ({node, ...props}) => <strong className="font-bold text-slate-900 dark:text-white" {...props} />
-                    }}
-                  >
-                    {article.content}
-                  </ReactMarkdown>
-               </div>
-            ) : null}
+            {(() => {
+               const contentToRender = article.full_analysis || article.content || "";
+               if (!contentToRender) return null;
+               
+               const paragraphs = contentToRender.split('\n\n');
+               // Only split if we have more than 2 paragraphs to make it look good
+               if (paragraphs.length > 2) {
+                 const midpoint = Math.floor(paragraphs.length / 2);
+                 const firstHalf = paragraphs.slice(0, midpoint).join('\n\n');
+                 const secondHalf = paragraphs.slice(midpoint).join('\n\n');
+                 
+                 return (
+                   <>
+                     <div className="mb-8 [&>p:first-of-type]:first-letter:text-6xl md:[&>p:first-of-type]:first-letter:text-7xl [&>p:first-of-type]:first-letter:font-black [&>p:first-of-type]:first-letter:text-indigo-600 dark:[&>p:first-of-type]:first-letter:text-indigo-400 [&>p:first-of-type]:first-letter:mr-3 [&>p:first-of-type]:first-letter:float-left">
+                        <ReactMarkdown
+                          rehypePlugins={[rehypeRaw]}
+                          components={{
+                            h1: ({node, ...props}) => <h1 className="text-3xl md:text-5xl font-black text-slate-900 dark:text-white mb-6 tracking-tight" {...props} />,
+                            h2: ({node, ...props}) => <h2 className="text-2xl md:text-4xl font-black text-slate-900 dark:text-white mt-12 mb-6 tracking-tight" {...props} />,
+                            h3: ({node, ...props}) => <h3 className="text-xl md:text-2xl font-black text-slate-900 dark:text-white mt-10 mb-4 tracking-tight" {...props} />,
+                            p: ({node, ...props}) => <p className="text-[17px] md:text-xl text-slate-700 dark:text-slate-300 leading-[1.8] mb-6 md:mb-8" {...props} />,
+                            ul: ({node, ...props}) => <ul className="space-y-4 mb-8 pl-6 list-disc text-[17px] md:text-xl text-slate-700 dark:text-slate-300" {...props} />,
+                            li: ({node, ...props}) => <li className="pl-2" {...props} />,
+                            blockquote: ({node, ...props}) => <blockquote className="border-l-4 border-indigo-500 pl-6 my-8 italic text-xl text-slate-800 dark:text-slate-200" {...props} />,
+                            strong: ({node, ...props}) => <strong className="font-bold text-slate-900 dark:text-white" {...props} />
+                          }}
+                        >
+                          {firstHalf}
+                        </ReactMarkdown>
+                     </div>
+                     {/* <InlineSubscriptionCTA /> */}
+                     <div className="mb-12 mt-8">
+                        <ReactMarkdown
+                          rehypePlugins={[rehypeRaw]}
+                          components={{
+                            h1: ({node, ...props}) => <h1 className="text-3xl md:text-5xl font-black text-slate-900 dark:text-white mb-6 tracking-tight" {...props} />,
+                            h2: ({node, ...props}) => <h2 className="text-2xl md:text-4xl font-black text-slate-900 dark:text-white mt-12 mb-6 tracking-tight" {...props} />,
+                            h3: ({node, ...props}) => <h3 className="text-xl md:text-2xl font-black text-slate-900 dark:text-white mt-10 mb-4 tracking-tight" {...props} />,
+                            p: ({node, ...props}) => <p className="text-[17px] md:text-xl text-slate-700 dark:text-slate-300 leading-[1.8] mb-6 md:mb-8" {...props} />,
+                            ul: ({node, ...props}) => <ul className="space-y-4 mb-8 pl-6 list-disc text-[17px] md:text-xl text-slate-700 dark:text-slate-300" {...props} />,
+                            li: ({node, ...props}) => <li className="pl-2" {...props} />,
+                            blockquote: ({node, ...props}) => <blockquote className="border-l-4 border-indigo-500 pl-6 my-8 italic text-xl text-slate-800 dark:text-slate-200" {...props} />,
+                            strong: ({node, ...props}) => <strong className="font-bold text-slate-900 dark:text-white" {...props} />
+                          }}
+                        >
+                          {secondHalf}
+                        </ReactMarkdown>
+                     </div>
+                   </>
+                 );
+               }
+
+               return (
+                 <div className="mb-12 [&>p:first-of-type]:first-letter:text-6xl md:[&>p:first-of-type]:first-letter:text-7xl [&>p:first-of-type]:first-letter:font-black [&>p:first-of-type]:first-letter:text-indigo-600 dark:[&>p:first-of-type]:first-letter:text-indigo-400 [&>p:first-of-type]:first-letter:mr-3 [&>p:first-of-type]:first-letter:float-left">
+                    <ReactMarkdown
+                      rehypePlugins={[rehypeRaw]}
+                      components={{
+                        h1: ({node, ...props}) => <h1 className="text-3xl md:text-5xl font-black text-slate-900 dark:text-white mb-6 tracking-tight" {...props} />,
+                        h2: ({node, ...props}) => <h2 className="text-2xl md:text-4xl font-black text-slate-900 dark:text-white mt-12 mb-6 tracking-tight" {...props} />,
+                        h3: ({node, ...props}) => <h3 className="text-xl md:text-2xl font-black text-slate-900 dark:text-white mt-10 mb-4 tracking-tight" {...props} />,
+                        p: ({node, ...props}) => <p className="text-[17px] md:text-xl text-slate-700 dark:text-slate-300 leading-[1.8] mb-6 md:mb-8" {...props} />,
+                        ul: ({node, ...props}) => <ul className="space-y-4 mb-8 pl-6 list-disc text-[17px] md:text-xl text-slate-700 dark:text-slate-300" {...props} />,
+                        li: ({node, ...props}) => <li className="pl-2" {...props} />,
+                        blockquote: ({node, ...props}) => <blockquote className="border-l-4 border-indigo-500 pl-6 my-8 italic text-xl text-slate-800 dark:text-slate-200" {...props} />,
+                        strong: ({node, ...props}) => <strong className="font-bold text-slate-900 dark:text-white" {...props} />
+                      }}
+                    >
+                      {contentToRender}
+                    </ReactMarkdown>
+                 </div>
+               );
+            })()}
 
             {/* Related Sources */}
             {article.related_sources && article.related_sources.length > 0 && (
@@ -236,39 +265,44 @@ export default async function NewsDetailPage({ params }: Props) {
             </div>
           </div>
 
-          {/* Sidebar */}
-          <aside className="lg:col-span-4 space-y-8">
-            <div className="bg-slate-50 dark:bg-slate-800/50 rounded-[2.5rem] p-8 border border-slate-100 dark:border-slate-800 sticky top-8">
-               <h3 className="text-[11px] font-black text-indigo-600 uppercase tracking-[0.3em] flex items-center gap-3 mb-6">
-                  <span className="w-4 h-0.5 bg-indigo-600" />
-                  Related News
-               </h3>
-               <div className="space-y-6">
-                  {relatedNews.length > 0 ? relatedNews.map((item, i) => (
-                    <Link 
-                      key={i} 
-                      href={`/news/${item.slug || item.id}`} 
-                      className="flex gap-4 group cursor-pointer"
-                    >
-                       <div className="w-20 h-20 rounded-2xl overflow-hidden shrink-0 shadow-md dark:shadow-none transition-colors duration-300 relative bg-slate-200 dark:bg-slate-800 flex items-center justify-center">
-                          {item.image_url ? (
-                            <Image src={item.image_url} alt={item.title || "Thumb"} fill unoptimized className="object-cover group-hover:scale-110 transition-all duration-500" />
-                          ) : (
-                            <Globe size={24} className="text-slate-400 dark:text-slate-500" />
-                          )}
-                       </div>
-                       <div className="space-y-1 flex-1">
-                          <p className="text-[9px] font-black text-indigo-600 tracking-widest uppercase">{item.category || 'INTELLIGENCE'}</p>
-                          <h4 className="text-xs font-bold text-slate-800 dark:text-slate-100 leading-snug group-hover:text-indigo-600 transition-colors line-clamp-2">{item.title}</h4>
-                          <p className="text-[9px] text-slate-400 font-bold uppercase tracking-widest">News Update</p>
-                       </div>
-                    </Link>
-                  )) : (
-                    <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest px-2">No related news found.</p>
-                  )}
-               </div>
+           {/* Sidebar */}
+           <aside className="lg:col-span-4 space-y-8">
+            <div className="space-y-8">
+              <div className="bg-slate-50 dark:bg-slate-800/50 rounded-[2.5rem] p-8 border border-slate-100 dark:border-slate-800">
+                 <h3 className="text-[11px] font-black text-indigo-600 uppercase tracking-[0.3em] flex items-center gap-3 mb-6">
+                    <span className="w-4 h-0.5 bg-indigo-600" />
+                    Related News
+                 </h3>
+                 <div className="space-y-6">
+                    {relatedNews.length > 0 ? relatedNews.map((item, i) => (
+                      <Link 
+                        key={i} 
+                        href={`/news/${item.slug || item.id}`} 
+                        className="flex gap-4 group cursor-pointer"
+                      >
+                         <div className="w-20 h-20 rounded-2xl overflow-hidden shrink-0 shadow-md dark:shadow-none transition-colors duration-300 relative bg-slate-200 dark:bg-slate-800 flex items-center justify-center">
+                            {item.image_url ? (
+                              <Image src={item.image_url} alt={item.title || "Thumb"} fill unoptimized className="object-cover group-hover:scale-110 transition-all duration-500" />
+                            ) : (
+                              <Globe size={24} className="text-slate-400 dark:text-slate-500" />
+                            )}
+                         </div>
+                         <div className="space-y-1 flex-1">
+                            <p className="text-[9px] font-black text-indigo-600 tracking-widest uppercase">{item.category || 'INTELLIGENCE'}</p>
+                            <h4 className="text-xs font-bold text-slate-800 dark:text-slate-100 leading-snug group-hover:text-indigo-600 transition-colors line-clamp-2">{item.title}</h4>
+                            <p className="text-[9px] text-slate-400 font-bold uppercase tracking-widest">News Update</p>
+                         </div>
+                      </Link>
+                    )) : (
+                      <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest px-2">No related news found.</p>
+                    )}
+                 </div>
+              </div>
+
+              {/* Recommended Articles Section */}
+              <RecommendedArticles />
             </div>
-          </aside>
+           </aside>
         </div>
       </main>
 

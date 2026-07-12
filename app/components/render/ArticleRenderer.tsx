@@ -3,19 +3,25 @@
 import React, { useState, useEffect } from "react";
 import { Article, ContentBlock, Reflection } from "@/lib/types";
 import { motion, AnimatePresence } from "framer-motion";
-import { User, Calendar, Share, ThumbsUp, ChevronRight, Quote as QuoteIcon, Trophy, Sparkles, MessageSquare, Send, Zap, Shield, Target, Bookmark } from "lucide-react";
+import { User, Calendar, Share, ThumbsUp, ChevronRight, Quote as QuoteIcon, Trophy, Sparkles, MessageSquare, Send, Zap, Shield, Target, Bookmark, Brain, ChevronDown, Loader2 } from "lucide-react";
 import Link from "next/link";
 import ParticleEffect from "../ParticleEffect";
 import InteractiveHero from "./InteractiveHero";
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, LineChart, Line, AreaChart, Area, Cell } from 'recharts';
-import { recordArticleView, toggleLike, submitReflection, getArticlesBySection } from "@/lib/articles";
+import { recordArticleView, toggleLike, submitReflection, getArticlesBySection, updateArticleDuration } from "@/lib/articles";
 import Cookies from "js-cookie";
 import toast from "react-hot-toast";
 import Footer from "../Footer";
 import { API_BASE } from "@/lib/config";
+import GoUnlimited from '../../components/GoUnlimited';
+import { getPopularKeywords } from '@/lib/articles';
+import InlineSubscriptionCTA from '../../components/InlineSubscriptionCTA';
+import CommunityPulse from '../CommunityPulse';
+
 import { getCategorySlugForArticle } from "@/lib/categoryMapping";
 interface ArticleRendererProps {
   article: Article;
+  sidebarComponent?: React.ReactNode;
 }
 
 const FONT_CLASSES: Record<string, string> = {
@@ -25,7 +31,12 @@ const FONT_CLASSES: Record<string, string> = {
   "Outfit": "font-sans tracking-tight",
 };
 
-export default function ArticleRenderer({ article }: ArticleRendererProps) {
+interface AiMessage {
+  role: "user" | "assistant";
+  content: string;
+}
+
+export default function ArticleRenderer({ article, sidebarComponent }: ArticleRendererProps) {
   const [liked, setLiked] = React.useState(false);
   const [likesCount, setLikesCount] = React.useState(article.likes_count || 0);
   const [reflections, setReflections] = React.useState<Reflection[]>(article.reflections || []);
@@ -37,9 +48,206 @@ export default function ArticleRenderer({ article }: ArticleRendererProps) {
   const [isSaved, setIsSaved] = React.useState(false);
   const [isSaving, setIsSaving] = React.useState(false);
 
+  // AI Summary state
+  const [aiSummary, setAiSummary] = useState(article.ai_summary || "");
+  const [summaryLoading, setSummaryLoading] = useState(false);
+  const [summaryError, setSummaryError] = useState<string | null>(null);
+  const [summaryModalOpen, setSummaryModalOpen] = useState(false);
+  const [displayedSummary, setDisplayedSummary] = useState("");
+  const [summaryLimitReached, setSummaryLimitReached] = useState<string | false>(false);
+
+  // Ask AI state
+  const [askAiOpen, setAskAiOpen] = React.useState(false);
+  const [aiMessages, setAiMessages] = React.useState<AiMessage[]>([]);
+  const [aiInput, setAiInput] = React.useState("");
+  const [aiLoading, setAiLoading] = React.useState(false);
+  const [aiError, setAiError] = React.useState<string | null>(null);
+  const [aiLimitReached, setAiLimitReached] = React.useState<string | false>(false);
+  const aiMessageContainerRef = React.useRef<HTMLDivElement>(null);
+  const askAiWrapperRef = React.useRef<HTMLDivElement>(null);
+  const [fabBottom, setFabBottom] = React.useState(24);
+  const [isKeywordsLoading, setIsKeywordsLoading] = React.useState(true);
+  const [derivedKeywords, setDerivedKeywords] = React.useState<string[]>([]);
+  
+
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  React.useEffect(() => {
+    setIsKeywordsLoading(true);
+    getPopularKeywords(10)
+          .then((data) => {
+            setDerivedKeywords(data);
+            setIsKeywordsLoading(false);
+          })
+          .catch((err) => {
+            console.error(err);
+            setIsKeywordsLoading(false);
+          });
+
+    const token = Cookies.get("access_token");
+    if (token) {
+      setIsLoggedIn(true);
+      fetch(`${API_BASE}/usage/status`, {
+        headers: { Authorization: `Bearer ${token}` }
+      })
+      .then(res => res.ok ? res.json() : null)
+      .then(data => {
+         if (data?.features?.ask_ai?.allowed === false) {
+            setAiLimitReached(data.tier || "free");
+         }
+         if (data?.features?.ai_summary?.allowed === false) {
+            setSummaryLimitReached(data.tier || "free");
+         }
+      })
+      .catch(err => console.error("Error fetching usage status:", err));
+    }
+  }, []);
+
+  React.useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (askAiOpen && askAiWrapperRef.current && !askAiWrapperRef.current.contains(event.target as Node)) {
+        setAskAiOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [askAiOpen]);
+
+  React.useEffect(() => {
+    if (askAiOpen && aiMessageContainerRef.current) {
+      const container = aiMessageContainerRef.current;
+      container.scrollTo({
+        top: container.scrollHeight,
+        behavior: "smooth"
+      });
+    }
+  }, [aiMessages, aiLoading, askAiOpen]);
+
+  React.useEffect(() => {
+    if (aiSummary && summaryModalOpen) {
+      let i = 0;
+      setDisplayedSummary("");
+      const interval = setInterval(() => {
+        i += 4;
+        setDisplayedSummary(aiSummary.substring(0, i));
+        if (i >= aiSummary.length) {
+          setDisplayedSummary(aiSummary);
+          clearInterval(interval);
+        }
+      }, 15);
+      return () => clearInterval(interval);
+    }
+  }, [aiSummary, summaryModalOpen]);
+
+  const handleGenerateSummary = async () => {
+    setSummaryModalOpen(true);
+    if (aiSummary) {
+      return;
+    }
+    const token = Cookies.get("access_token");
+    if (!token) {
+      setSummaryError("Please log in to generate an AI summary.");
+      return;
+    }
+    if (summaryLimitReached) {
+      setSummaryError(`LIMIT_REACHED:${summaryLimitReached}`);
+      return;
+    }
+    setSummaryLoading(true);
+    setSummaryError(null);
+    setDisplayedSummary("");
+    
+    try {
+      const [res] = await Promise.all([
+        fetch(`${API_BASE}/premium/ai/summary/${article.id}`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        }),
+        new Promise(resolve => setTimeout(resolve, 2000))
+      ]);
+      if (res.status === 403 || res.status === 429) {
+        const data = await res.json();
+        const tier = data.detail?.tier || data.detail?.current_tier || "free";
+        setSummaryError(`LIMIT_REACHED:${tier}`);
+      } else if (!res.ok) {
+        throw new Error("AI service error");
+      } else {
+        const data = await res.json();
+        setAiSummary(data.summary);
+      }
+    } catch {
+      setSummaryError("Failed to fetch summary. Please try again.");
+    } finally {
+      setSummaryLoading(false);
+    }
+  };
+
+  const handleAskAi = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!aiInput.trim() || aiLoading || aiLimitReached) return;
+    const token = Cookies.get("access_token");
+    if (!token) {
+      setAiError("Please log in to use Ask AI.");
+      return;
+    }
+    const question = aiInput.trim();
+    setAiMessages(prev => [...prev, { role: "user", content: question }]);
+    setAiInput("");
+    setAiLoading(true);
+    setAiError(null);
+    try {
+      const res = await fetch(`${API_BASE}/premium/ai/ask/${article.id}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ question }),
+      });
+      if (res.status === 403 || res.status === 429) {
+        const data = await res.json();
+        setAiMessages(prev => prev.slice(0, -1));
+        const tier = data.detail?.tier || data.detail?.current_tier || "free";
+        setAiLimitReached(tier);
+      } else if (!res.ok) {
+        throw new Error("AI service error");
+      } else {
+        const data = await res.json();
+        setAiMessages(prev => [...prev, { role: "assistant", content: data.answer }]);
+      }
+    } catch {
+      setAiError("Something went wrong. Please try again.");
+      setAiMessages(prev => prev.slice(0, -1));
+    } finally {
+      setAiLoading(false);
+    }
+  };
+
+  React.useEffect(() => {
+    const handleScroll = () => {
+      const footerWrapper = document.getElementById('relaypost-footer-wrapper');
+      if (footerWrapper) {
+        const rect = footerWrapper.getBoundingClientRect();
+        const viewportHeight = window.innerHeight;
+        if (rect.top < viewportHeight) {
+          const overlap = viewportHeight - rect.top;
+          setFabBottom(24 + overlap);
+          if (window.innerWidth < 768 && overlap > 20) {
+             setAskAiOpen(false);
+          }
+        } else {
+          setFabBottom(24);
+        }
+      }
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    handleScroll();
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
   React.useEffect(() => {
     if (article.id) {
-       recordArticleView(article.id);
+       const token = Cookies.get("access_token");
+       if (token) {
+         recordArticleView(article.id);
+       }
        
        // Fetch related articles if possible
        if (article.homepage_section) {
@@ -47,8 +255,59 @@ export default function ArticleRenderer({ article }: ArticleRendererProps) {
              setRelatedArticles(articles.filter(a => a.slug !== article.slug).slice(0, 3));
           });
        }
+
+       // Fetch initial bookmark state
+       if (token) {
+         fetch(`${API_BASE}/bookmarks?source_type=article&limit=100`, {
+           headers: { Authorization: `Bearer ${token}` }
+         })
+         .then(res => res.ok ? res.json() : null)
+         .then(data => {
+           if (data && data.bookmarks) {
+             const isBookmarked = data.bookmarks.some((b: any) => b.article_id === article.id);
+             setIsSaved(isBookmarked);
+           }
+         })
+         .catch(err => console.error("Error loading bookmark state", err));
+       }
     }
   }, [article.id, article.homepage_section, article.slug]);
+
+  // Track active reading time
+  React.useEffect(() => {
+    const articleId = article.id;
+    if (!articleId) return;
+    const token = Cookies.get("access_token");
+    if (!token) return; // Do not track duration if not logged in
+
+    let lastPingTime = Date.now();
+
+    const sendPing = () => {
+      const now = Date.now();
+      const elapsed = Math.floor((now - lastPingTime) / 1000);
+      if (elapsed > 0) {
+        updateArticleDuration(articleId, elapsed);
+      }
+      lastPingTime = now;
+    };
+
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        sendPing();
+      } else {
+        lastPingTime = Date.now();
+      }
+    };
+
+    window.addEventListener("visibilitychange", handleVisibilityChange);
+
+    return () => {
+      window.removeEventListener("visibilitychange", handleVisibilityChange);
+      if (!document.hidden) {
+        sendPing();
+      }
+    };
+  }, [article.id]);
 
   const handleLike = async () => {
     if (isLiking) return;
@@ -88,7 +347,7 @@ export default function ArticleRenderer({ article }: ArticleRendererProps) {
     if (isSaving) return;
     const token = Cookies.get("access_token");
     if (!token) {
-       toast.error("Please login to save this article");
+       toast.error("Please login to save this article", { id: "article-bookmark-auth" });
        return;
     }
     
@@ -107,16 +366,16 @@ export default function ArticleRenderer({ article }: ArticleRendererProps) {
             const data = await response.json();
             setIsSaved(data.saved);
             if (data.saved) {
-                toast.success("Article saved to your profile!");
+                toast.success("Article saved to your profile!", { id: `article-bookmark-${article.id}` });
             } else {
-                toast.success("Removed from saved list.");
+                toast.success("Removed from saved list.", { id: `article-bookmark-${article.id}` });
             }
         } else {
             throw new Error('Failed to save');
         }
     } catch (err) {
         setIsSaved(isSaved);
-        toast.error("Failed to update bookmark");
+        toast.error("Failed to update bookmark", { id: `article-bookmark-err-${article.id}` });
     } finally {
         setIsSaving(false);
     }
@@ -155,7 +414,7 @@ export default function ArticleRenderer({ article }: ArticleRendererProps) {
       button: "bg-brand text-white hover:bg-brand-dark"
     },
     intelligence: {
-      body: "bg-slate-900 dark:bg-black",
+      body: "bg-slate-900 dark:bg-[#0A0D1F]",
       card: "bg-slate-800 dark:bg-slate-900 border-indigo-500/20",
       text: "text-slate-300 dark:text-slate-400",
       heading: "text-white dark:text-indigo-100",
@@ -181,10 +440,164 @@ export default function ArticleRenderer({ article }: ArticleRendererProps) {
 
   return (
     <div className={`${themeClasses.body} min-h-screen font-sans selection:bg-brand selection:text-white transition-colors duration-300 ${theme === 'intelligence' ? 'dark' : ''}`}>
+      <div className="relative min-h-screen">
+      {/* Floating Ask AI Chatbot (Fixed to bottom right minus offset) */}
+      <div className="fixed right-6 z-50 pointer-events-none flex flex-col items-end transition-all duration-200" style={{ bottom: `${fabBottom}px` }}>
+        <div ref={askAiWrapperRef} className="pointer-events-auto flex flex-col items-end">
+           <AnimatePresence>
+             {askAiOpen && (
+               <motion.div
+                 initial={{ opacity: 0, y: 20, scale: 0.95 }}
+                 animate={{ opacity: 1, y: 0, scale: 1 }}
+                 exit={{ opacity: 0, y: 20, scale: 0.95 }}
+                 transition={{ duration: 0.2 }}
+                 className="mb-4 w-80 sm:w-96 bg-white dark:bg-slate-900 rounded-[1.5rem] shadow-[0_20px_60px_-15px_rgba(0,0,0,0.3)] border border-slate-100 dark:border-slate-800 overflow-hidden flex flex-col"
+               >
+                  {/* Header */}
+                  <div className="bg-gradient-to-r from-[#4f46e5] to-[#0ea5e9] p-4 flex items-center justify-between text-white shrink-0">
+                     <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center border border-white/30">
+                           <Brain size={20} className="text-white" />
+                        </div>
+                        <div>
+                           <h3 className="font-bold text-sm leading-tight">RelayPost AI</h3>
+                           <p className="text-[10px] text-white/80 font-medium tracking-wide">Ask questions about this article</p>
+                        </div>
+                     </div>
+                     <button onClick={() => setAskAiOpen(false)} className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                     </button>
+                  </div>
+
+                  {/* Message List */}
+                  <div ref={aiMessageContainerRef} className="h-80 overflow-y-auto p-4 space-y-4 bg-slate-50 dark:bg-slate-950/50">
+                    {aiMessages.length === 0 && (
+                      <div className="flex flex-col items-center justify-center h-full text-center space-y-4 opacity-80">
+                         <div className="w-16 h-16 rounded-full bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center">
+                            <Sparkles size={24} className="text-indigo-600 dark:text-indigo-400" />
+                         </div>
+                         <div>
+                            <p className="text-slate-800 dark:text-slate-200 font-bold">Welcome! 👋</p>
+                            <p className="text-xs text-slate-500 dark:text-slate-400 mt-2 max-w-[200px] leading-relaxed">
+                               Ask me anything about this article. I'll summarize, explain, or find specific details for you.
+                            </p>
+                         </div>
+                      </div>
+                    )}
+                    {aiMessages.map((msg, i) => (
+                      <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                        <div className={`max-w-[85%] px-4 py-3 rounded-2xl text-sm leading-relaxed shadow-sm ${
+                          msg.role === 'user'
+                            ? 'bg-indigo-600 text-white rounded-br-sm'
+                            : 'bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 text-slate-800 dark:text-slate-200 rounded-bl-sm'
+                        }`}>
+                          {msg.content}
+                        </div>
+                      </div>
+                    ))}
+                    {aiLoading && (
+                      <div className="flex justify-start">
+                        <div className="bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-2xl rounded-bl-sm px-4 py-3 flex items-center gap-2 shadow-sm">
+                          <Loader2 size={14} className="animate-spin text-indigo-500" />
+                          <span className="text-xs text-slate-500">thinking...</span>
+                        </div>
+                      </div>
+                    )}
+                    {aiError && (
+                      <div className="text-center py-2">
+                        <p className="text-xs text-red-500 dark:text-red-400 font-medium bg-red-50 dark:bg-red-900/20 py-2 px-3 rounded-lg border border-red-100 dark:border-red-900/30">{aiError}</p>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Input Area */}
+                  {!isLoggedIn ? (
+                    <div className="p-3 border-t border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 flex flex-col gap-3">
+                      <div className="flex items-center gap-2 bg-slate-100 dark:bg-slate-800/50 rounded-full p-1 pl-4 opacity-70">
+                         <input
+                           type="text"
+                           placeholder="Ask a Question..."
+                           disabled={true}
+                           className="flex-1 text-sm bg-transparent border-none outline-none dark:text-white placeholder:text-slate-400 cursor-not-allowed"
+                         />
+                         <button disabled className="w-10 h-10 rounded-full bg-slate-400 text-white flex items-center justify-center shrink-0 cursor-not-allowed">
+                           <Send size={16} className="ml-1" />
+                         </button>
+                      </div>
+                      <Link href="/login" className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-[11px] font-bold rounded-xl text-center shadow-md transition-colors w-full">
+                         Log In to Ask AI
+                      </Link>
+                    </div>
+                  ) : aiLimitReached ? (
+                    <div className="p-4 border-t border-slate-100 dark:border-slate-800 bg-amber-50 dark:bg-amber-950/20">
+                      <div className="flex items-center justify-between gap-3">
+                        <div>
+                          <p className="text-xs font-bold text-amber-800 dark:text-amber-300">
+                             {aiLimitReached === 'plus' ? 'Daily limit reached' : 'Monthly limit reached'}
+                          </p>
+                          <p className="text-[10px] text-amber-600 dark:text-amber-400 mt-0.5">Upgrade to keep asking questions.</p>
+                        </div>
+                        <Link
+                          href="/pricing"
+                          className="shrink-0 text-[10px] font-bold px-3 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white transition-colors shadow-sm"
+                        >
+                          Upgrade
+                        </Link>
+                      </div>
+                    </div>
+                  ) : (
+                    <form onSubmit={handleAskAi} className="p-3 border-t border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900">
+                      <div className="flex items-center gap-2 bg-slate-100 dark:bg-slate-800/50 rounded-full p-1 pl-4 border border-transparent focus-within:border-indigo-500/30 focus-within:bg-white dark:focus-within:bg-slate-800 transition-colors">
+                         <input
+                           type="text"
+                           value={aiInput}
+                           onChange={e => setAiInput(e.target.value)}
+                           placeholder="Ask a Question..."
+                           disabled={aiLoading}
+                           className="flex-1 text-sm bg-transparent border-none outline-none dark:text-white placeholder:text-slate-400"
+                         />
+                         <button
+                           type="submit"
+                           disabled={aiLoading || !aiInput.trim()}
+                           className="w-10 h-10 rounded-full bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white flex items-center justify-center shrink-0 transition-all shadow-md"
+                         >
+                           <Send size={16} className="ml-1" />
+                         </button>
+                      </div>
+                    </form>
+                  )}
+               </motion.div>
+             )}
+           </AnimatePresence>
+
+           <button 
+             onClick={() => setAskAiOpen(o => !o)} 
+             className="w-14 h-14 rounded-full bg-gradient-to-r from-[#0ea5e9] to-[#4f46e5] text-white flex items-center justify-center shadow-[0_10px_25px_-5px_rgba(79,70,229,0.5)] hover:scale-105 hover:shadow-[0_15px_30px_-5px_rgba(79,70,229,0.6)] transition-all"
+           >
+              <AnimatePresence mode="wait" initial={false}>
+                 {askAiOpen ? (
+                    <motion.div key="close" initial={{ rotate: -90, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }} exit={{ rotate: 90, opacity: 0 }} transition={{ duration: 0.15 }}>
+                       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                    </motion.div>
+                 ) : (
+                    <motion.div key="open" initial={{ rotate: 90, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }} exit={{ rotate: -90, opacity: 0 }} transition={{ duration: 0.15 }}>
+                       <MessageSquare size={24} />
+                    </motion.div>
+                 )}
+              </AnimatePresence>
+           </button>
+        </div>
+      </div>
       {/* Premium Hero Section (Maritime Style) */}
       <section className="relative h-[60vh] md:h-[85vh] min-h-[400px] md:min-h-[600px] overflow-hidden bg-[#0A0D1F]">
         <InteractiveHero imageSrc={article.hero_image || ""} />
         <ParticleEffect mode="attract" />
+        
+        <div className="absolute top-4 right-4 md:top-8 md:right-8 z-50">
+          <button onClick={handleGenerateSummary} className="flex items-center gap-2 px-4 py-2 bg-indigo-600/80 hover:bg-indigo-600 backdrop-blur-md text-white text-xs font-bold uppercase tracking-wider rounded-full shadow-[0_10px_25px_-5px_rgba(79,70,229,0.5)] transition-all border border-white/20 hover:scale-105">
+            <Sparkles size={14} /> AI Summary
+          </button>
+        </div>
         
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#0A0D1F]/40 to-[#0A0D1F] pointer-events-none" />
         
@@ -244,18 +657,6 @@ export default function ArticleRenderer({ article }: ArticleRendererProps) {
         <div className={`lg:col-span-7 ${themeClasses.card} rounded-[2.5rem] shadow-[0_32px_128px_-32px_rgba(0,0,0,0.15)] p-6 md:p-12 lg:p-20 border overflow-hidden`}>
           
           <div className="space-y-8 md:space-y-12">
-            {article.ai_summary && (
-              <div className="p-5 md:p-8 bg-indigo-50/50 dark:bg-indigo-900/10 rounded-3xl border border-indigo-100 dark:border-indigo-500/10">
-                <p className="text-[10px] font-black text-brand uppercase tracking-[0.2em] mb-4 flex items-center gap-2">
-                   <span className="w-2 h-2 rounded-full bg-brand animate-pulse" />
-                   AI Executive Summary
-                </p>
-                <p className="text-indigo-900 dark:text-indigo-200 text-base md:text-lg font-medium leading-relaxed italic">
-                  "{article.ai_summary}"
-                </p>
-              </div>
-            )}
-
             {article.content_blocks.map((block: ContentBlock, idx: number) => {
                const fontClass = FONT_CLASSES[block.styles?.fontFamily || "Inter"] || "font-sans";
                const blockStyle = {
@@ -271,6 +672,9 @@ export default function ArticleRenderer({ article }: ArticleRendererProps) {
                    transition={{ delay: Math.min(idx * 0.05, 0.3) }}
                    className={`${fontClass} leading-relaxed dark:text-slate-200`}
                  >
+                   {/* {idx === Math.floor(article.content_blocks.length / 2) && (
+                     <InlineSubscriptionCTA />
+                   )} */}
                    
                    {block.type === 'heading' && React.createElement(`h${block.metadata?.level || 2}`, {
                       className: `font-black tracking-tighter ${themeClasses.heading} ${
@@ -378,7 +782,7 @@ export default function ArticleRenderer({ article }: ArticleRendererProps) {
                                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={idx % 2 === 0 ? "#E2E8F0" : "#334155"} />
                                    <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: '#94A3B8' }} />
                                    <YAxis hide />
-                                   <Tooltip contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 20px 50px rgba(0,0,0,0.1)' }} />
+                                   <Tooltip contentStyle={{ borderRadius: '16px', border: theme === 'intelligence' ? '1px solid rgba(255,255,255,0.1)' : 'none', boxShadow: '0 20px 50px rgba(0,0,0,0.1)', backgroundColor: theme === 'intelligence' ? '#0f172a' : '#ffffff', color: theme === 'intelligence' ? '#f8fafc' : '#0f172a' }} itemStyle={{ color: theme === 'intelligence' ? '#cbd5e1' : '#334155' }} />
                                    <Line type="monotone" dataKey="value" stroke="#6366f1" strokeWidth={4} dot={{ r: 6, fill: '#6366f1' }} activeDot={{ r: 8 }} />
                                 </LineChart>
                               ) : (
@@ -386,7 +790,7 @@ export default function ArticleRenderer({ article }: ArticleRendererProps) {
                                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
                                    <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: '#94A3B8' }} />
                                    <YAxis hide />
-                                   <Tooltip />
+                                   <Tooltip contentStyle={{ borderRadius: '16px', border: theme === 'intelligence' ? '1px solid rgba(255,255,255,0.1)' : 'none', boxShadow: '0 20px 50px rgba(0,0,0,0.1)', backgroundColor: theme === 'intelligence' ? '#0f172a' : '#ffffff', color: theme === 'intelligence' ? '#f8fafc' : '#0f172a' }} itemStyle={{ color: theme === 'intelligence' ? '#cbd5e1' : '#334155' }} />
                                    <Bar dataKey="value" radius={[10, 10, 0, 0]}>
                                       {block.metadata.chartData.map((_: any, index: number) => (
                                         <Cell key={index} fill={index % 2 === 0 ? '#6366f1' : '#4338ca'} />
@@ -548,10 +952,16 @@ export default function ArticleRenderer({ article }: ArticleRendererProps) {
                 )) : (
                   <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest px-2">No related dispatches found.</p>
                 )}
-             </div>
-          </div>
+              </div>
+           </div>
 
-          <div className="bg-gradient-to-br from-indigo-600 to-brand rounded-[2.5rem] p-10 text-white shadow-2xl relative overflow-hidden group text-center">
+           {sidebarComponent && (
+              <div className="mt-8">
+                 {sidebarComponent}
+              </div>
+           )}
+
+          {/* <div className="bg-gradient-to-br from-indigo-600 to-brand rounded-[2.5rem] p-10 text-white shadow-2xl relative overflow-hidden group text-center">
              <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-3xl -mr-16 -mt-16 group-hover:bg-white/20 transition-colors" />
              <div className="relative z-10 space-y-6 flex flex-col items-center">
                 <div className="w-14 h-14 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center shadow-inner">
@@ -565,9 +975,14 @@ export default function ArticleRenderer({ article }: ArticleRendererProps) {
                   Become a Member
                 </button>
              </div>
-          </div>
-
-          <div className="bg-[#f8fafc] dark:bg-slate-900/50 rounded-[2.5rem] p-8 border border-slate-100 dark:border-white/5 space-y-6">
+          </div> */}
+          <GoUnlimited/>
+              {isKeywordsLoading ? (
+                <div className="h-[150px] bg-slate-200 dark:bg-slate-800 rounded-[2.5rem] animate-pulse w-full mt-6" />
+              ) : (
+                derivedKeywords.length > 0 && <CommunityPulse keywords={derivedKeywords} />
+              )}
+          {/* <div className="bg-[#f8fafc] dark:bg-slate-900/50 rounded-[2.5rem] p-8 border border-slate-100 dark:border-white/5 space-y-6">
              <h3 className="text-[11px] font-black text-slate-400 uppercase tracking-[0.2em] px-2">Trending Briefs</h3>
              <div className="flex flex-wrap gap-2 px-2">
                 {['#Geopolitics', '#TradeRoutes', '#AIInPolicy', '#SupplyChainAI'].map(tag => (
@@ -576,7 +991,7 @@ export default function ArticleRenderer({ article }: ArticleRendererProps) {
                    </span>
                 ))}
              </div>
-          </div>
+          </div> */}
         </aside>
       </main>
 
@@ -607,10 +1022,10 @@ export default function ArticleRenderer({ article }: ArticleRendererProps) {
                        <p className="font-black text-slate-900 dark:text-white text-sm tracking-tight">
                           {comment.is_anonymous ? 'Anonymous Member' : (comment.author_name || 'Member')}
                        </p>
-                       <span className="w-1 h-1 bg-brand rounded-full" />
-                       <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                       {/* <span className="w-1 h-1 bg-brand rounded-full" /> */}
+                       {/* <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
                           {comment.author_role || 'Verified Contribution'}
-                       </p>
+                       </p> */}
                     </div>
                     <p className="text-slate-700 dark:text-slate-300 leading-relaxed font-medium dark:text-slate-200 transition-colors duration-300">
                        {comment.content}
@@ -673,8 +1088,92 @@ export default function ArticleRenderer({ article }: ArticleRendererProps) {
          </div>
       </section>
 
+
+      <AnimatePresence>
+        {summaryModalOpen && (
+          <motion.div 
+            initial={{ opacity: 0 }} 
+            animate={{ opacity: 1 }} 
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm"
+            onClick={() => setSummaryModalOpen(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.95, opacity: 0, y: 20 }}
+              onClick={e => e.stopPropagation()}
+              className="w-full max-w-2xl bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden flex flex-col"
+            >
+              <div className="p-6 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-slate-50 dark:bg-slate-950/50">
+                 <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center text-indigo-600 dark:text-indigo-400">
+                       <Sparkles size={20} />
+                    </div>
+                    <div>
+                       <h3 className="font-bold text-lg text-slate-900 dark:text-white">AI Executive Summary</h3>
+                       <p className="text-xs text-slate-500 font-medium">Strategic Overview</p>
+                    </div>
+                 </div>
+                 <button onClick={() => setSummaryModalOpen(false)} className="w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-800 flex items-center justify-center hover:bg-slate-300 dark:hover:bg-slate-700 transition-colors">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-slate-600 dark:text-slate-400"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                 </button>
+              </div>
+              <div className="p-8 min-h-[200px] flex flex-col justify-center text-slate-700 dark:text-slate-300 text-[17px] leading-relaxed font-medium">
+                {summaryLoading ? (
+                   <div className="flex flex-col items-center justify-center gap-4 py-8">
+                      <Loader2 size={32} className="animate-spin text-indigo-500" />
+                      <span className="text-sm font-semibold text-slate-500 animate-pulse">Generating strategic summary...</span>
+                   </div>
+                ) : summaryError ? (
+                   <div className="text-center py-4">
+                      {summaryError.startsWith("LIMIT_REACHED:") ? (
+                        <div className="bg-amber-50 dark:bg-amber-950/20 p-6 rounded-2xl border border-amber-100 dark:border-amber-900/30 flex flex-col items-center">
+                          <div className="w-12 h-12 bg-amber-100 dark:bg-amber-900/50 text-amber-600 dark:text-amber-400 rounded-full flex items-center justify-center mb-4">
+                            <Brain size={24} />
+                          </div>
+                          <p className="text-lg font-bold text-amber-800 dark:text-amber-300 mb-2">
+                            {summaryError.split(":")[1] === "plus" ? "Daily limit reached" : "Monthly limit reached"}
+                          </p>
+                          <p className="text-sm text-amber-600 dark:text-amber-400 mb-6 max-w-[250px]">
+                            Upgrade your plan to generate more strategic summaries.
+                          </p>
+                          <Link href="/pricing" className="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm rounded-xl shadow-lg shadow-indigo-200 dark:shadow-none transition-all w-full">
+                            Upgrade Now
+                          </Link>
+                        </div>
+                      ) : (
+                        <div className="flex flex-col items-center gap-4">
+                          <p className="text-red-500 font-medium bg-red-50 dark:bg-red-900/20 p-4 rounded-xl inline-block border border-red-100 dark:border-red-900/30 text-center">
+                            {summaryError}
+                          </p>
+                          {summaryError.includes("log in") && (
+                            <Link href="/login" className="px-8 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm rounded-xl shadow-lg transition-all">
+                              Go to Login
+                            </Link>
+                          )}
+                        </div>
+                      )}
+                   </div>
+                ) : (
+                   <div className="whitespace-pre-line relative">
+                      {displayedSummary}
+                      {displayedSummary.length < (aiSummary?.length || 0) && (
+                         <span className="inline-block w-[2px] h-5 bg-indigo-500 ml-1 animate-pulse align-middle" />
+                      )}
+                   </div>
+                )}
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+      </div>
+
       {/* Corporate Footer */}
-      <Footer/>
+      <div id="relaypost-footer-wrapper">
+        <Footer/>
+      </div>
     </div>
   );
 }
