@@ -3,7 +3,7 @@ import { getAllArticles, getNewsLive } from '@/lib/articles';
 import { getCategorySlugForArticle } from '@/lib/categoryMapping';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = 'https://relay-post.vercel.app';
+  const baseUrl = 'https://relaypost.me';
   
   // Fetch dynamic articles
   const articles = await getAllArticles(undefined, 0, 1000);

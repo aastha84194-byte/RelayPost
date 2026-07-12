@@ -50,7 +50,7 @@ export default async function ArticlePage(
     "author": [{
       "@type": "Organization",
       "name": "RelayPost",
-      "url": "https://relay-post.vercel.app"
+      "url": "https://relaypost.me"
     }]
   };
 
