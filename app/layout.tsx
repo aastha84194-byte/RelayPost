@@ -16,6 +16,9 @@ export const metadata: Metadata = {
   verification: {
     google: '39eC-3uLPsyxpmG-CvFLWTAO9DheJfC_kXXIPYFO2ck',
   },
+  other: {
+    'google-adsense-account': 'ca-pub-8090657364719041',
+  },
   title: {
     default: 'RelayPost',
     template: '%s | RelayPost',
