@@ -215,6 +215,10 @@ export async function recordNewsView(newsId: number, title: string, slug: string
     if (token) {
       headers["Authorization"] = `Bearer ${token}`;
     }
+
+    // Record view in the news service to increment backend views counter
+    fetch(`${NEWS_API_BASE}/id/${newsId}/view`, { method: "POST" }).catch(err => console.error("news_service view error", err));
+
     await fetch(`${API_BASE}/public/news/${newsId}/view`, { 
       method: "POST",
       headers,
@@ -474,6 +478,20 @@ export async function getNewsByCategory(category: string, limit: number = 20, sk
     }
 }
 
+export async function getNewsByKeyword(keyword: string, limit: number = 20, skip: number = 0): Promise<{ items: NewsArticle[], total: number }> {
+    try {
+      const res = await fetch(`${NEWS_API_BASE}/keywords/${keyword}?limit=${limit}&skip=${skip}`, { 
+        cache: 'no-store' 
+      });
+      if (!res.ok) return { items: [], total: 0 };
+      const data = await res.json();
+      return { items: data.items, total: data.total };
+    } catch (err) {
+      console.error(`Failed to fetch news keyword ${keyword}`, err);
+      return { items: [], total: 0 };
+    }
+}
+
 export async function getNewsCategories(): Promise<string[]> {
   try {
     const response = await fetch(`${NEWS_API_BASE}/meta/categories`, {
@@ -558,5 +576,19 @@ export async function updateNewsAdmin(id: number, data: Partial<NewsArticle>): P
 }
 
 import { NewsArticle } from './types';
+
+export async function getTopNews(): Promise<NewsArticle[]> {
+  try {
+    const res = await fetch(`${NEWS_API_BASE}/top`, { 
+      cache: 'no-store' 
+    });
+    if (!res.ok) return [];
+    return await res.json();
+  } catch (err) {
+    console.error("Failed to fetch top news", err);
+    return [];
+  }
+}
+
 
 

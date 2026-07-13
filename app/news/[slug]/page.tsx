@@ -13,6 +13,10 @@ import rehypeRaw from 'rehype-raw';
 import RecommendedArticles from '../../components/RecommendedArticles';
 import NewsTracker from '../../components/NewsTracker';
 import InlineSubscriptionCTA from '../../components/InlineSubscriptionCTA';
+import GoUnlimited from '../../components/GoUnlimited';
+import TodayTopNews from '../../components/TodayTopNews';
+import BackButton from '../../components/BackButton';
+
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -76,16 +80,10 @@ export default async function NewsDetailPage({ params }: Props) {
       />
       <Navbar />
 
-      <main className="max-w-7xl mx-auto px-4 md:px-8 py-6 md:py-12">
+      <main className="max-w-7xl mx-auto px-4 md:px-8 py-4 md:py-8">
         {/* Navigation / Actions */}
-        <div className="flex items-center justify-between mb-6 md:][omb-12">
-          <Link 
-            href="/news"
-            className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 hover:text-indigo-600 transition-colors"
-          >
-            <ArrowLeft size={16} />
-            Back to News
-          </Link>
+        <div className="flex items-center justify-between mb-4 md:mb-6">
+          <BackButton fallbackUrl="/news" label="Back to News" />
 
           <NewsActionButtons newsArticle={article as any} />
         </div>
@@ -95,22 +93,25 @@ export default async function NewsDetailPage({ params }: Props) {
           {/* Main Content */}
           <div className="lg:col-span-8">
             {/* Article Header */}
-            <header className="mb-12">
-              <div className="flex items-center gap-2 mb-6">
-                <span className="px-3 py-1 rounded-full bg-indigo-600 text-[10px] font-black text-white uppercase tracking-widest">
+            <header className="mb-6">
+              <div className="flex items-center gap-2 mb-4">
+                <Link 
+                  href={`/news/category/${encodeURIComponent((article.category || 'Intelligence').toLowerCase().replace(/\s+/g, '-'))}`}
+                  className="px-3 py-1 rounded-full bg-indigo-600 text-[10px] font-black text-white uppercase tracking-widest hover:bg-indigo-700 transition-colors"
+                >
                   {article.category || 'Intelligence'}
-                </span>
+                </Link>
                 <div className="h-1 w-1 bg-slate-300 dark:bg-slate-700 rounded-full" />
                 <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-1 max-w-[200px]">
                   <Globe size={12} className="shrink-0" /> <span className="truncate">{article.source_name || 'Global Stream'}</span>
                 </span>
               </div>
 
-              <h1 className="text-3xl md:text-4xl lg:text-5xl font-black text-slate-900 dark:text-white tracking-tight leading-[1.15] mb-8">
+              <h1 className="text-2xl md:text-3xl lg:text-4xl font-black text-slate-900 dark:text-white tracking-tight leading-[1.15] mb-4">
                 {article.title}
               </h1>
 
-              <div className="flex flex-wrap items-center gap-6 pb-8 border-b border-slate-100 dark:border-slate-800">
+              <div className="flex flex-wrap items-center gap-6 pb-4 border-b border-slate-100 dark:border-slate-800">
                  <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-full bg-indigo-100 dark:bg-indigo-900/30 flex shrink-0 items-center justify-center text-indigo-600">
                        <Globe size={20} />
@@ -134,7 +135,7 @@ export default async function NewsDetailPage({ params }: Props) {
 
             {/* Hero Image */}
             {article.image_url && (
-              <div className="relative h-[300px] md:h-[400px] rounded-[3rem] overflow-hidden mb-12 shadow-2xl">
+              <div className="relative h-[300px] md:h-[400px] rounded-[3rem] overflow-hidden mb-8 shadow-2xl">
                 <Image 
                   src={article.image_url} 
                   alt={article.title} 
@@ -226,6 +227,8 @@ export default async function NewsDetailPage({ params }: Props) {
                );
             })()}
 
+            {/* Tags temporarily removed while engine gets fixed */}
+
             {/* Related Sources */}
             {article.related_sources && article.related_sources.length > 0 && (
               <div className="mb-12 p-8 bg-slate-50 dark:bg-slate-800/50 rounded-3xl border border-slate-100 dark:border-slate-800">
@@ -301,6 +304,12 @@ export default async function NewsDetailPage({ params }: Props) {
 
               {/* Recommended Articles Section */}
               <RecommendedArticles />
+              {/* Subscribe Now CTA */}
+              <GoUnlimited />
+              {/* Today's Top News Component */}
+              <TodayTopNews />
+
+
             </div>
            </aside>
         </div>
