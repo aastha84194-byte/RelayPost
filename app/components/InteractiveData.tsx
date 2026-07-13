@@ -88,10 +88,10 @@ export default function InteractiveData() {
 
   return (
     <section>
-      <div className="flex items-center justify-between mb-4">
+      <div className="flex flex-wrap items-center justify-between gap-y-2 mb-4">
         <div>
           <h2 className="text-xl md:text-2xl font-bold text-dark-bg mb-1 border-l-4 border-[#4f46e5] pl-3 dark:text-white transition-colors duration-300">Interactive Data</h2>
-          <p className="text-sm text-gray-500 ml-4 dark:text-slate-400 transition-colors duration-300">Live market trends with animated visualizations</p>
+          <p className="text-xs md:text-sm text-gray-500 ml-4 dark:text-slate-400 transition-colors duration-300">Live market trends with animated visualizations</p>
         </div>
         <div className="flex gap-2">
           <button 
