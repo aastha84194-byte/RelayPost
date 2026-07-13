@@ -28,11 +28,6 @@ export function NewsCard({ article, onClick }: { article: NewsArticle, onClick?:
              <Globe size={40} className="text-indigo-300 dark:text-indigo-700" />
           </div>
         )}
-        <div className="absolute top-4 left-4">
-          <span className="px-3 py-1 rounded-full bg-white/80 dark:bg-slate-900/80 backdrop-blur-md text-[10px] font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-widest border border-indigo-100 dark:border-indigo-900/50">
-            {article.category || 'General'}
-          </span>
-        </div>
       </div>
       
       <div className="p-6 flex flex-col flex-grow">

@@ -2,11 +2,13 @@ import { MetadataRoute } from 'next';
 import { getAllArticles, getNewsLive } from '@/lib/articles';
 import { getCategorySlugForArticle } from '@/lib/categoryMapping';
 
+export const dynamic = 'force-dynamic';
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = 'https://relaypost.me';
   
   // Fetch dynamic articles
-  const articles = await getAllArticles(undefined, 0, 1000);
+  const articles = await getAllArticles(undefined, 0, 100);
   const safeArticles = Array.isArray(articles) ? articles : [];
   
   const articleUrls: MetadataRoute.Sitemap = safeArticles.map((article) => {
@@ -32,7 +34,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       url: `${baseUrl}/news/${cleanSlug}`,
       lastModified: news.published_at ? new Date(news.published_at) : new Date(),
       changeFrequency: 'daily',
-      priority: 0.8,
+      priority: 0.9,
     };
   });
 

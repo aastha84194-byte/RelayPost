@@ -44,7 +44,7 @@ export default async function RecommendedArticles() {
                 {item.title}
               </h4>
               <p className="text-[9px] text-slate-400 font-bold uppercase tracking-widest flex items-center gap-1">
-                <Sparkles size={10} className="text-indigo-400" /> Editor's Pick
+                 Editor's Pick
               </p>
             </div>
           </Link>
