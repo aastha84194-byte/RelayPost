@@ -52,7 +52,7 @@ export default function Footer() {
             <p className="text-sm text-gray-400 mb-4">
               Sign up for exclusive content and monthly contributions to the site.
             </p>
-            <div className="flex items-center bg-dark-surface rounded-full p-1 border border-gray-700/50 focus-within:border-brand/50 transition-colors w-full max-w-sm">
+            <div className="flex items-center bg-dark-surface rounded-full p-1 border border-gray-700/50 focus-within:border-brand/50 transition-colors max-w-sm">
               <span className="pl-4 text-gray-500 dark:text-slate-400 transition-colors duration-300">$</span>
               <input 
                 type="number" 

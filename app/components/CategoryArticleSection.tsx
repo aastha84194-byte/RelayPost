@@ -125,12 +125,12 @@ export default function CategoryArticleSection({ title, slug, articles }: Catego
       transition={{ duration: 0.7, ease: "easeOut" }}
       className="py-6"
     >
-      <div className="flex flex-wrap items-end justify-between gap-y-2 mb-3 md:mb-6 px-1">
+      <div className="flex items-end justify-between mb-3 md:mb-6 px-1">
         <div>
            <h2 className="text-2xl md:text-3xl font-black text-slate-800 dark:text-white tracking-tight uppercase">{title}</h2>
         </div>
         
-        <div className="flex items-center gap-2 md:gap-4">
+        <div className="flex items-center gap-4">
            <Link 
             href={`/categories/${slug}`}
             className="group flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-indigo-600 transition-colors"
@@ -184,7 +184,7 @@ export default function CategoryArticleSection({ title, slug, articles }: Catego
                    </span>
                 </div>
               </div>
-              <div className="p-4 md:p-8">
+              <div className="p-8">
                 <h3 className="font-black text-slate-800 dark:text-white text-lg mb-3 leading-tight group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors line-clamp-2">
                   {item.title}
                 </h3>

@@ -82,7 +82,7 @@ function HomeContent() {
 
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
             {/* LEFT COLUMN - 8 columns wide */}
-            <div className="lg:col-span-8 flex flex-col gap-6 md:gap-8 order-2 lg:order-1">
+            <div className="lg:col-span-8 flex flex-col gap-6 md:gap-8">
               {isLoading ? (
                 <div className="space-y-8 animate-pulse w-full">
                    <div className="h-[400px] bg-slate-200 dark:bg-slate-800 rounded-[2.5rem] w-full"></div>
@@ -110,7 +110,7 @@ function HomeContent() {
             </div>
 
             {/* RIGHT COLUMN - Sidebar - 4 columns wide */}
-            <div className="lg:col-span-4 flex flex-col pl-0 lg:pl-4 order-1 lg:order-2">
+            <div className="lg:col-span-4 flex flex-col pl-0 lg:pl-4">
               <LiveInsightsSidebar />
               <PopularConversations />
               <GoUnlimited />
