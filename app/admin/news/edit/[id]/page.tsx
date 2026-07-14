@@ -106,6 +106,17 @@ export default function EditNewsPage() {
           </div>
 
           <div className="col-span-2">
+            <label className="block text-sm font-semibold text-gray-700 mb-2">Description / Excerpt</label>
+            <textarea
+              name="description"
+              value={article.description || ""}
+              onChange={handleChange}
+              rows={4}
+              className="w-full px-4 py-2 border border-gray-200 rounded-lg"
+            />
+          </div>
+
+          <div className="col-span-2">
             <label className="block text-sm font-semibold text-gray-700 mb-2">AI Summary</label>
             <textarea
               name="ai_summary"
