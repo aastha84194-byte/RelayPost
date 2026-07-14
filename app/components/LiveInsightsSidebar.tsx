@@ -7,21 +7,41 @@ import { NewsArticle } from '@/lib/types';
 import { getNewsLive } from '@/lib/articles';
 import NewsQuickReadModal from './NewsQuickReadModal';
 
-export default function LiveInsightsSidebar() {
-  const [news, setNews] = useState<NewsArticle[]>([]);
+export default function LiveInsightsSidebar({
+  news: initialNews,
+  isLoading: initialLoading
+}: {
+  news?: NewsArticle[];
+  isLoading?: boolean;
+} = {}) {
+  const [news, setNews] = useState<NewsArticle[]>(initialNews || []);
   const [selectedNews, setSelectedNews] = useState<NewsArticle | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(initialLoading !== undefined ? initialLoading : true);
 
   useEffect(() => {
-    const fetchNews = async () => {
-      setIsLoading(true);
-      const data = await getNewsLive(5);
-      setNews(data);
-      setIsLoading(false);
-    };
-    fetchNews();
-  }, []);
+    if (initialNews !== undefined) {
+      setNews(initialNews);
+    }
+  }, [initialNews]);
+
+  useEffect(() => {
+    if (initialLoading !== undefined) {
+      setIsLoading(initialLoading);
+    }
+  }, [initialLoading]);
+
+  useEffect(() => {
+    if (initialNews === undefined && initialLoading === undefined) {
+      const fetchNews = async () => {
+        setIsLoading(true);
+        const data = await getNewsLive(5);
+        setNews(data);
+        setIsLoading(false);
+      };
+      fetchNews();
+    }
+  }, [initialNews, initialLoading]);
 
   const openModal = (article: NewsArticle) => {
     setSelectedNews(article);

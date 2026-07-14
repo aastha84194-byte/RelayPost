@@ -419,6 +419,7 @@ export default function ArticlesManagement() {
                          <option value="ExpertAnalysis">Expert Analysis</option>
                          <option value="LatestInsights">Latest Insights</option>
                          <option value="DeepDives">Deep Dives</option>
+                         <option value="TechSpotlight">Tech Spotlight</option>
                       </select>
                    </div>
 

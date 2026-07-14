@@ -9,7 +9,10 @@ import { motion, AnimatePresence } from 'framer-motion';
 import NetworkBackground from '../../components/NetworkBackground';
 import Navbar from '../../components/Navbar';
 import Footer from '../../components/Footer';
+import { Mail, Lock, Eye, EyeOff } from 'lucide-react';
 import { AUTH_BASE } from "@/lib/config";
+import { RedirectHelper } from "@/lib/redirectHelper";
+
 
 export default function Login() {
   const [formData, setFormData] = useState({ email: '', password: '' });
@@ -35,7 +38,7 @@ export default function Login() {
             localStorage.setItem('auth_token', tokenData.access_token);
             toast.success("Verification successful! Logging in...");
             clearInterval(interval);
-            setTimeout(() => window.location.href = "/", 600);
+            setTimeout(() => window.location.href = '/?onboarding=true', 600);
           }
         } catch (e) {
           // Ignore network errors during polling
@@ -73,7 +76,8 @@ export default function Login() {
       Cookies.set('access_token', data.access_token, { expires: 7, secure: true, sameSite: 'strict' });
       localStorage.setItem('auth_token', data.access_token);
       toast.success("Welcome back!");
-      setTimeout(() => window.location.href = "/", 600);
+      const target = RedirectHelper.getAndClearTarget();
+      setTimeout(() => window.location.href = target, 600);
     } catch (err: any) {
       toast.error(err.message || "Invalid credentials");
     } finally {
@@ -93,7 +97,12 @@ export default function Login() {
         Cookies.set('access_token', data.access_token, { expires: 7, secure: true, sameSite: 'strict' });
         localStorage.setItem('auth_token', data.access_token);
         toast.success("Successfully authenticated with Google");
-        setTimeout(() => window.location.href = "/", 600);
+        if (data.is_new_user) {
+          setTimeout(() => window.location.href = '/?onboarding=true', 600);
+        } else {
+          const target = RedirectHelper.getAndClearTarget();
+          setTimeout(() => window.location.href = target, 600);
+        }
       } else {
         toast.error(data.detail || "Google Login failed");
       }
@@ -131,7 +140,7 @@ export default function Login() {
                       <div className="space-y-1">
                         <label className="text-xs font-semibold text-slate-300 uppercase tracking-widest px-1">Email Address</label>
                         <div className="relative">
-                          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 material-symbols-outlined text-lg">mail</span>
+                          <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5" />
                           <input
                             type="email"
                             value={formData.email}
@@ -144,7 +153,7 @@ export default function Login() {
                       <div className="space-y-1">
                         <label className="text-xs font-semibold text-slate-300 uppercase tracking-widest px-1">Password</label>
                         <div className="relative">
-                          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 material-symbols-outlined text-lg">lock</span>
+                          <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5" />
                           <input
                             type={showPassword ? "text" : "password"}
                             value={formData.password}
@@ -152,7 +161,7 @@ export default function Login() {
                             className="w-full bg-white/5 border border-white/10 rounded-lg pl-10 pr-10 py-2 text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all text-sm"
                             placeholder="••••••••" minLength={8} required />
                           <button onClick={() => setShowPassword(!showPassword)} type="button" className="absolute right-3 top-[50%] -translate-y-[50%] flex items-center justify-center text-slate-400 hover:text-primary transition-colors">
-                            <span className="material-symbols-outlined text-lg leading-none">{showPassword ? "visibility_off" : "visibility"}</span>
+                            {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                           </button>
                         </div>
                       </div>
@@ -162,7 +171,7 @@ export default function Login() {
                           <input type="checkbox" className="mr-2 w-3 h-3 rounded border-white/20 bg-white/5 text-primary focus:ring-primary focus:ring-offset-0" />
                           Remember me
                         </label>
-                        <a href="#" className="text-xs text-indigo-400 hover:text-indigo-300 transition-colors">Forgot Password?</a>
+                        <Link href="/forgot-password" className="text-xs text-indigo-400 hover:text-indigo-300 transition-colors">Forgot Password?</Link>
                       </div>
 
                       <button type="submit" disabled={isLoading} className="w-full py-2.5 bg-gradient-to-br from-primary to-primary-container text-white font-bold rounded-lg shadow-lg shadow-primary/20 hover:shadow-primary/40 hover:scale-[1.02] active:scale-95 transition-all duration-300 text-xs uppercase tracking-widest mt-2">
@@ -180,12 +189,14 @@ export default function Login() {
                         </div>
 
                         <div className="mt-4 flex justify-center opacity-90 transition-opacity hover:opacity-100 transform scale-90">
-                          <GoogleLogin
-                            onSuccess={handleGoogleSuccess}
-                            onError={() => console.log('Login Failed')}
-                            theme="filled_blue"
-                            shape="pill"
-                          />
+                          <div className="rounded-full overflow-hidden flex items-center justify-center">
+                            <GoogleLogin
+                              onSuccess={handleGoogleSuccess}
+                              onError={() => console.log('Login Failed')}
+                              theme="filled_blue"
+                              shape="pill"
+                            />
+                          </div>
                         </div>
                       </div>
 

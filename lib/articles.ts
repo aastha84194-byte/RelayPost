@@ -64,10 +64,12 @@ const MOCK_EXPERT_ARTICLES: Article[] = [
   }
 ];
 
-export async function getAllArticles(category?: string): Promise<Article[]> {
+export async function getAllArticles(category?: string, skip: number = 0, limit: number = 20): Promise<Article[]> {
   try {
     const url = new URL(`${API_BASE}/public/articles`);
     if (category) url.searchParams.append("category", category);
+    url.searchParams.append("skip", skip.toString());
+    url.searchParams.append("limit", limit.toString());
     
     const res = await fetch(url.toString(), { next: { revalidate: 60 } });
     if (!res.ok) return [];
@@ -164,9 +166,79 @@ export async function getArticlesBySection(section: string, category?: string): 
 
 export async function recordArticleView(id: string): Promise<void> {
   try {
-    await fetch(`${API_BASE}/public/articles/${id}/view`, { method: "POST" });
+    const headers: Record<string, string> = {};
+    const Cookies = require("js-cookie");
+    const token = typeof window !== "undefined" 
+      ? ((Cookies.default ? Cookies.default.get("access_token") : Cookies.get("access_token")) || localStorage.getItem("auth_token"))
+      : undefined;
+    if (token) {
+      headers["Authorization"] = `Bearer ${token}`;
+    }
+    await fetch(`${API_BASE}/public/articles/${id}/view`, { 
+      method: "POST",
+      headers
+    });
   } catch (err) {
     console.error("Failed to record view", err);
+  }
+}
+
+export async function updateArticleDuration(id: string, durationSeconds: number): Promise<void> {
+  try {
+    const headers: Record<string, string> = { "Content-Type": "application/json" };
+    const Cookies = require("js-cookie");
+    const token = typeof window !== "undefined" 
+      ? ((Cookies.default ? Cookies.default.get("access_token") : Cookies.get("access_token")) || localStorage.getItem("auth_token"))
+      : undefined;
+    if (token) {
+      headers["Authorization"] = `Bearer ${token}`;
+    }
+    // Using fetch with keepalive ensures it completes even if the tab is closing
+    await fetch(`${API_BASE}/public/articles/${id}/view/duration`, { 
+      method: "PATCH",
+      headers,
+      body: JSON.stringify({ duration_seconds: durationSeconds }),
+      keepalive: true
+    });
+  } catch (err) {
+    console.error("Failed to update article duration", err);
+  }
+}
+
+export async function recordNewsView(newsId: number, title: string, slug: string): Promise<void> {
+  try {
+    const headers: Record<string, string> = { "Content-Type": "application/json" };
+    const Cookies = require("js-cookie");
+    const token = typeof window !== "undefined" 
+      ? ((Cookies.default ? Cookies.default.get("access_token") : Cookies.get("access_token")) || localStorage.getItem("auth_token"))
+      : undefined;
+    if (token) {
+      headers["Authorization"] = `Bearer ${token}`;
+    }
+
+    // Record view in the news service to increment backend views counter
+    fetch(`${NEWS_API_BASE}/id/${newsId}/view`, { method: "POST" }).catch(err => console.error("news_service view error", err));
+
+    await fetch(`${API_BASE}/public/news/${newsId}/view`, { 
+      method: "POST",
+      headers,
+      body: JSON.stringify({ title, slug })
+    });
+  } catch (err) {
+    console.error("Failed to record news view", err);
+  }
+}
+
+export async function getUserHistory(token: string, limit: number = 20, offset: number = 0): Promise<any[]> {
+  try {
+    const res = await fetch(`${API_BASE}/profile/history?limit=${limit}&offset=${offset}`, {
+      headers: { "Authorization": `Bearer ${token}` }
+    });
+    if (!res.ok) return [];
+    return await res.json();
+  } catch (err) {
+    console.error("Failed to fetch user history", err);
+    return [];
   }
 }
 
@@ -347,6 +419,17 @@ export async function getUserFollows(user_id: string): Promise<any[]> {
 
 export function getUserIdentifier(): string {
     if (typeof window === 'undefined') return '';
+    const token = localStorage.getItem('auth_token');
+    if (token) {
+        try {
+            const payload = JSON.parse(atob(token.split('.')[1]));
+            if (payload && payload.sub) {
+                return payload.sub;
+            }
+        } catch (e) {
+            // ignore
+        }
+    }
     let id = localStorage.getItem('rp_user_id');
     if (!id) {
         id = crypto.randomUUID();
@@ -395,22 +478,53 @@ export async function getNewsByCategory(category: string, limit: number = 20, sk
     }
 }
 
+export async function getNewsByKeyword(keyword: string, limit: number = 20, skip: number = 0): Promise<{ items: NewsArticle[], total: number }> {
+    try {
+      const res = await fetch(`${NEWS_API_BASE}/keywords/${keyword}?limit=${limit}&skip=${skip}`, { 
+        cache: 'no-store' 
+      });
+      if (!res.ok) return { items: [], total: 0 };
+      const data = await res.json();
+      return { items: data.items, total: data.total };
+    } catch (err) {
+      console.error(`Failed to fetch news keyword ${keyword}`, err);
+      return { items: [], total: 0 };
+    }
+}
+
 export async function getNewsCategories(): Promise<string[]> {
   try {
-    const res = await fetch(`${NEWS_API_BASE}/meta/categories`, { 
-      next: { revalidate: 300 } 
+    const response = await fetch(`${NEWS_API_BASE}/meta/categories`, {
+      next: { revalidate: 3600 }
     });
-    if (!res.ok) return [];
-    return await res.json();
-  } catch (err) {
-    console.error("Failed to fetch news categories", err);
+    if (!response.ok) return [];
+    return await response.json();
+  } catch (error) {
+    console.error('Error fetching categories:', error);
     return [];
   }
 }
 
-export async function getAllNewsAdmin(limit: number = 50, skip: number = 0): Promise<{ items: NewsArticle[], total: number }> {
+export async function getPopularKeywords(limit: number = 10): Promise<string[]> {
   try {
-    const res = await fetch(`${NEWS_API_BASE}/live?limit=${limit}&skip=${skip}&is_admin=true`, { 
+    const response = await fetch(`${API_BASE}/public/meta/popular-keywords?limit=${limit}`, {
+      next: { revalidate: 3600 }
+    });
+    if (!response.ok) return [];
+    return await response.json();
+  } catch (error) {
+    console.error('Error fetching popular keywords:', error);
+    return [];
+  }
+}
+
+export async function getAllNewsAdmin(limit: number = 50, skip: number = 0, search: string = ""): Promise<{ items: NewsArticle[], total: number }> {
+  try {
+    let url = `${NEWS_API_BASE}/live?limit=${limit}&skip=${skip}&is_admin=true`;
+    if (search) {
+      url += `&search=${encodeURIComponent(search)}`;
+    }
+    const res = await fetch(url, { 
       cache: 'no-store' 
     });
     if (!res.ok) return { items: [], total: 0 };
@@ -462,5 +576,19 @@ export async function updateNewsAdmin(id: number, data: Partial<NewsArticle>): P
 }
 
 import { NewsArticle } from './types';
+
+export async function getTopNews(): Promise<NewsArticle[]> {
+  try {
+    const res = await fetch(`${NEWS_API_BASE}/top`, { 
+      cache: 'no-store' 
+    });
+    if (!res.ok) return [];
+    return await res.json();
+  } catch (err) {
+    console.error("Failed to fetch top news", err);
+    return [];
+  }
+}
+
 
 

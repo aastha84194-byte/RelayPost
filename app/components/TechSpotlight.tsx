@@ -2,8 +2,16 @@
 import React from 'react';
 import Image from 'next/image';
 import { ArrowRight } from 'lucide-react';
+import { Article } from '@/lib/types';
+import Link from 'next/link';
+import { getCategorySlugForArticle } from '@/lib/categoryMapping';
 
-export default function TechSpotlight() {
+export default function TechSpotlight({ articles }: { articles?: Article[] }) {
+  if (!articles || articles.length === 0) return null;
+  
+  const mainArticle = articles[0];
+  const sideArticles = articles.slice(1, 4);
+
   return (
     <section>
       <h2 className="text-xl md:text-2xl font-bold text-dark-bg mb-4 border-l-4 border-[#4f46e5] pl-3 dark:text-white transition-colors duration-300">Tech Spotlight</h2>
@@ -11,40 +19,48 @@ export default function TechSpotlight() {
 
         {/* Large Featured Spotlight */}
         <div className="md:col-span-3 relative rounded-none md:rounded-xl overflow-hidden min-h-[300px] group shadow-md -mx-4 md:mx-0 dark:shadow-none transition-colors duration-300">
+          <Link href={`/${getCategorySlugForArticle(mainArticle.category_name)}/${mainArticle.slug}`} className="absolute inset-0 block z-10" />
           <div className="absolute inset-0">
-            <Image src="https://images.unsplash.com/photo-1677442136019-21780ecad995?w=800&auto=format&fit=crop&q=60" alt="Spotlight" fill sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw" priority className="object-cover group-hover:scale-105 transition-transform duration-700" />
+            {mainArticle.hero_image ? (
+              <Image src={mainArticle.hero_image} alt={mainArticle.title || "Spotlight"} fill sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw" priority className="object-cover group-hover:scale-105 transition-transform duration-700" />
+            ) : (
+              <div className="w-full h-full bg-slate-200 dark:bg-slate-800" />
+            )}
             <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-gray-900/40 to-transparent" />
           </div>
-          <div className="absolute bottom-0 left-0 p-6 w-full">
-            <span className="inline-block px-3 py-1 bg-[#4f46e5] text-[10px] font-bold text-white rounded-full mb-3 tracking-wider">GRAPHICS & TECH</span>
-            <h3 className="text-xl md:text-2xl font-bold text-white mb-3 leading-tight max-w-[90%]">Can Artificial Intelligence Ever Truly Be Creative?</h3>
-            <p className="text-gray-300 text-xs md:text-sm mb-4 line-clamp-2 max-w-[90%]">The shift from bits to qubits represents more than a speed upgrade - it&apos;s a fundamental change in...</p>
-            <button className="bg-[#4f46e5] hover:bg-[#3730a3] text-white px-5 py-2 rounded-full text-xs md:text-sm font-medium inline-flex items-center gap-1.5 transition-colors shadow-lg">
+          <div className="absolute bottom-0 left-0 p-6 w-full z-20 pointer-events-none">
+            <span className="inline-block px-3 py-1 bg-[#4f46e5] text-[10px] font-bold text-white rounded-full mb-3 tracking-wider">{mainArticle.category_name?.toUpperCase() || 'TECH'}</span>
+            <h3 className="text-xl md:text-2xl font-bold text-white mb-3 leading-tight max-w-[90%]">{mainArticle.title}</h3>
+            {mainArticle.ai_summary && (
+              <p className="text-gray-300 text-xs md:text-sm mb-4 line-clamp-2 max-w-[90%]">{mainArticle.ai_summary}</p>
+            )}
+            <Link href={`/${getCategorySlugForArticle(mainArticle.category_name)}/${mainArticle.slug}`} className="pointer-events-auto bg-[#4f46e5] hover:bg-[#3730a3] text-white px-5 py-2 rounded-full text-xs md:text-sm font-medium inline-flex items-center gap-1.5 transition-colors shadow-lg">
               Read More
-            </button>
+              <ArrowRight size={16} />
+            </Link>
           </div>
         </div>
-
-        {/* Side Stack Spotlight */}
-        <div className="md:col-span-2 flex flex-col justify-between gap-4">
-          {[
-            { title: "Cloud Gaming: The End of Consoles?", desc: "Cloud gaming allows users to stream high-end console and PC titles directly to their...", time: "13 HOURS AGO", img: "https://images.unsplash.com/photo-1542751371-adc38448a05e?w=800&auto=format&fit=crop&q=60" },
-            { title: "The Zero Trust Era of Cybersecurity", desc: "Modern security infrastructures are shifting towards \"never trust, always verify\"...", time: "16 HOURS AGO", img: "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=800&auto=format&fit=crop&q=60" },
-            { title: "Data Sovereignty in the Age of Big Tech", desc: "Nations are passing stricter laws to ensure their citizens' data remains within national...", time: "18 HOURS AGO", img: "https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=800&auto=format&fit=crop&q=60" }
-          ].map((item, i) => (
-            <div key={i} className="flex gap-4 items-center group cursor-pointer hover:bg-gray-50 md:p-2 rounded-xl transition-all duration-300 dark:hover:bg-slate-800/50">
-              <div className="w-16 h-16 md:w-20 md:h-20 rounded-xl relative overflow-hidden flex-shrink-0 shadow-sm dark:shadow-none transition-colors duration-300">
-                <Image src={item.img} alt={item.title} fill sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw" className="object-cover group-hover:scale-110 transition-transform duration-500" />
-              </div>
-              <div className="flex-1">
-                <h4 className="font-bold text-dark-bg text-xs md:text-sm leading-snug group-hover:text-brand transition-colors mb-0.5 md:mb-1 dark:text-white">{item.title}</h4>
-                <p className="text-[10px] md:text-[11px] text-gray-500 line-clamp-2 mb-1 md:mb-1.5 dark:text-slate-400 transition-colors duration-300">{item.desc}</p>
-                <p className="text-[8px] md:text-[9px] font-bold text-gray-400 uppercase">{item.time}</p>
-              </div>
-            </div>
-          ))}
-        </div>
-
+        
+        {/* Side Articles */}
+        {sideArticles.length > 0 && (
+          <div className="md:col-span-2 flex flex-col gap-4">
+            {sideArticles.map(article => (
+              <Link href={`/${getCategorySlugForArticle(article.category_name)}/${article.slug}`} key={article.id} className="flex gap-4 p-4 rounded-xl bg-white dark:bg-slate-800 hover:shadow-lg transition-shadow border border-slate-100 dark:border-slate-700 h-full">
+                {article.hero_image ? (
+                  <div className="w-24 h-24 relative rounded-lg overflow-hidden shrink-0">
+                    <Image src={article.hero_image} alt={article.title} fill className="object-cover" />
+                  </div>
+                ) : (
+                  <div className="w-24 h-24 relative rounded-lg overflow-hidden shrink-0 bg-slate-200 dark:bg-slate-700" />
+                )}
+                <div className="flex flex-col justify-center">
+                  <h3 className="font-bold text-sm text-slate-800 dark:text-white line-clamp-2 mb-2">{article.title}</h3>
+                  <span className="text-[10px] font-bold text-[#4f46e5] uppercase tracking-wider">{article.category_name || 'TECH'}</span>
+                </div>
+              </Link>
+            ))}
+          </div>
+        )}
       </div>
     </section>
   );

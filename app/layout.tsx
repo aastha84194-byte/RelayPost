@@ -1,21 +1,51 @@
 import type { Metadata } from 'next';
 import './globals.css';
 import { Toaster } from 'react-hot-toast';
+import { Analytics } from '@vercel/analytics/react';
 import { ThemeProvider } from './components/ThemeProvider';
+import { TierProvider } from '@/components/TierProvider';
+import { GoogleAnalytics } from '@next/third-parties/google';
+import { GoogleOAuthProvider } from '@react-oauth/google';
+import GlobalOneTap from './components/GlobalOneTap';
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://relay-post.vercel.app'),
+  metadataBase: new URL('https://relaypost.me'),
+  applicationName: 'RelayPost',
+  appleWebApp: {
+    title: 'RelayPost',
+    statusBarStyle: 'default',
+    capable: true,
+  },
+  verification: {
+    google: '39eC-3uLPsyxpmG-CvFLWTAO9DheJfC_kXXIPYFO2ck',
+  },
+  other: {
+    'google-adsense-account': 'ca-pub-8090657364719041',
+  },
   title: {
     default: 'RelayPost',
     template: '%s | RelayPost',
   },
-  description: 'Scale your insights with AI-driven content discovery, dynamic analysis, and real-time curation across business, technology, and science.',
+  description: 'Discover trending news and in-depth articles. Scale your insights with advanced content discovery, dynamic analysis, and real-time curation across business, technology, and science.',
   keywords: [
     'RelayPost',
-    'Digital Curator',
+    'Digital Publisher',
     'News Aggregator',
     'Automated Insights',
-    'Technology News'
+    'Technology News',
+    'Business News',
+    'Science Discoveries',
+    'Real-time News Curation',
+    'Content Discovery Platform',
+    'Smart News Reader',
+    'Tech Trends',
+    'Industry Insights',
+    'Personalized News Feed',
+    'Trending Articles',
+    'In-depth Articles',
+    'Article Discovery',
+    'Latest Articles',
+    'Research Articles'
   ],
   authors: [{ name: 'RelayPost Team' }],
   creator: 'RelayPost',
@@ -24,15 +54,24 @@ export const metadata: Metadata = {
     type: 'website',
     locale: 'en_US',
     url: '/',
-    title: 'RelayPost | The Premier Digital Curator',
-    description: 'Scale your insights with AI-driven content discovery, dynamic analysis, and real-time curation across business, technology, and science.',
+    title: 'RelayPost | The Premier Digital Publisher',
+    description: 'Discover trending news and in-depth articles. Scale your insights with advanced content discovery, dynamic analysis, and real-time curation across business, technology, and science.',
     siteName: 'RelayPost',
+    images: [
+      {
+        url: '/fallback_article.png',
+        width: 1200,
+        height: 630,
+        alt: 'RelayPost Default Image',
+      }
+    ]
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'RelayPost | The Premier Digital Curator',
-    description: 'Scale your insights with AI-driven content discovery, dynamic analysis, and real-time curation across business, technology, and science.',
+    title: 'RelayPost | The Premier Digital Publisher',
+    description: 'Discover trending news and in-depth articles. Scale your insights with advanced content discovery, dynamic analysis, and real-time curation across business, technology, and science.',
     creator: '@RelayPost',
+    images: ['/fallback_article.png'],
   },
   robots: {
     index: true,
@@ -75,9 +114,17 @@ export default function RootLayout({
                   border: '1px solid rgba(255, 255, 255, 0.1)',
               }
           }} />
-          {children}
+          <TierProvider>
+            <GoogleOAuthProvider clientId={process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "45916998595-bd3pc3o44oo0qst9mob0ibsq05te4cjq.apps.googleusercontent.com"}>
+              <GlobalOneTap />
+              {children}
+            </GoogleOAuthProvider>
+          </TierProvider>
+          <Analytics />
+          <GoogleAnalytics gaId={process.env.NEXT_PUBLIC_GA_ID!} />
         </ThemeProvider>
       </body>
     </html>
   );
 }
+

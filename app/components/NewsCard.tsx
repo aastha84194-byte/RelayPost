@@ -28,18 +28,13 @@ export function NewsCard({ article, onClick }: { article: NewsArticle, onClick?:
              <Globe size={40} className="text-indigo-300 dark:text-indigo-700" />
           </div>
         )}
-        <div className="absolute top-4 left-4">
-          <span className="px-3 py-1 rounded-full bg-white/80 dark:bg-slate-900/80 backdrop-blur-md text-[10px] font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-widest border border-indigo-100 dark:border-indigo-900/50">
-            {article.category || 'General'}
-          </span>
-        </div>
       </div>
       
       <div className="p-6 flex flex-col flex-grow">
         <div className="flex items-center gap-3 mb-3 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
-           <span className="flex items-center gap-1"><Clock size={12} /> {getTimeAgo(article.published_at)}</span>
-           <span className="w-1 h-1 bg-slate-200 dark:bg-slate-700 rounded-full" />
-           <span className="truncate max-w-[100px]">{article.source_name || 'Global News'}</span>
+           <span className="flex items-center gap-1 shrink-0"><Clock size={12} /> {getTimeAgo(article.published_at)}</span>
+           <span className="w-1 h-1 bg-slate-200 dark:bg-slate-700 rounded-full shrink-0" />
+           <span className="truncate">{article.source_name || 'Global News'}</span>
         </div>
         
         <h3 className="text-lg font-bold text-slate-900 dark:text-white leading-tight group-hover:text-indigo-600 transition-colors line-clamp-2 mb-3">
@@ -92,17 +87,21 @@ export function NewsSpotlight({ articles, onQuickRead }: { articles: NewsArticle
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
         {/* Main Feature */}
         <div className="lg:col-span-8">
-          <div className="relative group cursor-pointer overflow-hidden rounded-[2.5rem] bg-slate-900 h-[500px]" onClick={() => onQuickRead(main)}>
-            {main.image_url && (
+          <div className="relative group cursor-pointer overflow-hidden rounded-[2.5rem] bg-indigo-100 dark:bg-indigo-900/20 h-[500px]" onClick={() => onQuickRead(main)}>
+            {main.image_url ? (
               <Image 
                 src={main.image_url} 
                 alt={main.title} 
                 fill 
-                className="object-cover opacity-60 group-hover:scale-105 transition-transform duration-700" 
+                className="object-cover group-hover:scale-105 transition-transform duration-700" 
                 unoptimized
               />
+            ) : (
+              <div className="absolute inset-0 flex items-center justify-center">
+                 <Globe size={80} className="text-indigo-300 dark:text-indigo-700" />
+              </div>
             )}
-            <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/20 to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-gray-900/40 to-transparent" />
             
             <div className="absolute bottom-0 left-0 right-0 p-10">
               <span className="inline-block px-3 py-1 mb-6 rounded-full bg-indigo-600 text-[10px] font-black text-white uppercase tracking-[0.2em]">
@@ -112,9 +111,9 @@ export function NewsSpotlight({ articles, onQuickRead }: { articles: NewsArticle
                 {main.title}
               </h3>
               <div className="flex items-center gap-6">
-                <span className="flex items-center gap-2 text-xs font-bold text-slate-300">
-                  <Globe size={14} className="text-indigo-400" />
-                  {main.source_name || 'Global News'}
+                <span className="flex items-center gap-2 text-xs font-bold text-slate-300 max-w-[150px] md:max-w-[250px]">
+                  <Globe size={14} className="text-indigo-400 shrink-0" />
+                  <span className="truncate">{main.source_name || 'Global News'}</span>
                 </span>
                 <span className="flex items-center gap-2 text-xs font-bold text-slate-300">
                    <Clock size={14} className="text-indigo-400" />

@@ -69,12 +69,12 @@ export default function NewsQuickReadModal({ article, isOpen, onClose }: NewsQui
                 </button>
 
                 <div className="absolute bottom-4 left-6 right-6">
-                  <div className="flex items-center gap-2 mb-2">
-                    <span className="px-2 py-0.5 rounded-full bg-indigo-600 text-[10px] font-bold text-white uppercase tracking-wider">
+                  <div className="flex flex-wrap items-center gap-2 mb-2">
+                    <span className="px-2 py-0.5 rounded-full bg-indigo-600 text-[10px] font-bold text-white uppercase tracking-wider shrink-0">
                       {article.category || 'General'}
                     </span>
-                    <span className="flex items-center gap-1 text-[10px] font-medium text-slate-500 dark:text-slate-400">
-                      <Globe size={10} /> {article.source_name || 'News Stream'}
+                    <span className="flex items-center gap-1 text-[10px] font-medium text-slate-500 dark:text-slate-400 max-w-[200px]">
+                      <Globe size={10} className="shrink-0" /> <span className="truncate">{article.source_name || 'News Stream'}</span>
                     </span>
                   </div>
                   <h2 className="text-xl md:text-2xl font-black text-slate-900 dark:text-white leading-tight">

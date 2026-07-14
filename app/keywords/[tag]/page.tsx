@@ -5,9 +5,12 @@ import { useParams } from "next/navigation";
 import Navbar from "../../components/Navbar";
 import Footer from "../../components/Footer";
 import { getPublicKeywords, getArticlesByKeyword, toggleFollow, getUserFollows, getUserIdentifier } from "@/lib/articles";
+import Cookies from "js-cookie";
+import toast from "react-hot-toast";
 import { Article } from "@/lib/types";
 import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
-import { Zap, Bookmark, BookmarkCheck } from "lucide-react";
+import { Hash, Sparkles, TrendingUp, Bookmark, BookmarkCheck, Zap } from "lucide-react";
+import { getCategorySlugForArticle } from "@/lib/categoryMapping";
 
 export default function KeywordDetailPage() {
   const { tag } = useParams();
@@ -60,6 +63,11 @@ export default function KeywordDetailPage() {
   };
 
   const handleToggleFollow = async () => {
+    const token = Cookies.get("access_token") || localStorage.getItem("auth_token");
+    if (!token) {
+      toast.error("Please log in to follow keywords");
+      return;
+    }
     if (!keyword) return;
     const res = await toggleFollow(userId, keyword.id, 'keyword');
     setIsFollowed(!!res);
@@ -148,7 +156,7 @@ export default function KeywordDetailPage() {
                   whileHover={{ z: 50, scale: 1.02 }}
                   className="group relative"
                 >
-                  <Link href={`/article/${article.slug}`} className="block">
+                  <Link href={`/${getCategorySlugForArticle(article.category_name)}/${article.slug}`} className="block">
                     <div className="aspect-[16/10] bg-slate-100 dark:bg-slate-900 rounded-[2.5rem] overflow-hidden mb-8 relative shadow-sm group-hover:shadow-2xl transition-all duration-500 border border-slate-100 dark:border-white/5">
                       <img
                         src={article.hero_image || `https://images.unsplash.com/photo-${1600000000000 + idx * 1000}?auto=format&fit=crop&q=80&w=800`}

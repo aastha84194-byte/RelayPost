@@ -16,8 +16,13 @@ export default function AdminDashboard() {
     totalUsers: 0
   });
   const [activity, setActivity] = useState<any[]>([]);
+  const [categories, setCategories] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isProcessing, setIsProcessing] = useState(false);
+  
+  const [manualTopic, setManualTopic] = useState("");
+  const [manualQueries, setManualQueries] = useState("");
+  const [manualCategory, setManualCategory] = useState("Intelligence");
 
   const handleAutomationAction = async (endpoint: string, successMessage: string) => {
     setIsProcessing(true);
@@ -63,6 +68,38 @@ export default function AdminDashboard() {
     }
   };
 
+  const handleTopicGeneration = async () => {
+    if (!manualTopic.trim()) return alert("Please enter a topic");
+    setIsProcessing(true);
+    const token = Cookies.get("access_token");
+    try {
+      const res = await fetch(`${API_BASE}/admin/ai/trigger-topic`, {
+        method: "POST",
+        headers: { 
+          "Authorization": `Bearer ${token}`,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ 
+          topic: manualTopic, 
+          category: manualCategory,
+          search_queries: manualQueries 
+        })
+      });
+      if (res.ok) {
+        alert(`Generation for topic '${manualTopic}' triggered in background.`);
+        setManualTopic("");
+      } else {
+        const err = await res.json();
+        alert(`Error: ${err.detail || "Failed to execute"}`);
+      }
+    } catch (e) {
+      console.error(e);
+      alert("Network error");
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
   useEffect(() => {
     const fetchData = async () => {
       setIsLoading(true);
@@ -86,6 +123,12 @@ export default function AdminDashboard() {
         });
         const activityData = activityRes.ok ? await activityRes.json() : [];
 
+        // Fetch Categories
+        const categoriesRes = await fetch(`${API_BASE}/admin/categories`, {
+          headers: { "Authorization": `Bearer ${token}` }
+        });
+        const categoriesData = categoriesRes.ok ? await categoriesRes.json() : [];
+
         setStats({
           articles: contentData.total_articles ?? 0,
           views: contentData.total_views ?? 0,
@@ -93,6 +136,7 @@ export default function AdminDashboard() {
           totalUsers: authData.total_users ?? 0
         });
         setActivity(Array.isArray(activityData) ? activityData : []);
+        setCategories(Array.isArray(categoriesData) ? categoriesData : []);
       } catch (e) {
         console.error("Dashboard fetch failed", e);
       } finally {
@@ -208,6 +252,55 @@ export default function AdminDashboard() {
               >
                 <Brain size={14} /> Curate Placement
               </button>
+            </div>
+            
+            <div className="mt-8 pt-8 border-t border-slate-100">
+               <h3 className="text-xs font-black text-slate-800 uppercase tracking-widest mb-4 flex items-center gap-2">
+                 <FileText size={14} className="text-indigo-600"/> Generate Specific Topic
+               </h3>
+               <div className="flex flex-col gap-4">
+                 <div className="flex flex-col sm:flex-row gap-4">
+                   <input 
+                     type="text"
+                     value={manualTopic}
+                     onChange={(e) => setManualTopic(e.target.value)}
+                     placeholder="Enter topic (e.g. The Future of Quantum Computing)"
+                     className="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-indigo-600 focus:ring-1 focus:ring-indigo-600 transition-all"
+                     disabled={isProcessing}
+                   />
+                   <select
+                     value={manualCategory}
+                     onChange={(e) => setManualCategory(e.target.value)}
+                     className="bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-indigo-600 focus:ring-1 focus:ring-indigo-600 transition-all"
+                     disabled={isProcessing}
+                   >
+                     {categories.length > 0 ? (
+                       categories.map(c => (
+                         <option key={c.id} value={c.name}>{c.name}</option>
+                       ))
+                     ) : (
+                       <option value="Intelligence">Intelligence</option>
+                     )}
+                   </select>
+                 </div>
+                 <div className="flex flex-col sm:flex-row gap-4">
+                   <input 
+                     type="text"
+                     value={manualQueries}
+                     onChange={(e) => setManualQueries(e.target.value)}
+                     placeholder="Optional: Specific search queries (comma separated)"
+                     className="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-indigo-600 focus:ring-1 focus:ring-indigo-600 transition-all"
+                     disabled={isProcessing}
+                   />
+                   <button 
+                     onClick={handleTopicGeneration}
+                     disabled={isProcessing || !manualTopic.trim()}
+                     className="flex items-center justify-center gap-2 bg-slate-900 text-white hover:bg-slate-800 px-6 py-3 rounded-xl font-bold transition-all disabled:opacity-50 text-xs uppercase tracking-widest whitespace-nowrap"
+                   >
+                     <Cpu size={14} /> Generate
+                   </button>
+                 </div>
+               </div>
             </div>
          </div>
       </div>

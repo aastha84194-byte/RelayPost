@@ -22,7 +22,7 @@ function NewsContent() {
     const fetchData = async () => {
       setIsLoading(true);
       try {
-        const MAIN_CATEGORIES = ['World News', 'Politics', 'Business', 'Technology', 'Science', 'Health', 'Sports', 'Entertainment'];
+        const MAIN_CATEGORIES = ['World News', 'India News', 'Politics', 'Business', 'Technology', 'Science', 'Health', 'Sports', 'Entertainment'];
         const liveNews = await getNewsLive(10);
         
         setSpotlight(liveNews.slice(0, 4));
@@ -83,7 +83,7 @@ function NewsContent() {
                   </div>
                   <h2 className="text-2xl font-black text-slate-900 dark:text-white uppercase tracking-tight">{cat}</h2>
                 </div>
-                <Link href={`/?category=${encodeURIComponent(cat)}`} className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-indigo-600 transition-colors">
+                <Link href={`/news/category/${encodeURIComponent(cat.toLowerCase().replace(/\s+/g, '-'))}`} className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-indigo-600 transition-colors">
                   View Full Feed
                   <ArrowRight size={14} />
                 </Link>

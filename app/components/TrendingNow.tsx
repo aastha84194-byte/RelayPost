@@ -4,6 +4,7 @@ import Image from 'next/image';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Article } from '@/lib/types';
 import Link from 'next/link';
+import { getCategorySlugForArticle } from '@/lib/categoryMapping';
 import { motion } from 'framer-motion';
 
 export default function TrendingNow({ articles }: { articles: Article[] }) {
@@ -144,7 +145,7 @@ export default function TrendingNow({ articles }: { articles: Article[] }) {
           {displayArticles.map((item, i) => (
             <Link
               key={`${item.id}-${i}`}
-              href={`/${item.category_name?.toLowerCase().replace(/ /g, '-') || 'general'}/${item.slug}`}
+              href={`/${getCategorySlugForArticle(item.category_name)}/${item.slug}`}
               className="w-[200px] md:w-[240px] shrink-0 bg-white border border-gray-200 shadow-sm hover:shadow-md transition-all duration-300 rounded-lg overflow-hidden group dark:bg-slate-900 dark:border-slate-800 dark:shadow-none"
             >
               <div className="h-28 relative overflow-hidden">

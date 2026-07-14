@@ -34,6 +34,13 @@ export default function SettingsPage() {
   const [isSaving, setIsSaving] = useState(false);
   const [apiStatus, setApiStatus] = useState({ gemini: "checking", unsplash: "checking" });
 
+  const [passwords, setPasswords] = useState({
+    currentPassword: "",
+    newPassword: "",
+    confirmPassword: ""
+  });
+  const [isChangingPassword, setIsChangingPassword] = useState(false);
+
   useEffect(() => {
     fetchSettings();
     checkAPIs();
@@ -77,6 +84,47 @@ export default function SettingsPage() {
       }
     } catch (e) { toast.error("Connection error", { id }); }
     finally { setIsSaving(false); }
+  };
+
+  const handlePasswordChange = async () => {
+    if (passwords.newPassword !== passwords.confirmPassword) {
+      toast.error("New passwords do not match");
+      return;
+    }
+    if (passwords.newPassword.length < 8) {
+      toast.error("Password must be at least 8 characters");
+      return;
+    }
+
+    setIsChangingPassword(true);
+    const id = toast.loading("Updating password...");
+    try {
+      const token = Cookies.get("access_token");
+      // Use AUTH_BASE because this goes to the auth service, not content/admin settings service.
+      const AUTH_BASE_URL = "http://localhost:8000"; // Fallback if API_BASE is content service.
+      const base = API_BASE.replace('8001', '8000'); // Ensure it hits auth service
+      
+      const res = await fetch(`${base}/users/me/password`, {
+        method: "PUT",
+        headers: { 
+          "Authorization": `Bearer ${token}`,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          current_password: passwords.currentPassword,
+          new_password: passwords.newPassword
+        })
+      });
+      
+      if (res.ok) {
+        toast.success("Password updated successfully", { id });
+        setPasswords({ currentPassword: "", newPassword: "", confirmPassword: "" });
+      } else {
+        const err = await res.json();
+        toast.error(err.detail || "Password update failed", { id });
+      }
+    } catch (e) { toast.error("Connection error", { id }); }
+    finally { setIsChangingPassword(false); }
   };
 
   if (isLoading) return <div className="p-12 text-center text-[10px] font-black uppercase tracking-widest text-slate-400">Loading Index...</div>;
@@ -189,6 +237,54 @@ export default function SettingsPage() {
                       />
                    </div>
                 ))}
+             </div>
+          </section>
+
+          <section className="bg-white border border-slate-100 rounded-[2.5rem] p-8 shadow-sm">
+             <div className="flex items-center gap-4 mb-8">
+                <div className="w-10 h-10 bg-amber-50 text-amber-600 rounded-2xl flex items-center justify-center">
+                   <ShieldCheck size={18} />
+                </div>
+                <h2 className="text-xs font-black uppercase tracking-widest text-slate-800">Security Settings</h2>
+             </div>
+             
+             <div className="space-y-6">
+                <div>
+                   <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block ml-1">Current Password</label>
+                   <input 
+                     type="password" 
+                     value={passwords.currentPassword}
+                     onChange={(e) => setPasswords({...passwords, currentPassword: e.target.value})}
+                     className="w-full px-5 py-4 bg-slate-50 border border-slate-100 rounded-2xl text-sm font-bold outline-none focus:ring-4 focus:ring-amber-500/10 transition-all"
+                   />
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                   <div>
+                      <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block ml-1">New Password</label>
+                      <input 
+                        type="password" 
+                        value={passwords.newPassword}
+                        onChange={(e) => setPasswords({...passwords, newPassword: e.target.value})}
+                        className="w-full px-5 py-4 bg-slate-50 border border-slate-100 rounded-2xl text-sm font-bold outline-none focus:ring-4 focus:ring-amber-500/10 transition-all"
+                      />
+                   </div>
+                   <div>
+                      <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block ml-1">Confirm New Password</label>
+                      <input 
+                        type="password" 
+                        value={passwords.confirmPassword}
+                        onChange={(e) => setPasswords({...passwords, confirmPassword: e.target.value})}
+                        className="w-full px-5 py-4 bg-slate-50 border border-slate-100 rounded-2xl text-sm font-bold outline-none focus:ring-4 focus:ring-amber-500/10 transition-all"
+                      />
+                   </div>
+                </div>
+                <button 
+                  onClick={handlePasswordChange}
+                  disabled={isChangingPassword || !passwords.currentPassword || !passwords.newPassword || !passwords.confirmPassword}
+                  className="mt-2 bg-amber-500 text-white px-6 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest hover:scale-105 transition-all shadow-xl shadow-amber-100 disabled:opacity-50"
+                >
+                  {isChangingPassword ? "Updating..." : "Update Password"}
+                </button>
              </div>
           </section>
 

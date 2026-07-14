@@ -4,6 +4,7 @@ import Image from 'next/image';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Article } from '@/lib/types';
 import Link from 'next/link';
+import { getCategorySlugForArticle } from '@/lib/categoryMapping';
 import { motion } from 'framer-motion';
 
 export default function ExpertAnalysis({ articles }: { articles: Article[] }) {
@@ -118,7 +119,7 @@ export default function ExpertAnalysis({ articles }: { articles: Article[] }) {
           {displayArticles.map((item, i) => (
             <Link 
               key={`${item.id}-${i}`} 
-              href={`/${item.category_name?.toLowerCase().replace(/ /g, '-') || 'general'}/${item.slug}`}
+              href={`/${getCategorySlugForArticle(item.category_name)}/${item.slug}`}
               className="w-[300px] shrink-0 bg-white p-6 border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition-all duration-300 group dark:bg-slate-900 dark:border-slate-800 dark:shadow-none"
             >
               <div className="flex items-center gap-3 mb-4">

@@ -40,8 +40,26 @@ export default async function ArticlePage(
     notFound();
   }
 
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "NewsArticle",
+    "headline": article.meta_title || article.title,
+    "description": article.meta_description || article.excerpt || article.subtitle,
+    "image": article.hero_image ? [article.hero_image] : [],
+    "datePublished": article.published_at,
+    "author": [{
+      "@type": "Organization",
+      "name": "RelayPost",
+      "url": "https://relaypost.me"
+    }]
+  };
+
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <Navbar />
       <ArticleRenderer article={article} />
     </>

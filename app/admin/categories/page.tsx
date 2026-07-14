@@ -295,6 +295,15 @@ export default function CategoriesManagement() {
                         />
                      </div>
                      <div className="md:col-span-2">
+                        <label className="text-[8px] font-black text-slate-400 uppercase mb-1 block">Description</label>
+                        <textarea 
+                           value={editCat.description} 
+                           onChange={(e) => setEditCat({...editCat, description: e.target.value})}
+                           placeholder="Category description..."
+                           className="w-full px-4 py-2 text-slate-950 bg-slate-50 border border-slate-200 rounded-lg text-xs font-bold font-sans outline-none focus:ring-2 focus:ring-indigo-500/10 min-h-[60px]"
+                        />
+                     </div>
+                     <div className="md:col-span-2">
                         <label className="text-[8px] font-black text-slate-400 uppercase mb-1 block">Image URL</label>
                         <div className="flex gap-2">
                            <input 

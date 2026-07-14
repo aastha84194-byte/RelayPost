@@ -6,33 +6,70 @@ import { motion, AnimatePresence } from 'framer-motion';
 import ParticleEffect from './ParticleEffect';
 import { Article } from '@/lib/types';
 import Link from 'next/link';
+import { getCategorySlugForArticle } from '@/lib/categoryMapping';
 
 export default function HeroSection({ articles = [] }: { articles?: Article[] }) {
-  const [currentIndex, setCurrentIndex] = useState(0);
+  const [[page, direction], setPage] = useState([0, 0]);
+
+  const currentIndex = articles.length > 0 ? (page % articles.length + articles.length) % articles.length : 0;
+
+  const paginate = (newDirection: number) => {
+    setPage([page + newDirection, newDirection]);
+  };
 
   useEffect(() => {
     if (articles.length <= 1) return;
     const timer = setInterval(() => {
-      setCurrentIndex((prev) => (prev + 1) % articles.length);
+      paginate(1);
     }, 6000);
     return () => clearInterval(timer);
-  }, [articles.length]);
+  }, [articles.length, page]);
 
   if (!articles || articles.length === 0) return null;
 
   const currentArticle = articles[currentIndex];
 
+  const slideVariants = {
+    enter: (direction: number) => ({
+      x: direction > 0 ? '100%' : direction < 0 ? '-100%' : 0,
+      opacity: 0
+    }),
+    center: {
+      zIndex: 1,
+      x: 0,
+      opacity: 1
+    },
+    exit: (direction: number) => ({
+      zIndex: 0,
+      x: direction < 0 ? '100%' : direction > 0 ? '-100%' : 0,
+      opacity: 0
+    })
+  };
+
   return (
-    <div className="relative w-full rounded-3xl md:rounded-[2.5rem] overflow-hidden min-h-[360px] md:min-h-[460px] group shadow-xl">
-      <AnimatePresence initial={false}>
+    <div className="relative w-full rounded-3xl md:rounded-[2.5rem] overflow-hidden min-h-[360px] md:min-h-[460px] group shadow-xl touch-pan-y">
+      <AnimatePresence initial={false} custom={direction}>
         <motion.div
-          key={currentArticle.id}
-          initial={{ x: '100%' }}
-          animate={{ x: 0 }}
-          exit={{ x: '-100%' }}
+          key={page}
+          custom={direction}
+          variants={slideVariants}
+          initial="enter"
+          animate="center"
+          exit="exit"
           transition={{
             x: { type: "spring", stiffness: 300, damping: 30 },
             opacity: { duration: 0.2 }
+          }}
+          drag="x"
+          dragConstraints={{ left: 0, right: 0 }}
+          dragElastic={0.6}
+          onDragEnd={(event, info) => {
+            const swipeThreshold = 50;
+            if (info.offset.x < -swipeThreshold) {
+              paginate(1);
+            } else if (info.offset.x > swipeThreshold) {
+              paginate(-1);
+            }
           }}
           className="absolute inset-0"
         >
@@ -75,7 +112,7 @@ export default function HeroSection({ articles = [] }: { articles?: Article[] })
               className="pointer-events-auto inline-block"
             >
               <Link
-                href={`/${currentArticle.category_name?.toLowerCase().replace(/ /g, '-') || 'general'}/${currentArticle.slug}`}
+                href={`/${getCategorySlugForArticle(currentArticle.category_name)}/${currentArticle.slug}`}
                 className="bg-brand hover:bg-brand-dark text-white px-8 py-3 rounded-full font-bold text-xs md:text-sm inline-flex items-center gap-2 transition-all shadow-xl shadow-brand/20 active:scale-95 uppercase tracking-widest"
               >
                 Read Report
@@ -86,13 +123,18 @@ export default function HeroSection({ articles = [] }: { articles?: Article[] })
         </motion.div>
       </AnimatePresence>
 
-      {/* Carousel Indicators */}
+      {/* Carousel Indicators - Repositioned to top-right on mobile */}
       {articles.length > 1 && (
-        <div className="absolute bottom-6 right-6 md:right-10 flex gap-2 z-30">
+        <div className="absolute top-6 right-6 md:top-auto md:bottom-6 md:right-10 flex gap-2 z-30">
           {articles.map((_, idx) => (
             <button
               key={idx}
-              onClick={() => setCurrentIndex(idx)}
+              onClick={() => {
+                const diff = idx - currentIndex;
+                if (diff !== 0) {
+                  setPage([page + diff, diff > 0 ? 1 : -1]);
+                }
+              }}
               className={`h-1.5 rounded-full transition-all duration-300 ${idx === currentIndex ? 'w-6 bg-white' : 'w-2 bg-white/50 hover:bg-white/80'
                 }`}
               aria-label={`Go to slide ${idx + 1}`}
