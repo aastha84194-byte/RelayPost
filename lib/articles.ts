@@ -321,7 +321,7 @@ export async function restoreArticle(id: string, token?: string): Promise<any> {
 export async function getArticlesByKeyword(tag: string, page: number = 1, size: number = 20): Promise<any> {
     try {
         const res = await fetch(`${API_BASE}/public/articles/keyword/${tag}?page=${page}&size=${size}`, {
-            cache: 'no-store'
+            next: { revalidate: 60 }
         });
         if (!res.ok) return { items: [], total: 0, pages: 0 };
         return await res.json();
@@ -353,7 +353,7 @@ export async function getHomepageCategorySections(limit?: number, categories?: s
             categories.forEach(cat => url.searchParams.append("categories", cat));
         }
         const res = await fetch(url.toString(), { 
-            cache: 'no-store' 
+            next: { revalidate: 60 } 
         });
         if (!res.ok) return {};
         return await res.json();
@@ -441,7 +441,7 @@ export function getUserIdentifier(): string {
 export async function getNewsLive(limit: number = 20): Promise<NewsArticle[]> {
   try {
     const res = await fetch(`${NEWS_API_BASE}/live?limit=${limit}`, { 
-      cache: 'no-store' 
+      next: { revalidate: 60 } 
     });
     if (!res.ok) return [];
     return await res.json();
@@ -454,7 +454,7 @@ export async function getNewsLive(limit: number = 20): Promise<NewsArticle[]> {
 export async function getNewsBySlug(slug: string): Promise<NewsArticle | null> {
   try {
     const res = await fetch(`${NEWS_API_BASE}/slug/${slug}`, { 
-      cache: 'no-store' 
+      next: { revalidate: 300 } 
     });
     if (!res.ok) return null;
     return await res.json();
@@ -467,7 +467,7 @@ export async function getNewsBySlug(slug: string): Promise<NewsArticle | null> {
 export async function getNewsByCategory(category: string, limit: number = 20, skip: number = 0): Promise<{ items: NewsArticle[], total: number }> {
     try {
       const res = await fetch(`${NEWS_API_BASE}/categories/${category}?limit=${limit}&skip=${skip}`, { 
-        cache: 'no-store' 
+        next: { revalidate: 60 } 
       });
       if (!res.ok) return { items: [], total: 0 };
       const data = await res.json();
@@ -481,7 +481,7 @@ export async function getNewsByCategory(category: string, limit: number = 20, sk
 export async function getNewsByKeyword(keyword: string, limit: number = 20, skip: number = 0): Promise<{ items: NewsArticle[], total: number }> {
     try {
       const res = await fetch(`${NEWS_API_BASE}/keywords/${keyword}?limit=${limit}&skip=${skip}`, { 
-        cache: 'no-store' 
+        next: { revalidate: 60 } 
       });
       if (!res.ok) return { items: [], total: 0 };
       const data = await res.json();
@@ -580,7 +580,7 @@ import { NewsArticle } from './types';
 export async function getTopNews(): Promise<NewsArticle[]> {
   try {
     const res = await fetch(`${NEWS_API_BASE}/top`, { 
-      cache: 'no-store' 
+      next: { revalidate: 60 } 
     });
     if (!res.ok) return [];
     return await res.json();
