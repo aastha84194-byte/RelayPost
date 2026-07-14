@@ -156,10 +156,6 @@ Fork → Create Branch → Commit Changes → Open Pull Request
 
 ---
 
-## 👨‍💻 Developer
-
-**Prince Verma**
-
 💼 Full Stack Developer  
 🚀 Building AI Powered Applications  
 🌍 India
