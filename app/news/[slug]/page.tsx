@@ -147,9 +147,9 @@ export default async function NewsDetailPage({ params }: Props) {
             )}
 
             {/* Excerpt / Description */}
-            {(article.description) && (
+            {(article.ai_summary || article.description) && (
               <p className="text-lg md:text-xl text-slate-600 dark:text-slate-300 leading-relaxed font-medium border-l-4 border-indigo-500/40 pl-5 mb-12 italic">
-                {article.description}
+                {article.ai_summary || article.description}
               </p>
             )}
 
