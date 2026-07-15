@@ -78,6 +78,7 @@ export default async function NewsDetailPage({ params }: Props) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
+      <NewsTracker newsId={article.id} title={article.title} slug={article.slug || ''} />
       <Navbar />
 
       <main className="max-w-7xl mx-auto px-4 md:px-8 py-4 md:py-8">
