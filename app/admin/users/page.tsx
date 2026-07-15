@@ -22,6 +22,10 @@ interface User {
   created_at?: string;
   tier: string;
   subscription_status: string;
+  country?: string;
+  state?: string;
+  city?: string;
+  timezone?: string;
 }
 
 
@@ -197,6 +201,7 @@ export default function UsersManagement() {
                     <th className="px-8 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">User Identity</th>
                     <th className="px-6 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Access Role</th>
                     <th className="px-6 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Tier</th>
+                    <th className="px-6 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Location</th>
                     <th className="px-6 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Status</th>
                     <th className="px-6 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Joined</th>
                     <th className="px-8 py-5 text-right text-[10px] font-black text-slate-400 uppercase tracking-widest">Action</th>
@@ -234,6 +239,12 @@ export default function UsersManagement() {
                              {user.tier}
                           </span>
                        </td>
+                       <td className="px-6 py-6">
+                          <div className="flex flex-col">
+                            <span className="text-xs font-bold text-slate-700">{user.city ? `${user.city}, ${user.country}` : (user.country || 'Unknown')}</span>
+                            <span className="text-[10px] text-slate-400">{user.timezone || 'N/A'}</span>
+                          </div>
+                       </td>
                        <td className="px-6 py-6 font-bold text-xs uppercase text-slate-500">
                           <button 
                             onClick={() => toggleUserStatus(user)}
@@ -266,7 +277,7 @@ export default function UsersManagement() {
                  ))}
                  {users.length === 0 && !isLoading && (
                    <tr>
-                     <td colSpan={6} className="py-20 text-center">
+                     <td colSpan={7} className="py-20 text-center">
                         <UsersIcon size={48} className="mx-auto text-slate-100 mb-4" />
                         <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Zero nodes detected</p>
                      </td>
