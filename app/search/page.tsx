@@ -6,7 +6,8 @@ import { Search, ArrowRight, Clock, User, Hash, AlertTriangle } from "lucide-rea
 import Link from "next/link";
 import { motion } from "framer-motion";
 import Navbar from "../components/Navbar";
-import { API_BASE } from "@/lib/config";
+import Footer from "../components/Footer";
+import { API_BASE, NEWS_API_BASE } from "@/lib/config";
 import { getCategorySlugForArticle } from "@/lib/categoryMapping";
 
 function SearchResults() {
@@ -14,15 +15,40 @@ function SearchResults() {
   const query = searchParams.get("q") || "";
   const [results, setResults] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [timeFilter, setTimeFilter] = useState<'all' | '24h' | '7d'>('all');
+  const [typeFilter, setTypeFilter] = useState<'all' | 'news' | 'articles'>('all');
 
   useEffect(() => {
     const fetchResults = async () => {
-      if (!query) return;
+      if (!query) {
+        setLoading(false);
+        return;
+      }
       setLoading(true);
       try {
-        const res = await fetch(`${API_BASE}/public/articles/search?q=${encodeURIComponent(query)}&limit=20`);
-        const data = await res.json();
-        setResults(data);
+        const [articleRes, newsRes] = await Promise.all([
+          fetch(`${API_BASE}/public/articles/search?q=${encodeURIComponent(query)}&limit=20`).catch(() => null),
+          fetch(`${NEWS_API_BASE}/live?search=${encodeURIComponent(query)}&limit=20`).catch(() => null)
+        ]);
+        
+        let fetched: any[] = [];
+        
+        if (articleRes && articleRes.ok) {
+          const articleData = await articleRes.json();
+          fetched = [...fetched, ...articleData.map((a: any) => ({ ...a, isNews: false }))];
+        }
+        
+        if (newsRes && newsRes.ok) {
+           const newsData = await newsRes.json();
+           fetched = [...fetched, ...newsData.map((n: any) => ({ 
+             ...n, 
+             isNews: true, 
+             hero_image: n.image_url, 
+             category_name: n.category || 'Live News' 
+           }))];
+        }
+        
+        setResults(fetched);
       } catch (e) {
         console.error("Search fetch failed", e);
       } finally {
@@ -37,24 +63,65 @@ function SearchResults() {
       <Navbar />
       
       <main className="max-w-7xl mx-auto px-4 md:px-8 py-12">
+        {(() => {
+          const filteredResults = results.filter(article => {
+            if (typeFilter === 'news' && !article.isNews) return false;
+            if (typeFilter === 'articles' && article.isNews) return false;
+            if (timeFilter !== 'all') {
+              const pubDate = new Date(article.published_at || article.created_at);
+              const now = new Date();
+              const diffHours = (now.getTime() - pubDate.getTime()) / (1000 * 60 * 60);
+              if (timeFilter === '24h' && diffHours > 24) return false;
+              if (timeFilter === '7d' && diffHours > 24 * 7) return false;
+            }
+            return true;
+          });
+
+          return (
+            <>
         {/* Search Header */}
         <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-16 border-b border-white/5 pb-12">
-          <div className="space-y-4">
-            <div className="flex items-center gap-2 text-indigo-400 font-black text-xs uppercase tracking-widest">
-              <Search size={14} /> Universal Intel Search
-            </div>
+          <div className="space-y-2">
             <h1 className="text-4xl md:text-5xl font-black tracking-tight">
-              Results for <span className="text-indigo-500">"{query}"</span>
+              {query ? <>Results for <span className="text-indigo-500">"{query}"</span></> : "Search Everything"}
             </h1>
-            <p className="text-slate-400 max-w-xl font-medium">
-              Intelligence matches found across our strategic reports and editorial deep-dives.
-            </p>
           </div>
-          <div className="bg-slate-800/40 border border-white/5 px-6 py-4 rounded-[2rem] shadow-xl">
-             <span className="text-2xl font-black text-indigo-400">{results.length}</span>
-             <span className="ml-2 text-xs font-bold text-slate-500 uppercase tracking-widest">Reports Found</span>
-          </div>
+          {query && (
+            <div className="bg-slate-800/40 border border-white/5 px-6 py-4 rounded-[2rem] shadow-xl">
+               <span className="text-2xl font-black text-indigo-400">{filteredResults.length}</span>
+               <span className="ml-2 text-xs font-bold text-slate-500 uppercase tracking-widest">Reports Found</span>
+            </div>
+          )}
         </div>
+
+        {/* Filters */}
+        {query && (
+          <div className="flex flex-wrap items-center gap-4 mb-8">
+            <div className="flex bg-slate-800/40 rounded-full p-1 border border-white/5">
+              {(['all', '24h', '7d'] as const).map(f => (
+                <button
+                  key={f}
+                  onClick={() => setTimeFilter(f)}
+                  className={`px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest transition-colors ${timeFilter === f ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:text-white'}`}
+                >
+                  {f === 'all' ? 'All Time' : f === '24h' ? 'Last 24h' : 'Last 7 Days'}
+                </button>
+              ))}
+            </div>
+            
+            <div className="flex bg-slate-800/40 rounded-full p-1 border border-white/5">
+              {(['all', 'news', 'articles'] as const).map(f => (
+                <button
+                  key={f}
+                  onClick={() => setTypeFilter(f)}
+                  className={`px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest transition-colors ${typeFilter === f ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:text-white'}`}
+                >
+                  {f === 'all' ? 'All Types' : f === 'news' ? 'Live News' : 'Articles'}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
 
         {loading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -62,17 +129,17 @@ function SearchResults() {
               <div key={i} className="h-96 bg-slate-800/20 rounded-[2.5rem] animate-pulse border border-white/5"></div>
             ))}
           </div>
-        ) : results.length > 0 ? (
+        ) : filteredResults.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {results.map((article, idx) => (
+            {filteredResults.map((article, idx) => (
               <motion.div
-                key={article.id}
+                key={`${article.isNews ? 'news' : 'article'}-${article.id}`}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: idx * 0.1 }}
                 className="group relative"
               >
-                <Link href={`/${getCategorySlugForArticle(article.category_name)}/${article.slug}`} className="block bg-slate-900 border border-white/5 rounded-[2.5rem] overflow-hidden hover:border-indigo-500/50 transition-all duration-500 shadow-xl hover:shadow-indigo-500/10">
+                <Link href={article.isNews ? `/news/${article.slug}` : `/${getCategorySlugForArticle(article.category_name)}/${article.slug}`} className="block bg-slate-900 border border-white/5 rounded-[2.5rem] overflow-hidden hover:border-indigo-500/50 transition-all duration-500 shadow-xl hover:shadow-indigo-500/10">
                   <div className="relative aspect-[16/10] overflow-hidden">
                     {article.hero_image ? (
                       <img 
@@ -96,21 +163,14 @@ function SearchResults() {
                   <div className="p-8 space-y-4">
                     <div className="flex items-center gap-4 text-xs font-bold text-slate-500 uppercase tracking-widest">
                        <span className="flex items-center gap-1.5"><Clock size={12} /> {new Date(article.published_at || article.created_at).toLocaleDateString()}</span>
-                       <span className="flex items-center gap-1.5"><Hash size={12} /> {article.template_type}</span>
                     </div>
-                    <h3 className="text-xl font-black leading-tight text-white group-hover:text-indigo-400 transition-colors">
+                    <h3 className="text-lg font-black leading-tight text-white group-hover:text-indigo-400 transition-colors">
                       {article.title}
                     </h3>
                     <p className="text-sm text-slate-400 line-clamp-2 font-medium leading-relaxed">
-                      {article.excerpt}
+                      {article.excerpt || article.ai_summary}
                     </p>
-                    <div className="pt-4 flex items-center justify-between">
-                       <div className="flex items-center gap-2">
-                          <div className="w-6 h-6 bg-indigo-600/20 rounded-full flex items-center justify-center">
-                             <User size={12} className="text-indigo-400" />
-                          </div>
-                          <span className="text-[10px] font-black uppercase tracking-widest text-slate-500">Editorial Team</span>
-                       </div>
+                    <div className="pt-4 flex justify-end">
                        <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center group-hover:bg-indigo-600 group-hover:text-white transition-all">
                           <ArrowRight size={14} />
                        </div>
@@ -119,6 +179,18 @@ function SearchResults() {
                 </Link>
               </motion.div>
             ))}
+          </div>
+        ) : !query ? (
+          <div className="py-24 flex flex-col items-center text-center space-y-6">
+            <div className="w-20 h-20 bg-slate-800/50 rounded-[2rem] flex items-center justify-center border border-white/5">
+               <Search size={32} className="text-slate-600" />
+            </div>
+            <div className="space-y-2">
+               <h2 className="text-2xl font-black">Search Intelligence</h2>
+               <p className="text-slate-400 max-w-md font-medium">
+                 Enter a keyword to explore our vast database of strategic reports and live news.
+               </p>
+            </div>
           </div>
         ) : (
           <div className="py-24 flex flex-col items-center text-center space-y-6">
@@ -136,7 +208,11 @@ function SearchResults() {
             </Link>
           </div>
         )}
+        </>
+        );
+        })()}
       </main>
+      <Footer />
     </div>
   );
 }
