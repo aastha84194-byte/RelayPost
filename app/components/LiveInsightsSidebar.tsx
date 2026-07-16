@@ -50,12 +50,15 @@ export default function LiveInsightsSidebar({
 
   const getTimeAgo = (dateStr?: string) => {
     if (!dateStr) return 'Recently';
-    const date = new Date(dateStr);
+    // Append 'Z' to force UTC parsing if the backend didn't provide timezone info
+    const utcDateStr = dateStr.endsWith('Z') ? dateStr : `${dateStr}Z`;
+    const date = new Date(utcDateStr);
     const now = new Date();
     const diffMs = now.getTime() - date.getTime();
     const diffMins = Math.floor(diffMs / 60000);
     const diffHours = Math.floor(diffMins / 60);
 
+    if (diffMins <= 0) return 'Just now';
     if (diffMins < 60) return `${diffMins}m ago`;
     if (diffHours < 24) return `${diffHours}h ago`;
     return date.toLocaleDateString();

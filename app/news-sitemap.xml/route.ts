@@ -10,7 +10,7 @@ export async function GET() {
   const fortyEightHoursAgo = new Date(Date.now() - 48 * 60 * 60 * 1000);
 
   // Fetch dynamic news
-  const newsItems = await getNewsLive(100);
+  const newsItems = await getNewsLive(1000);
   const safeNews = Array.isArray(newsItems) ? newsItems : [];
 
   // Combine and filter for recent publications

@@ -3,6 +3,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { getArticlesBySection } from '@/lib/articles';
 import { Sparkles, BookOpen } from 'lucide-react';
+import { getCategorySlugForArticle } from '@/lib/categoryMapping';
 
 export default async function RecommendedArticles() {
   const articles = await getArticlesBySection("Hero");
@@ -20,7 +21,7 @@ export default async function RecommendedArticles() {
         {recommended.map((item, i) => (
           <Link 
             key={item.id || i} 
-            href={`/article/${item.slug || item.id}`} 
+            href={`/${getCategorySlugForArticle(item.category_name)}/${item.slug || item.id}`} 
             className="flex gap-4 group cursor-pointer"
           >
             <div className="w-20 h-20 rounded-2xl overflow-hidden shrink-0 shadow-sm transition-colors duration-300 relative bg-slate-100 dark:bg-slate-800 flex items-center justify-center">

@@ -7,6 +7,19 @@ import { TierProvider } from '@/components/TierProvider';
 import { GoogleAnalytics } from '@next/third-parties/google';
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import GlobalOneTap from './components/GlobalOneTap';
+import { Inter, Manrope } from 'next/font/google';
+
+const inter = Inter({
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-inter',
+});
+
+const manrope = Manrope({
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-manrope',
+});
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://relaypost.me'),
@@ -97,10 +110,9 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-        <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
         <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
       </head>
-      <body>
+      <body className={`${inter.variable} ${manrope.variable}`}>
         <ThemeProvider
           attribute="class"
           defaultTheme="system"

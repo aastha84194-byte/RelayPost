@@ -4,7 +4,7 @@ import Footer from '../../components/Footer';
 import { getNewsBySlug, getNewsByCategory } from '@/lib/articles';
 import { Metadata } from 'next';
 import Image from 'next/image';
-import { Clock, ArrowLeft,Globe, Share2, Bookmark, Layers } from 'lucide-react';
+import { Clock, ArrowLeft,Globe, Share2, Bookmark, Layers, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import NewsActionButtons from '../../components/NewsActionButtons';
@@ -301,6 +301,14 @@ export default async function NewsDetailPage({ params }: Props) {
                       <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest px-2">No related news found.</p>
                     )}
                  </div>
+                 
+                 <Link 
+                   href="/news"
+                   className="flex items-center justify-center gap-2 mt-6 pt-4 text-[10px] font-black uppercase tracking-[0.15em] text-slate-500 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-all border-t border-slate-100 dark:border-slate-800"
+                 >
+                   Explore All News
+                   <ArrowRight size={12} />
+                 </Link>
               </div>
 
               {/* Recommended Articles Section */}

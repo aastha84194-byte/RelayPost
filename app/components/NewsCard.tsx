@@ -7,8 +7,10 @@ import { NewsArticle } from '@/lib/types';
 
 export function NewsCard({ article, onClick }: { article: NewsArticle, onClick?: (article: NewsArticle) => void }) {
   const getTimeAgo = (dateStr?: string) => {
-    if (!dateStr) return '';
-    const date = new Date(dateStr);
+    if (!dateStr) return 'Recently';
+    // Append 'Z' to force UTC parsing if the backend didn't provide timezone info
+    const utcDateStr = dateStr.endsWith('Z') ? dateStr : `${dateStr}Z`;
+    const date = new Date(utcDateStr);
     return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
   };
 

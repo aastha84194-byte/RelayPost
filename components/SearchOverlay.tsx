@@ -5,14 +5,15 @@ import { Search, X, History, TrendingUp, ArrowRight, FileText, Clock, Trash2 } f
 import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { API_BASE } from "@/lib/config";
+import { API_BASE, NEWS_API_BASE } from "@/lib/config";
+import { getCategorySlugForArticle } from "@/lib/categoryMapping";
 
 interface SearchOverlayProps {
   isOpen: boolean;
   onClose: () => void;
 }
 
-const TRENDING_SEARCHES = [
+const DEFAULT_TRENDING = [
   "India's Economic Tightrope",
   "India's AI & Election Era",
   "Streaming War Shifts",
@@ -26,6 +27,7 @@ export default function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
   const [suggestions, setSuggestions] = useState<any[]>([]);
   const [recentSearches, setRecentSearches] = useState<string[]>([]);
   const [featuredArticles, setFeaturedArticles] = useState<any[]>([]);
+  const [trendingSearches, setTrendingSearches] = useState<string[]>(DEFAULT_TRENDING);
   const [isLoading, setIsLoading] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
@@ -34,7 +36,6 @@ export default function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
     const saved = localStorage.getItem("recent_searches");
     if (saved) setRecentSearches(JSON.parse(saved));
     
-    // Fetch featured/trending articles for the empty state
     const fetchFeatured = async () => {
       try {
         const res = await fetch(`${API_BASE}/public/articles/trending?limit=3`);
@@ -44,7 +45,27 @@ export default function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
         console.error("Featured fetch error", e);
       }
     };
+    
+    const fetchTrending = async () => {
+      try {
+        const res = await fetch(`${NEWS_API_BASE}/live?limit=6`);
+        if (res.ok) {
+           const data = await res.json();
+           if (data && data.length > 0) {
+             const dynamicTrends = data.map((d: any) => {
+                const title = d.title;
+                return title.length > 40 ? title.substring(0, 40) + '...' : title;
+             });
+             setTrendingSearches(dynamicTrends);
+           }
+        }
+      } catch (e) {
+        console.error("Trending fetch error", e);
+      }
+    };
+
     fetchFeatured();
+    fetchTrending();
 
     if (isOpen) {
       setTimeout(() => inputRef.current?.focus(), 100);
@@ -62,9 +83,29 @@ export default function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
       }
       setIsLoading(true);
       try {
-        const res = await fetch(`${API_BASE}/public/articles/search?q=${encodeURIComponent(query)}&limit=5`);
-        const data = await res.json();
-        setSuggestions(data);
+        const [articleRes, newsRes] = await Promise.all([
+          fetch(`${API_BASE}/public/articles/search?q=${encodeURIComponent(query)}&limit=3`).catch(() => null),
+          fetch(`${NEWS_API_BASE}/live?search=${encodeURIComponent(query)}&limit=3`).catch(() => null)
+        ]);
+        
+        let results: any[] = [];
+        
+        if (articleRes && articleRes.ok) {
+          const articleData = await articleRes.json();
+          results = [...results, ...articleData.map((a: any) => ({ ...a, isNews: false }))];
+        }
+        
+        if (newsRes && newsRes.ok) {
+           const newsData = await newsRes.json();
+           results = [...results, ...newsData.map((n: any) => ({ 
+             ...n, 
+             isNews: true, 
+             hero_image: n.image_url, 
+             category_name: n.category || 'Live News' 
+           }))];
+        }
+        
+        setSuggestions(results);
       } catch (e) {
         console.error("Search fetch error", e);
       } finally {
@@ -161,7 +202,7 @@ export default function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
                 <TrendingUp size={14} /> Trending Intelligence
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                {TRENDING_SEARCHES.map((s) => (
+                {trendingSearches.map((s) => (
                   <button 
                     key={s} 
                     onClick={() => handleSearch(s)}
@@ -185,7 +226,7 @@ export default function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
                 {featuredArticles.map((article) => (
                   <Link 
                     key={article.id} 
-                    href={`/article/${article.slug}`}
+                    href={`/${getCategorySlugForArticle(article.category_name)}/${article.slug}`}
                     onClick={onClose}
                     className="flex items-center gap-4 p-4 bg-slate-900/40 hover:bg-slate-800 border border-white/5 rounded-2xl group transition-all"
                   >
@@ -218,8 +259,8 @@ export default function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
                   <>
                     {suggestions.map((item) => (
                       <Link 
-                        key={item.id} 
-                        href={`/article/${item.slug}`}
+                        key={`${item.isNews ? 'news' : 'article'}-${item.id}`} 
+                        href={item.isNews ? `/news/${item.slug}` : `/${getCategorySlugForArticle(item.category_name)}/${item.slug}`}
                         onClick={onClose}
                         className="flex items-center gap-4 p-4 bg-slate-900/40 hover:bg-slate-800 border border-white/5 rounded-2xl group transition-all"
                       >
