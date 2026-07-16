@@ -51,7 +51,7 @@ export async function GET() {
     headers: {
       'Content-Type': 'application/xml; charset=utf-8',
       // Optional: Add cache-control headers if you want to cache it at the CDN level
-      'Cache-Control': 'public, max-age=60, s-maxage=600',
+      'Cache-Control': 'no-cache, no-store, must-revalidate',
     },
   });
 }
