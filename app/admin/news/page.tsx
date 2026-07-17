@@ -2,7 +2,7 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { NewsArticle } from "@/lib/types";
 import { getAllNewsAdmin, deleteNewsAdmin } from "@/lib/articles";
-import { Edit, Trash2, Globe, CheckCircle, XCircle, ChevronLeft, ChevronRight, RefreshCw, Search } from "lucide-react";
+import { Edit, Trash2, Globe, CheckCircle, XCircle, ChevronLeft, ChevronRight, RefreshCw, Search, Copy, Check } from "lucide-react";
 import Link from "next/link";
 
 const PAGE_SIZE = 25;
@@ -14,8 +14,17 @@ export default function AdminNewsPage() {
   const [total, setTotal] = useState(0);
   const [searchInput, setSearchInput] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
+  const [copiedId, setCopiedId] = useState<number | null>(null);
 
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+
+  const handleCopyUrl = (id: number, url: string) => {
+    if (url) {
+      navigator.clipboard.writeText(url);
+      setCopiedId(id);
+      setTimeout(() => setCopiedId(null), 2000);
+    }
+  };
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -146,6 +155,13 @@ export default function AdminNewsPage() {
                     </td>
                     <td className="p-4 text-right">
                       <div className="flex items-center justify-end gap-2">
+                        <button
+                          onClick={() => handleCopyUrl(item.id, item.url || "")}
+                          title="Copy URL"
+                          className="p-2 text-gray-500 hover:text-indigo-600 hover:bg-indigo-50 rounded transition-colors"
+                        >
+                          {copiedId === item.id ? <Check size={16} className="text-green-600" /> : <Copy size={16} />}
+                        </button>
                         <Link
                           href={`/admin/news/edit/${item.id}`}
                           className="p-2 text-indigo-600 hover:bg-indigo-50 rounded transition-colors"
