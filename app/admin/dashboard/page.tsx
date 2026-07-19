@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
-import { CopyPlus, TrendingUp, Users, Activity, FileText, Pause, Play, Brain, Cpu, Globe, Zap } from "lucide-react";
+import { CopyPlus, TrendingUp, Users, Activity, FileText, Pause, Play, Brain, Cpu, Globe, Zap, Mail, Clock } from "lucide-react";
 import Cookies from "js-cookie";
 import { motion } from "framer-motion";
 import { AUTH_BASE, API_BASE, NEWS_API_BASE } from "@/lib/config";
@@ -19,7 +19,9 @@ export default function AdminDashboard() {
   const [categories, setCategories] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isProcessing, setIsProcessing] = useState(false);
-  
+  const [digestStatus, setDigestStatus] = useState<{ active: boolean; next_run: string | null } | null>(null);
+  const [isDigestProcessing, setIsDigestProcessing] = useState(false);
+
   const [manualTopic, setManualTopic] = useState("");
   const [manualQueries, setManualQueries] = useState("");
   const [manualCategory, setManualCategory] = useState("Intelligence");
@@ -100,6 +102,36 @@ export default function AdminDashboard() {
     }
   };
 
+  const fetchDigestStatus = async () => {
+    const token = Cookies.get("access_token");
+    try {
+      const res = await fetch(`${API_BASE}/admin/digest/status`, {
+        headers: { "Authorization": `Bearer ${token}` }
+      });
+      if (res.ok) setDigestStatus(await res.json());
+    } catch (e) {
+      console.error("Failed to fetch digest status", e);
+    }
+  };
+
+  const handleDigestToggle = async (action: "pause" | "resume") => {
+    setIsDigestProcessing(true);
+    const token = Cookies.get("access_token");
+    try {
+      const res = await fetch(`${API_BASE}/admin/digest/${action}`, {
+        method: "POST",
+        headers: { "Authorization": `Bearer ${token}` }
+      });
+      const data = await res.json();
+      alert(data.message || (res.ok ? "Done" : "Error"));
+      await fetchDigestStatus();
+    } catch (e) {
+      alert("Network error");
+    } finally {
+      setIsDigestProcessing(false);
+    }
+  };
+
   useEffect(() => {
     const fetchData = async () => {
       setIsLoading(true);
@@ -144,6 +176,7 @@ export default function AdminDashboard() {
       }
     };
     fetchData();
+    fetchDigestStatus();
   }, []);
 
   return (
@@ -304,6 +337,71 @@ export default function AdminDashboard() {
             </div>
          </div>
       </div>
+
+      {/* ── Digest Scheduler Control ── */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.15 }}
+        className="bg-white rounded-[2rem] border border-slate-100 shadow-xl p-8 mb-8 relative overflow-hidden"
+      >
+        <div className="absolute top-0 right-0 p-8 opacity-5">
+          <Mail size={180} />
+        </div>
+        <div className="relative z-10">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-xl font-black text-slate-800 tracking-tight uppercase flex items-center gap-2">
+              <Mail className="text-violet-600" size={24} /> Weekly Digest Scheduler
+            </h2>
+            {/* Live status badge */}
+            <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest border ${
+              digestStatus === null
+                ? "bg-slate-50 border-slate-200 text-slate-400"
+                : digestStatus.active
+                ? "bg-emerald-50 border-emerald-200 text-emerald-600"
+                : "bg-red-50 border-red-200 text-red-500"
+            }`}>
+              <span className={`w-1.5 h-1.5 rounded-full ${
+                digestStatus === null ? "bg-slate-300" : digestStatus.active ? "bg-emerald-500 animate-pulse" : "bg-red-400"
+              }`} />
+              {digestStatus === null ? "Loading..." : digestStatus.active ? "Scheduled" : "Paused"}
+            </div>
+          </div>
+
+          {/* Next run info */}
+          {digestStatus?.active && digestStatus.next_run && (
+            <div className="flex items-center gap-2 mb-6 text-xs text-slate-500">
+              <Clock size={13} className="text-violet-400" />
+              <span>Next run: <span className="font-bold text-slate-700">{new Date(digestStatus.next_run).toLocaleString()}</span></span>
+            </div>
+          )}
+          {digestStatus && !digestStatus.active && (
+            <p className="text-xs text-red-400 font-semibold mb-6">⚠ Digest is paused — no email will be sent this Sunday.</p>
+          )}
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <button
+              id="digest-pause-btn"
+              onClick={() => handleDigestToggle("pause")}
+              disabled={isDigestProcessing || digestStatus?.active === false}
+              className="flex items-center justify-center gap-2 bg-red-50 text-red-600 hover:bg-red-100 border border-red-100 px-6 py-4 rounded-2xl font-bold transition-all disabled:opacity-40 text-xs uppercase tracking-widest"
+            >
+              <Pause size={14} /> Pause Digest
+            </button>
+            <button
+              id="digest-resume-btn"
+              onClick={() => handleDigestToggle("resume")}
+              disabled={isDigestProcessing || digestStatus?.active === true}
+              className="flex items-center justify-center gap-2 bg-violet-50 text-violet-700 hover:bg-violet-100 border border-violet-100 px-6 py-4 rounded-2xl font-bold transition-all disabled:opacity-40 text-xs uppercase tracking-widest"
+            >
+              <Play size={14} /> Resume Digest
+            </button>
+          </div>
+          <p className="mt-4 text-[10px] text-slate-400 font-medium">
+            Pausing removes the job from the live scheduler. Resuming re-registers it for Sunday 06:00 UTC. State resets on container restart — use the DISABLE_DIGEST_JOB env var for a permanent disable.
+          </p>
+        </div>
+      </motion.div>
 
       <div className="bg-white rounded-[2rem] border border-slate-100 shadow-xl p-8 mb-12 relative overflow-hidden">
          <div className="absolute top-0 right-0 p-8 opacity-5">

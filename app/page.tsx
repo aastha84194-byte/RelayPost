@@ -10,6 +10,7 @@ import PopularConversations from './components/PopularConversations';
 import GoUnlimited from './components/GoUnlimited';
 import Navbar from './components/Navbar';
 import TheBriefing from './components/TheBriefing';
+import SudokuWidget from '../components/SudokuWidget';
 import CommunityPulse from './components/CommunityPulse';
 import Footer from './components/Footer';
 import CategoryArticleSection from './components/CategoryArticleSection';
@@ -346,6 +347,7 @@ function HomeContent() {
               </div>
               <PopularConversations articles={trending.slice(0, 5)} />
               <GoUnlimited />
+              <SudokuWidget />
               {/* <TheBriefing /> */}
               {isKeywordsLoading ? (
                 <div className="h-[150px] bg-slate-200 dark:bg-slate-800 rounded-[2.5rem] animate-pulse w-full mt-6" />
