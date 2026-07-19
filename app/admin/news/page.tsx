@@ -156,8 +156,8 @@ export default function AdminNewsPage() {
                     <td className="p-4 text-right">
                       <div className="flex items-center justify-end gap-2">
                         <button
-                          onClick={() => handleCopyUrl(item.id, item.url || "")}
-                          title="Copy URL"
+                          onClick={() => handleCopyUrl(item.id, `https://relaypost.me/news/${item.slug}`)}
+                          title="Copy Website URL"
                           className="p-2 text-gray-500 hover:text-indigo-600 hover:bg-indigo-50 rounded transition-colors"
                         >
                           {copiedId === item.id ? <Check size={16} className="text-green-600" /> : <Copy size={16} />}
