@@ -5,7 +5,7 @@ import { getCategorySlugForArticle } from '@/lib/categoryMapping';
 export const dynamic = 'force-dynamic';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = 'https://relaypost.me';
+  const baseUrl = 'https://relay-post-chi.vercel.app';
   
   // Fetch dynamic articles
   const articles = await getAllArticles(undefined, 0, 100);

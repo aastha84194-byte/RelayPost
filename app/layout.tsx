@@ -22,7 +22,7 @@ const manrope = Manrope({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://relaypost.me'),
+  metadataBase: new URL('https://relay-post-chi.vercel.app'),
   applicationName: 'RelayPost',
   appleWebApp: {
     title: 'RelayPost',

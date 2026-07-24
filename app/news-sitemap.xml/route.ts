@@ -4,7 +4,7 @@ import { getNewsLive } from '@/lib/articles';
 export const dynamic = 'force-dynamic';
 
 export async function GET() {
-  const baseUrl = 'https://relaypost.me';
+  const baseUrl = 'https://relay-post-chi.vercel.app';
   
   // Google News Sitemaps should ideally only contain articles from the last 48 hours
   const fortyEightHoursAgo = new Date(Date.now() - 48 * 60 * 60 * 1000);
