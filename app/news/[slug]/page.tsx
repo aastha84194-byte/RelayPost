@@ -68,7 +68,7 @@ export default async function NewsDetailPage({ params }: Props) {
     "author": [{
       "@type": "Organization",
       "name": "RelayPost",
-      "url": "https://relay-post-chi.vercel.app"
+      "url": "https://relay-post-mauve.vercel.app"
     }]
   };
 

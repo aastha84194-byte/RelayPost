@@ -1,7 +1,7 @@
 import { MetadataRoute } from 'next';
 
 export default function robots(): MetadataRoute.Robots {
-  const baseUrl = 'https://relay-post-chi.vercel.app';
+  const baseUrl = 'https://relay-post-mauve.vercel.app';
   
   return {
     rules: {
