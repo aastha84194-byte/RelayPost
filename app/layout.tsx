@@ -136,14 +136,18 @@ export default function RootLayout({
           </TierProvider>
           <Analytics />
           <GoogleAnalytics gaId={process.env.NEXT_PUBLIC_GA_ID!} />
-          <Script id="aclib" src="//acscdn.com/script/aclib.js" strategy="afterInteractive" />
-          <Script id="aclib-init" strategy="afterInteractive">
-            {`
-              aclib.runAutoTag({
+          <Script 
+            id="aclib" 
+            src="//acscdn.com/script/aclib.js" 
+            strategy="afterInteractive"
+            onLoad={() => {
+              if (typeof window !== 'undefined' && (window as any).aclib) {
+                (window as any).aclib.runAutoTag({
                   zoneId: 'isleobkjgr',
-              });
-            `}
-          </Script>
+                });
+              }
+            }}
+          />
         </ThemeProvider>
       </body>
     </html>
