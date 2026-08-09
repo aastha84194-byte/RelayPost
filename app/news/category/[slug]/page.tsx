@@ -21,7 +21,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       description: `Stay updated with the latest news and intelligence on ${decodedCategory} from RelayPost.`,
     },
     alternates: {
-      canonical: `https://relaypost.com/news/category/${slug}`
+      canonical: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://relaypost.me'}/news/category/${slug}`
     }
   };
 }
