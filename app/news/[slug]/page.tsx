@@ -37,7 +37,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     description: article.meta_description || article.ai_summary || article.description,
     keywords: (article.keywords || []).filter(Boolean),
     alternates: {
-      canonical: `https://relaypost.com/news/${article.slug}`
+      canonical: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://relay-post-mauve.vercel.app'}/news/${article.slug}`
     },
     openGraph: {
       title: article.meta_title || article.title,

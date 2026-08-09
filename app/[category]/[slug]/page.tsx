@@ -26,7 +26,7 @@ export async function generateMetadata(
     description: article.meta_description || article.excerpt || article.subtitle,
     keywords: [article.focus_keyword, ...(article.secondary_keywords || [])].filter(Boolean) as string[],
     alternates: {
-      canonical: article.canonical_url || `https://relaypost.com/${catSlug}/${article.slug}`
+      canonical: article.canonical_url || `${process.env.NEXT_PUBLIC_SITE_URL || 'https://relay-post-mauve.vercel.app'}/${catSlug}/${article.slug}`
     },
     openGraph: {
       title: article.meta_title || article.title,

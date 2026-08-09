@@ -5,7 +5,7 @@ import { getCategorySlugForArticle } from '@/lib/categoryMapping';
 export const dynamic = 'force-dynamic';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = 'https://relay-post-mauve.vercel.app';
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://relay-post-mauve.vercel.app';
   
   // Fetch dynamic articles
   const articles = await getAllArticles(undefined, 0, 100);
@@ -14,10 +14,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const articleUrls: MetadataRoute.Sitemap = safeArticles.map((article) => {
     const catSlug = getCategorySlugForArticle(article.category_name);
     
-    const cleanSlug = article.slug ? article.slug.replace(/&/g, 'and').replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') : '';
-
     return {
-      url: `${baseUrl}/${catSlug}/${cleanSlug}`,
+      url: `${baseUrl}/${catSlug}/${article.slug}`,
       lastModified: article.published_at ? new Date(article.published_at) : new Date(),
       changeFrequency: 'daily',
       priority: 0.9,
@@ -29,9 +27,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const safeNews = Array.isArray(newsItems) ? newsItems : [];
 
   const newsUrls: MetadataRoute.Sitemap = safeNews.map((news) => {
-    const cleanSlug = news.slug ? news.slug.replace(/&/g, 'and').replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') : '';
     return {
-      url: `${baseUrl}/news/${cleanSlug}`,
+      url: `${baseUrl}/news/${news.slug}`,
       lastModified: news.published_at ? new Date(news.published_at) : new Date(),
       changeFrequency: 'daily',
       priority: 0.9,
