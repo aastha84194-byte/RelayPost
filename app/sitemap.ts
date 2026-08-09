@@ -1,6 +1,6 @@
 import { MetadataRoute } from 'next';
 import { getAllArticles, getNewsLive } from '@/lib/articles';
-import { getCategorySlugForArticle } from '@/lib/categoryMapping';
+import { getCategorySlugForArticle,HARDCODED_CATEGORIES  } from '@/lib/categoryMapping';
 
 export const dynamic = 'force-dynamic';
 
@@ -33,6 +33,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.9,
     };
   });
+    const categoryUrls: MetadataRoute.Sitemap = HARDCODED_CATEGORIES.map((cat) => ({
+    url: `${baseUrl}/categories/${cat.slug}`,
+    lastModified: new Date(),
+    changeFrequency: 'daily',
+    priority: 0.9,
+  }));
+
 
   const staticUrls: MetadataRoute.Sitemap = [
     {
@@ -60,12 +67,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.9,
     },
     {
-      url: `${baseUrl}/search`,
-      lastModified: new Date(),
-      changeFrequency: 'weekly',
-      priority: 0.8,
-    },
-    {
       url: `${baseUrl}/contribute`,
       lastModified: new Date(),
       changeFrequency: 'weekly',
@@ -91,5 +92,5 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     },
   ];
 
-  return [...staticUrls, ...articleUrls, ...newsUrls];
+  return [...staticUrls,...categoryUrls, ...articleUrls, ...newsUrls];
 }
