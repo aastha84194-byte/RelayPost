@@ -34,7 +34,6 @@ export const metadata: Metadata = {
   },
   other: {
     'google-adsense-account': 'ca-pub-8090657364719041',
-    'monetag': '4bda5f61d9a86390e44b3e93dce3df4b',
   },
   title: {
     default: 'RelayPost',
