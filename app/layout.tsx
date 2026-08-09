@@ -8,6 +8,7 @@ import { GoogleAnalytics } from '@next/third-parties/google';
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import GlobalOneTap from './components/GlobalOneTap';
 import { Inter, Manrope } from 'next/font/google';
+import Script from 'next/script';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -135,6 +136,14 @@ export default function RootLayout({
           </TierProvider>
           <Analytics />
           <GoogleAnalytics gaId={process.env.NEXT_PUBLIC_GA_ID!} />
+          <Script id="aclib" src="//acscdn.com/script/aclib.js" strategy="afterInteractive" />
+          <Script id="aclib-init" strategy="afterInteractive">
+            {`
+              aclib.runAutoTag({
+                  zoneId: 'isleobkjgr',
+              });
+            `}
+          </Script>
         </ThemeProvider>
       </body>
     </html>
