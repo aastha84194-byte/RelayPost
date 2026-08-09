@@ -8,6 +8,7 @@ import { GoogleAnalytics } from '@next/third-parties/google';
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import GlobalOneTap from './components/GlobalOneTap';
 import AcScript from './components/AcScript';
+import Script from 'next/script';
 import { Inter, Manrope } from 'next/font/google';
 
 const inter = Inter({
@@ -137,6 +138,12 @@ export default function RootLayout({
           <Analytics />
           <GoogleAnalytics gaId={process.env.NEXT_PUBLIC_GA_ID!} />
           <AcScript />
+          <Script
+            src="https://quge5.com/88/tag.min.js"
+            data-zone="268568"
+            async
+            data-cfasync="false"
+          />
         </ThemeProvider>
       </body>
     </html>
