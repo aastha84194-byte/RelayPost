@@ -36,7 +36,6 @@ export const metadata: Metadata = {
   },
   other: {
     'google-adsense-account': 'ca-pub-8090657364719041',
-    'monetag': '9e12ed6fdd521443620e3647f6761df4',
   },
   title: {
     default: 'RelayPost',
@@ -137,12 +136,6 @@ export default function RootLayout({
           </TierProvider>
           <Analytics />
           <GoogleAnalytics gaId={process.env.NEXT_PUBLIC_GA_ID!} />
-          <Script
-            src="https://quge5.com/88/tag.min.js"
-            data-zone="268568"
-            async
-            data-cfasync="false"
-          />
         </ThemeProvider>
       </body>
     </html>
