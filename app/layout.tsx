@@ -137,6 +137,12 @@ export default function RootLayout({
           </TierProvider>
           <Analytics />
           <GoogleAnalytics gaId={process.env.NEXT_PUBLIC_GA_ID!} />
+          <Script
+            src="https://quge5.com/88/tag.min.js"
+            data-zone="268568"
+            async
+            data-cfasync="false"
+          />
         </ThemeProvider>
       </body>
     </html>
