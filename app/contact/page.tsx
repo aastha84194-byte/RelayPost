@@ -48,7 +48,7 @@ export default function ContactPage() {
           <div className="text-center mb-10">
             <h1 className="text-3xl md:text-5xl font-black text-slate-900 dark:text-white tracking-tight mb-4">Contact Us</h1>
             <p className="text-slate-500 dark:text-slate-400">
-              Have a question or want to work together? Fill out the form below or email us directly at <a href="mailto:kartikkalra2705@gmail.com" className="text-indigo-600 dark:text-indigo-400 font-medium hover:underline">kartikkalra2705@gmail.com</a>.
+              Have a question or want to work together? Fill out the form below or email us directly at <a href="mailto:contact@relaypost.me" className="text-indigo-600 dark:text-indigo-400 font-medium hover:underline">contact@relaypost.me</a>.
             </p>
           </div>
 
