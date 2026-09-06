@@ -8,7 +8,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://relaypost.me';
   
   // Fetch dynamic articles
-  const articles = await getAllArticles(undefined, 0, 100);
+  const articles = await getAllArticles(undefined, 0, 500);
   const safeArticles = Array.isArray(articles) ? articles : [];
   
   const articleUrls: MetadataRoute.Sitemap = safeArticles.map((article) => {
@@ -22,7 +22,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   });
 
   // Fetch dynamic news
-  const newsItems = await getNewsLive(1000);
+  const newsItems = await getNewsLive(700);
   const safeNews = Array.isArray(newsItems) ? newsItems : [];
 
   const newsUrls: MetadataRoute.Sitemap = safeNews.map((news) => {
