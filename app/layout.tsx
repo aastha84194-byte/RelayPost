@@ -8,6 +8,7 @@ import { GoogleAnalytics } from '@next/third-parties/google';
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import GlobalOneTap from './components/GlobalOneTap';
 import { Inter, Manrope } from 'next/font/google';
+import Script from 'next/script';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -131,7 +132,15 @@ export default function RootLayout({
               <GlobalOneTap />
               {children}
             </GoogleOAuthProvider>
+            <div id="container-5067a6beb837c283c7f3165b8812fe90" />
+
+        <Script
+          src="https://pl31255651.profitableratecpmnetwork.com/5067a6beb837c283c7f3165b8812fe90/invoke.js"
+          strategy="afterInteractive"
+          data-cfasync="false"
+        />
           </TierProvider>
+          
           <Analytics />
           <GoogleAnalytics gaId={process.env.NEXT_PUBLIC_GA_ID!} />
         </ThemeProvider>
