@@ -132,13 +132,6 @@ export default function RootLayout({
               <GlobalOneTap />
               {children}
             </GoogleOAuthProvider>
-            <div id="container-eefc89afa7aef1dd4d02b9d9114c7507" />
-
-        <Script
-          src="https://pl31247942.profitableratecpmnetwork.com/eefc89afa7aef1dd4d02b9d9114c7507/invoke.js"
-          strategy="afterInteractive"
-          data-cfasync="false"
-        />
           </TierProvider>
           
           <Analytics />
