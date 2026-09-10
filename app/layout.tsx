@@ -132,6 +132,11 @@ export default function RootLayout({
               <GlobalOneTap />
               {children}
             </GoogleOAuthProvider>
+            <Script
+          src="https://js.mbidadm.com/static/scripts.js"
+          data-admpid="463199"
+          strategy="afterInteractive"
+        />
           </TierProvider>
           
           <Analytics />
