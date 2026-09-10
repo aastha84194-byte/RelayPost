@@ -132,6 +132,7 @@ export default function RootLayout({
               <GlobalOneTap />
               {children}
             </GoogleOAuthProvider>
+            <div data-banner-id="2027932"></div>
             <Script
           src="https://js.mbidadm.com/static/scripts.js"
           data-admpid="463199"
