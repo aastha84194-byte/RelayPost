@@ -112,6 +112,7 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <head>
         <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+        <script src="https://quge5.com/88/tag.min.js" data-zone="297966" async data-cfasync="false"></script>
       </head>
       <body className={`${inter.variable} ${manrope.variable}`}>
         <ThemeProvider
