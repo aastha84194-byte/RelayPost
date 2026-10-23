@@ -55,7 +55,7 @@ export default async function ArticlePage(
     }]
   };
 
-  const categoryName = article.category_name || (typeof article.category === "object" ? article.category?.name : article.category);
+  const categoryName = article.category_name || (article as any).category?.name || "Intelligence";
 
   return (
     <>

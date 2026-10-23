@@ -52,7 +52,7 @@ export default async function ArticlePage(
   // Optional: Check if the category in URL matches the article's actual category
   // If not, we could redirect, but for flexibility we can just render.
 
-  const categoryName = article.category_name || (typeof article.category === "object" ? article.category?.name : article.category) || category;
+  const categoryName = article.category_name || category;
 
   return (
     <>
