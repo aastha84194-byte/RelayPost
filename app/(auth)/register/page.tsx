@@ -184,7 +184,7 @@ export default function Register() {
                   >
                     {/* Header Content */}
                     <div className="flex flex-col items-center mb-10" style={{ transform: "translateZ(60px)" }}>
-                      <h1 className="text-white text-2xl font-bold tracking-tight text-center">New Operator Registration</h1>
+                      <h1 className="text-white text-2xl font-bold tracking-tight text-center">Registration</h1>
                       <p className="text-slate-400 text-sm mt-3 font-medium opacity-80 text-center">Establish your credentials to access the global feed.</p>
                     </div>
                     

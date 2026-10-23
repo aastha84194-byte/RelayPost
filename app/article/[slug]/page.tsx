@@ -2,6 +2,7 @@ import React from "react";
 import { getArticleBySlug } from "@/lib/articles";
 import ArticleRenderer from "@/app/components/render/ArticleRenderer";
 import Navbar from "@/app/components/Navbar";
+import AuthInsightOverlay from "@/app/components/AuthInsightOverlay";
 import { notFound } from "next/navigation";
 import { Metadata } from "next";
 
@@ -54,6 +55,8 @@ export default async function ArticlePage(
     }]
   };
 
+  const categoryName = article.category_name || (typeof article.category === "object" ? article.category?.name : article.category);
+
   return (
     <>
       <script
@@ -61,6 +64,12 @@ export default async function ArticlePage(
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
       <Navbar />
+      <AuthInsightOverlay
+        slug={article.slug}
+        title={article.title}
+        category={categoryName}
+        type="article"
+      />
       <ArticleRenderer article={article} />
     </>
   );

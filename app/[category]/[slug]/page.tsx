@@ -37,6 +37,7 @@ export async function generateMetadata(
 }
 
 import RecommendedNews from "@/app/components/RecommendedNews";
+import AuthInsightOverlay from "@/app/components/AuthInsightOverlay";
 
 export default async function ArticlePage(
   { params }: { params: Promise<{ category: string, slug: string }> }
@@ -51,9 +52,17 @@ export default async function ArticlePage(
   // Optional: Check if the category in URL matches the article's actual category
   // If not, we could redirect, but for flexibility we can just render.
 
+  const categoryName = article.category_name || (typeof article.category === "object" ? article.category?.name : article.category) || category;
+
   return (
     <>
       <Navbar />
+      <AuthInsightOverlay
+        slug={article.slug}
+        title={article.title}
+        category={categoryName}
+        type="article"
+      />
       <ArticleRenderer article={article} sidebarComponent={<RecommendedNews />} />
     </>
   );

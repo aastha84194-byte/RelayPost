@@ -16,7 +16,7 @@ import InlineSubscriptionCTA from '../../components/InlineSubscriptionCTA';
 import GoUnlimited from '../../components/GoUnlimited';
 import TodayTopNews from '../../components/TodayTopNews';
 import BackButton from '../../components/BackButton';
-
+import AuthInsightOverlay from '../../components/AuthInsightOverlay';
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -80,6 +80,12 @@ export default async function NewsDetailPage({ params }: Props) {
       />
       <NewsTracker newsId={article.id} title={article.title} slug={article.slug || ''} />
       <Navbar />
+      <AuthInsightOverlay
+        slug={article.slug}
+        title={article.title}
+        category={article.category}
+        type="news"
+      />
 
       <main className="max-w-7xl mx-auto px-4 md:px-8 py-4 md:py-8">
         {/* Navigation / Actions */}
