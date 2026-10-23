@@ -25,10 +25,36 @@ export default function AuthInsightOverlay({
   const [isDismissed, setIsDismissed] = useState(false);
 
   useEffect(() => {
-    // 1. Check if user is already authenticated
-    const token = Cookies.get("access_token") || (typeof window !== "undefined" ? localStorage.getItem("auth_token") : null);
+    // 1. Check if user is actively authenticated (valid non-expired JWT)
+    const cookieToken = Cookies.get("access_token");
+    const localToken = typeof window !== "undefined" ? localStorage.getItem("auth_token") : null;
+    const token = cookieToken || localToken;
+
     if (token) {
-      return;
+      let isValid = false;
+      try {
+        const parts = token.split(".");
+        if (parts.length === 3) {
+          const sanitizedPayload = parts[1].replace(/-/g, "+").replace(/_/g, "/");
+          const payload = JSON.parse(decodeURIComponent(escape(atob(sanitizedPayload))));
+          // Token is valid if it has no exp or expiration timestamp is in the future
+          if (!payload.exp || payload.exp * 1000 > Date.now()) {
+            isValid = true;
+          }
+        }
+      } catch {
+        isValid = false;
+      }
+
+      if (isValid) {
+        return;
+      } else {
+        // Clear stale/expired token
+        Cookies.remove("access_token");
+        if (typeof window !== "undefined") {
+          localStorage.removeItem("auth_token");
+        }
+      }
     }
 
     // 2. Check if user dismissed the prompt for this specific item in this session
