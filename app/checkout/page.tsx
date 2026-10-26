@@ -62,7 +62,7 @@ interface RazorpaySubscriptionResponseData {
 
 declare global {
   interface Window {
-    Razorpay?: new (options: RazorpayOptions) => RazorpayInstance;
+    Razorpay: any;
     gtag?: (command: string, action: string, params: Record<string, unknown>) => void;
   }
 }
@@ -100,7 +100,8 @@ function CheckoutContent() {
   const [contribLoading, setContribLoading] = useState<boolean>(false);
   const [contribSuccess, setContribSuccess] = useState<boolean>(false);
 
-  const openRazorpayModal = async (data: RazorpaySubscriptionResponseData) => {
+  const openRazorpayModal = async (data: RazorpaySubscriptionResponseData | null) => {
+    if (!data) return;
     const loadRazorpay = () => {
       return new Promise((resolve) => {
         if (typeof window !== "undefined" && window.Razorpay) {
