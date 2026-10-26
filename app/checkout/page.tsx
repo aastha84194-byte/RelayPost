@@ -531,16 +531,11 @@ function CheckoutContent() {
               <Heart size={32} />
             </div>
             <div>
-              <div className="inline-block mb-2">
-                <span className="text-[10px] font-bold text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/30 px-2.5 py-0.5 rounded-full border border-indigo-200 dark:border-indigo-800">
-                  Direct Support
-                </span>
-              </div>
               <h2 className="text-2xl font-black text-slate-900 dark:text-white mb-2">
                 Support the Mission
               </h2>
               <p className="text-slate-500 dark:text-slate-400 text-sm leading-relaxed">
-                Make a direct one-time contribution to power independent journalism &amp; AI research. No recurring mandate.
+                Make a one-time contribution to power independent journalism &amp; AI research. No recurring mandate.
               </p>
             </div>
 
@@ -625,7 +620,7 @@ function CheckoutContent() {
               </button>
               <div className="flex items-center justify-center gap-1.5 text-slate-400 text-xs">
                 <ShieldCheck size={14} className="text-emerald-500" />
-                <span>Secured by Razorpay &bull; UPI &bull; Cards &bull; NetBanking</span>
+                <span>Secured by Razorpay &bull; UPI &bull; Cards &bull; NetBanking &bull; PayPal</span>
               </div>
             </div>
 
